@@ -1,0 +1,25 @@
+version: '3'
+
+services: 
+  nginx:
+    build:
+      context: .
+      dockerfile: ./nginx/Dockerfile
+    platform: linux/amd64
+    volumes:
+      - .:/hannuri
+      - ./nginx:/etc/nginx/
+    command: ["nginx", "-g", "daemon off;"]
+    ports:
+      - 80:80
+      - 70:70
+  
+  backend:
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile
+    platform: linux/amd64
+    volumes:
+      - ./backend:/backend
+    ports:
+      - 8000:8000

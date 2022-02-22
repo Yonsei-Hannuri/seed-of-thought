@@ -1,0 +1,344 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+a {
+  text-decoration: none;
+  color: gray;
+}
+
+.small-dropdown {
+  width: 20%;
+  height: 10%;
+  min-width: 150px;
+  margin-left: 2%;
+  margin-top: 2%;
+}
+
+/* comment CSS*/
+.commentDiv > hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #ffffff;
+}
+.commentDiv > a {
+  color: #82b440;
+  text-decoration: none;
+}
+.blog-comment::before,
+.blog-comment::after,
+.blog-comment-form::before,
+.blog-comment-form::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.blog-comment ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.blog-comment img {
+  opacity: 1;
+  filter: Alpha(opacity=100);
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+}
+
+.blog-comment img.avatar {
+  position: relative;
+  float: left;
+  margin-left: 0;
+  margin-top: 0;
+  width: 65px;
+  height: 65px;
+}
+
+.blog-comment .post-comments {
+  margin-bottom: 2px;
+  border: 1px solid #eee;
+  padding: 10px 20px;
+  position: relative;
+  -webkit-border-radius: 4px;
+  -moz-border-radius: 4px;
+  -o-border-radius: 4px;
+  border-radius: 4px;
+  background: #fff;
+  color: #6b6e80;
+  position: relative;
+}
+
+.post-comments > p {
+  line-height: normal;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  margin: 0;
+}
+
+.blog-comment .meta {
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  color: #aaaaaa;
+  border-bottom: 1px solid #eee;
+}
+
+.blog-comment ul.comments ul {
+  list-style-type: none;
+  padding: 0;
+  margin-left: 65px;
+}
+
+.blog-comment-form {
+  padding-left: 15%;
+  padding-right: 15%;
+  padding-top: 40px;
+}
+
+.blog-comment h3,
+.blog-comment-form h3 {
+  margin-bottom: 40px;
+  font-size: 26px;
+  line-height: 30px;
+  font-weight: 800;
+}
+
+.blog-comment h3 {
+  margin-bottom: 0px;
+}
+
+/* container */
+@media screen and (min-width: 991px) {
+  .container {
+    max-width: 880px;
+  }
+}
+
+/*login page*/
+
+/* Custom default button */
+.btn-secondary,
+.btn-secondary:hover,
+.btn-secondary:focus {
+  color: #333;
+  text-shadow: none; /* Prevent inheritance from `body` */
+}
+
+/*
+ * Base structure
+ */
+
+.cover-container {
+  max-width: 42em;
+}
+
+/*
+ * Header
+ */
+
+.nav-masthead .nav-link {
+  padding: 0.25rem 0;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.5);
+  background-color: transparent;
+  border-bottom: 0.25rem solid transparent;
+}
+
+.nav-masthead .nav-link:hover,
+.nav-masthead .nav-link:focus {
+  border-bottom-color: rgba(255, 255, 255, 0.25);
+}
+
+.nav-masthead .nav-link + .nav-link {
+  margin-left: 1rem;
+}
+
+.nav-masthead .active {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+/*profile color*/
+.dot {
+  height: 5rem;
+  width: 5rem;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/*no active => blank*/
+.blank {
+  display: none;
+}
+
+.blankBox500 {
+  height: 250px;
+}
+/*wordcloud*/
+
+/*chart*/
+.small-width {
+  width: 85px !important;
+}
+
+/*freenote*/
+.h-rem15 {
+  height: 15rem;
+}
+
+/*text styling*/
+/*East Sea Dokdo*/
+@import url('https://fonts.googleapis.com/css2?family=East+Sea+Dokdo&display=swap');
+/*Nanum Brush Script*/
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Brush+Script&display=swap');
+/*Gowun Dodum*/
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
+/*Poor Story*/
+@import url('https://fonts.googleapis.com/css2?family=Poor+Story&display=swap');
+/*Nanum Pen Script*/
+@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Poor+Story&display=swap');
+.font-1 {
+  font-family: 'East Sea Dokdo', cursive;
+  font-size: 1.3rem;
+}
+.font-2 {
+  font-family: 'Nanum Brush Script', cursive;
+  font-size: 1.31rem;
+}
+.font-3 {
+  font-family: 'Gowun Dodum', sans-serif;
+  font-size: 1.18rem;
+}
+
+.font-4 {
+  font-family: 'Poor Story', cursive;
+  font-size: 1.32rem;
+}
+
+.font-5 {
+  font-family: 'Nanum Pen Script', cursive;
+  font-size: 1.42rem;
+}
+
+/*etc*/
+.cursor2Pointer {
+  cursor: pointer;
+}
+
+/*responsiveWidth for img size in socialActivity*/
+.responsiveWidth {
+  width: 60%;
+}
+
+/*sizing*/
+@media screen and (max-width: 800px) {
+  .responsiveWidth {
+    width: 100%;
+  }
+}
+
+/*bar graph in session min width*/
+.maxWidth {
+  max-width: 600px;
+}
+
+/*etc*/
+textarea {
+  resize: none;
+}
+
+.form-control:focus {
+  border-color: #d2d8da;
+  box-shadow: inset 0 1px 1px #c5c5c5, 0 0 8px #d2d8da;
+}
+
+.nav-item {
+  color: #2571b8;
+}
+.nav-link {
+  color: #2571b8;
+}
+.nav-link:hover {
+  color: black;
+}
+
+.nav-pills .nav-link.active,
+.nav-pills .show > .nav-link {
+  color: white;
+  background-color: #2571b8;
+}
+
+.whiteColor {
+  color: white;
+}
+
+.link-button {
+  background-color: transparent;
+  text-decoration: none;
+  color: gray;
+  border: none;
+  cursor: pointer;
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.link-button:hover {
+  color: #2571b8;
+}
+
+.link-button2 {
+  background-color: transparent;
+  text-decoration: none;
+  color: gray;
+  border: none;
+  cursor: pointer;
+  display: inline;
+  margin: 0;
+  padding: 0;
+}
+
+.link-button2:hover {
+  color: white;
+}
+
+.textDiv {
+  white-space: pre-wrap;
+  overflow-y: scroll;
+}
+
+.bg-theme {
+  background-color: #2571b8;
+}
+
+.react-pdf__Page__canvas {
+  margin: 0 auto;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.react-pdf__Page__textContent {
+  display: none;
+}
+
+.carousel-control-prev-icon {
+  filter: invert(48%);
+}
+
+.carousel-control-next-icon {
+  filter: invert(48%);
+}
