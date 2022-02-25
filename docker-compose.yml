@@ -21,5 +21,6 @@ services:
     platform: linux/amd64
     volumes:
       - ./backend:/backend
+    command : ["gunicorn", "-w", "3", "backend.wsgi"]
     ports:
       - 8000:8000

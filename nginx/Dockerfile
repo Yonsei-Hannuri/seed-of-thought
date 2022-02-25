@@ -4,8 +4,11 @@ FROM nginx:latest
 VOLUME /hannuri
 
 RUN apt-get update && \
-  apt-get install -y python3-certbot-nginx
-  
+  apt-get-repository ppa:certbot/certbot && \
+  apt-get install -y python3-certbot-nginx && \
+  certbot --nginx -d hannuri.xyz -d www.hannuri.xyz -d pag.hannuri.xyz
+
+
 #RUN certbot --authenticator webroot -w /usr/share/nginx/html --installer nginx -d hannuri.xyz --email jnh03336@gmail.com 
 
 EXPOSE 80

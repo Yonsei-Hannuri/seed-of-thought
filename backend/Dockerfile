@@ -4,7 +4,7 @@ FROM ubuntu:latest
 
 WORKDIR /backend
 
-COPY requirements.txt /backend/requirements.txt 
+COPY ./backend/requirements.txt /backend/requirements.txt 
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -40,7 +40,5 @@ RUN curl -L https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab
 
 RUN pip3 install -r requirements.txt
 RUN pip3 install gunicorn
-
-ENTRYPOINT ["gunicorn", "-w", "3", "backend.wsgi"]
 
 EXPOSE 2102
