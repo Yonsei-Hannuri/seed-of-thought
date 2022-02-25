@@ -9,10 +9,22 @@ services:
     volumes:
       - .:/hannuri
       - ./nginx:/etc/nginx/
+      - ./cerbot/etc:/etc/letsencrypt
+      - ./certbot/var:/var/lib/letsencrypt
     command: ["nginx", "-g", "daemon off;"]
     ports:
       - 80:80
       - 70:70
+
+  certbot:
+    depends_on:
+      - nginx
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - ./certbot/etc:/etc/letsencrypt
+      - ./certbot/var:/var/lib/letsencrypt
+    command: certonly --webroot --webroot-path=/var/www/html --email hajihun16@yonsei.ac.kr --agree-tos --no-eff-email --force-renewal -d page.hannuri.xyz -d hannuri.xyz -d www.hannury.xyz
   
   backend:
     build:
