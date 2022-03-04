@@ -10,9 +10,6 @@ router.register(r'notification', views.NotificationViewSet)
 router.register(r'session', views.SessionViewSet)
 router.register(r'sessionReadfile', views.SessionReadfileViewSet)
 router.register(r'detgori', views.DetgoriViewSet)
-router.register(r'detgoriComment', views.DetgoriCommentViewSet)
-router.register(r'detgoriCommentReply', views.DetgoriCommentReplyViewSet)
-router.register(r'socialActivity', views.SocialActivityViewSet)
 router.register(r'freeNote', views.FreeNoteViewSet)
 
 
@@ -23,5 +20,6 @@ urlpatterns = [
     path('logout/', views.Logout),
     path('profileColor/', views.ProfileColor),
     path('wordList/<str:type>/<int:sessionId>', views.WordList),
+    path('mypageInfo', views.MypageInfo),
     path('frontError/', views.FrontError)
 ]

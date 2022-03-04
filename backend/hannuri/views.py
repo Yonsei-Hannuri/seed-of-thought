@@ -119,6 +119,57 @@ def WordList(request, type, sessionId):
         return HttpResponse(json.dumps({'wordList':wordList})) 
     return HttpResponse('')
 
+def myDetgoriInfos(userId, currentSeason):
+        myDetgoriInfos = list()
+        currentSessions = currentSeason.session.all()
+        currentDetgoris = Detgori.objects.filter(author=userId, parentSession__in=currentSessions)
+        myDetgoriInfos.append(currentSeason.title)
+        for i in range(len(currentDetgoris)):
+            myDetgoriInfos.append({
+                'sessionTitle': currentDetgoris[i].parentSession.title,
+                'detgoriTitle': currentDetgoris[i].title,
+                'googleId': currentDetgoris[i].googleId,
+            })
+        return myDetgoriInfos
+
+def MypageInfo(request):
+    if not(request.user):
+        return HttpResponse('')
+    else:
+        try:
+            seasonId =  request.GET['seasonId'] 
+        except:
+            seasonId = None
+        if seasonId:
+            requestedSeason = Season.objects.get(id=seasonId)
+            seasonDetgoriInfos = myDetgoriInfos(request.user.id, requestedSeason)
+            response_data = dict()
+            response_data['seasonDetgoris'] = seasonDetgoriInfos
+            return HttpResponse(json.dumps(response_data)) 
+        response_data = dict()
+        userSeasons_pk = list(map(int, request.user.actingSeason.split()))
+        userSeasons = Season.objects.filter(id__in=userSeasons_pk)
+        seasons = list()
+        currentInfos = []
+        len_userSeaons= len(userSeasons)
+        for i in range(len_userSeaons-1, -1,-1):
+            if i == len_userSeaons-1:
+                currentInfos = myDetgoriInfos(request.user.id, userSeasons[i])
+            seasonInfo = {
+                'id' : userSeasons[i].id,
+                'year' : userSeasons[i].year,
+                'semester' : userSeasons[i].semester
+                }
+            seasons.append(seasonInfo)
+        response_data['seasonDetgoris'] = currentInfos
+        response_data['seasons'] = seasons
+        response_data['name'] = request.user.name
+        response_data['color'] = request.user.color
+        response_data['generation'] = request.user.generation
+        response_data['is_staff'] = request.user.is_staff
+
+        return HttpResponse(json.dumps(response_data)) 
+
 def FrontError(request):
     try:
         if request.user:
@@ -138,6 +189,7 @@ def FrontError(request):
                 log.close()
     except: pass
     return HttpResponse('')
+
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.order_by('-id')
@@ -164,7 +216,6 @@ class SeasonViewSet(viewsets.ModelViewSet):
         current = self.request.query_params.get('current', None)
         if current:
             queryset = queryset.filter(is_current=True)
-
         return queryset
 
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -212,56 +263,51 @@ class DetgoriViewSet(viewsets.ModelViewSet):
 
 
     def perform_create(self, serializer): # Detgori 관련 create가 발생했을 때 호출되는 메쏘드의 일부분 custom
+        #check users acting season, if first detgori add current season as his acting season.
+        actingSeason_Str = self.request.user.actingSeason
+        actingSeason_li = tuple(map(int,actingSeason_Str.split()))
+        currentSeason = Season.objects.get(is_current=True).pk
+        if not currentSeason in actingSeason_li:
+            self.request.user.actingSeason += ' '+str(currentSeason)
+        self.request.user.save()
+            
+
+        #parse nouns of a detgori and upload on the google drive
         parentSession = Session.objects.get(pk=self.request.POST['parentSession'])
         parentFolderId = parentSession.googleFolderId
         fileName = '댓거리' + str(parentSession.week) + '주차_'+ self.request.user.name + '.pdf'
 
-        PDF = False
         try: # if deep copy not working (this happens when pdf file is too big)
             PDF = copy.deepcopy(self.request.FILES['pdf'])
-        except:
-            words = '{ }'
-           
-        if PDF != False:
             text = wordcloud.read_pdf(PDF.file)
             words = wordcloud.tokenizer(text)  
+        except:
+            words = '{ }'
 
         googleId = googleDriveAPI.savePDF(fileName, parentFolderId, self.request.FILES['pdf'])
-        PDF.name = googleId+'.pdf'
-        serializer.save(googleId=googleId, author=self.request.user, words=words, pdf=PDF)
+        self.request.FILES['pdf'].name = googleId+'.pdf'
+        serializer.save(googleId=googleId, author=self.request.user, words=words, pdf=self.request.FILES['pdf'])
     
     def perform_destroy(self, instance):
         try:
             googleDriveAPI.deletePDF(instance.googleId)
         except:
             pass
-        
+
+        #check whether was a detgori was the only detgori of the season
+        #if so erase this acting season.
+        userDetgoris = Detgori.objects.filter(author=self.request.user)
+        userDetgoriSeason_li = [detgori.parentSession.season.pk for detgori in userDetgoris]
+        removingDetgoriSeason = instance.parentSession.season.pk
+        if userDetgoriSeason_li.count(removingDetgoriSeason) == 1:
+            self.request.user.actingSeason = \
+                ' '.join(self.request.user.actingSeason.split().remove(str(removingDetgoriSeason)))
+            self.request.user.save()
+
         if os.path.exists('uploads/detgori/'+instance.googleId+'.pdf'):
             os.remove('uploads/detgori/'+instance.googleId+'.pdf')
         
         instance.delete()
-
-
-class DetgoriCommentViewSet(viewsets.ModelViewSet):
-    queryset = DetgoriComment.objects.order_by('-id')
-    serializer_class = DetgoriCommentSerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
-class DetgoriCommentReplyViewSet(viewsets.ModelViewSet):
-    queryset = DetgoriCommentReply.objects.order_by('-id')
-    serializer_class = DetgoriCommentReplySerializer
-    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
-class SocialActivityViewSet(viewsets.ModelViewSet):
-    queryset = SocialActivity.objects.order_by('-id')
-    serializer_class = SocialActivitySerializer
-    permission_classes = [IsAuthenticated, AlwaysReadOnly]
 
 class FreeNoteViewSet(viewsets.ModelViewSet):
     queryset = FreeNote.objects.order_by('-id')
