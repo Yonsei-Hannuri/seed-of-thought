@@ -6,33 +6,26 @@ services:
       context: .
       dockerfile: ./nginx/Dockerfile
     platform: linux/amd64
+    container_name: nginx
     volumes:
-      - .:/hannuri
+      - .:/hannuri     
       - ./nginx:/etc/nginx/
-      - ./cerbot/etc:/etc/letsencrypt
-      - ./certbot/var:/var/lib/letsencrypt
+      - ${host_path_to_ssl}:/etc/letsencrypt
     command: ["nginx", "-g", "daemon off;"]
     ports:
       - 80:80
-      - 70:70
-
-  certbot:
-    depends_on:
-      - nginx
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./certbot/etc:/etc/letsencrypt
-      - ./certbot/var:/var/lib/letsencrypt
-    command: certonly --webroot --webroot-path=/var/www/html --email hajihun16@yonsei.ac.kr --agree-tos --no-eff-email --force-renewal -d page.hannuri.xyz -d hannuri.xyz -d www.hannury.xyz
+      - 443:443
+    links:
+      - backend:backend
   
   backend:
     build:
       context: .
       dockerfile: ./backend/Dockerfile
     platform: linux/amd64
+    container_name: backend
     volumes:
       - ./backend:/backend
-    command : ["gunicorn", "-w", "3", "backend.wsgi"]
+    command : bash -c "cd /backend && gunicorn -w 3 --bind 0:2102 backend.wsgi"
     ports:
-      - 8000:8000
+      - 2102:2102
