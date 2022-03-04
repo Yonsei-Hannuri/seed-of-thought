@@ -6,7 +6,7 @@ class SessionBanner extends Component {
   };
 
   render() {
-    if (this.props.recentSession !== null){
+    if (this.props.recentSession.week){
         return (
         <div>
             <div className="px-4 py-5 my-5 text-center">

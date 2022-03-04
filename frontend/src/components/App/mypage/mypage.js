@@ -115,6 +115,8 @@ class Mypage extends Component {
               <span className="d-inline fw-bolder fs-4 mt-3">
                 &nbsp;&nbsp;댓거리
               </span>
+              {this.state.userInfo.seasons.length === 0 ?
+              '' :
               <select
                 className="d-inline form-select small-dropdown"
                 onChange={this.getSeasonDetgori}
@@ -122,6 +124,7 @@ class Mypage extends Component {
               >
                 {seasonOptions}
               </select>
+              }
             </div>
             <div className="fw-bolder fs-4 mt-1">
               &nbsp;&nbsp;{this.state.seasonDetgoris[0]}

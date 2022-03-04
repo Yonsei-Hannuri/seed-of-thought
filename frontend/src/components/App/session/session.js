@@ -311,14 +311,16 @@ class Session extends Component {
               </div>
             </div>
             <div>
-              <ul className="d-flex p-0 clear-fix">
+              <ul className="d-flex p-0 clear-fix overflow-auto">
                 {name_list}
+                {name_list.length === 0 ? 
+                '' :
                 <button
-                  className="btn m-1 btn-light border"
+                  className="btn m-1 btn-primary border"
                   onClick={this.onClickCloseDetgori}
                 >
-                  댓거리 닫기
-                </button>
+                  닫기
+                </button>}
               </ul>
             </div>
           </div>
@@ -348,6 +350,8 @@ class NameCard extends Component {
   };
 
   componentDidMount() {
+    const url = new URL(this.props.detgoriUrl);
+
     axios({
       method: 'GET',
       url: this.props.detgoriUrl,
