@@ -201,16 +201,7 @@ a {
 }
 
 /*text styling*/
-/*East Sea Dokdo*/
-@import url('https://fonts.googleapis.com/css2?family=East+Sea+Dokdo&display=swap');
-/*Nanum Brush Script*/
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Brush+Script&display=swap');
-/*Gowun Dodum*/
-@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&display=swap');
-/*Poor Story*/
-@import url('https://fonts.googleapis.com/css2?family=Poor+Story&display=swap');
-/*Nanum Pen Script*/
-@import url('https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&family=Poor+Story&display=swap');
+/*download font through html head tag <link> and use disk cache*/
 .font-1 {
   font-family: 'East Sea Dokdo', cursive;
   font-size: 1.3rem;
