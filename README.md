@@ -9,7 +9,7 @@
 ### 웹 프로그램 구조  
 <figure  style="text-align: center;">
 
-![web_structure](https://raw.githubusercontent.com/habibi03336/Hannuri/master/asset/web_structure.jpg?raw=true)
+![web_structure](https://raw.githubusercontent.com/habibi03336/Hannuri/master/asset/web_structure.png?raw=true)
 
 1. React를 활용하고, 트랜드에 맞는 개발 경험을 쌓기 위해서 프론트엔드와 백앤드를 구분하여 개발하였다. 서버 쪽에서는 Django REST Framework, 프론트 쪽에서는 React를 중심으로 개발하였다.
 
