@@ -3,7 +3,7 @@ import Login from './components/App/login/login';
 import Index from './components/App/index';
 import Session from './components/App/session/session';
 import { BrowserRouter, Route, Switch } from 'react-router-dom';
-import freeNote from './components/App/metaSpace/freeNote';
+import freeNote from './components/App/metaSpace/freeNote/freeNote';
 
 class App extends Component {
   render() {

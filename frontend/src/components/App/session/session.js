@@ -6,6 +6,7 @@ import address from '../../../config/address.json';
 import axios from 'axios';
 import { Page, Document } from 'react-pdf';
 import { pdfjs } from 'react-pdf';
+import NameCard from './nameCard';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 class Session extends Component {
@@ -335,46 +336,6 @@ class Session extends Component {
       );
     }
     return '';
-  }
-}
-
-class NameCard extends Component {
-  static defaultProps = {
-    onClick: null,
-    detgoriUrl: null,
-  };
-
-  state = {
-    detgoriInfo: { authorName: '', googleId: '' },
-    currentDetgoriId: null,
-  };
-
-  componentDidMount() {
-    const url = new URL(this.props.detgoriUrl);
-
-    axios({
-      method: 'GET',
-      url: this.props.detgoriUrl,
-      withCredentials: true,
-    })
-      .then((res) => res.data)
-      .then((data) => {
-        this.setState({ detgoriInfo: data });
-      });
-  }
-
-  render() {
-    return (
-      <div>
-        <button
-          className="btn m-1 btn-light border"
-          value={this.state.detgoriInfo.googleId}
-          onClick={this.props.onClick}
-        >
-          {this.state.detgoriInfo.authorName}
-        </button>
-      </div>
-    );
   }
 }
 
