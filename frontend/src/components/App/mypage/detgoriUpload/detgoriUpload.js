@@ -1,34 +1,8 @@
 import React, { Component } from 'react';
-import errorReport from '../../../modules/errorReport';
-import address from '../../../config/address.json';
+import SessionOption from './sessionOption';
+import errorReport from '../../../../modules/errorReport';
+import address from '../../../../config/address.json';
 import axios from 'axios';
-
-class SessionOption extends Component {
-  static defaultProps = {
-    url: '',
-  };
-  state = {
-    info: {},
-  };
-  componentDidMount() {
-    let url = this.props.url;
-    axios({
-      method: 'GET',
-      url: url,
-      withCredentials: true,
-    })
-      .then((res) => res.data)
-      .then((data) => this.setState({ info: data }))
-      .catch((e) => errorReport(e, 'sessionOption_componentDidMount'));
-  }
-  render() {
-    return (
-      <option value={this.state.info.id}>
-        {this.state.info.week}주차: {this.state.info.title}
-      </option>
-    );
-  }
-}
 
 class DetgoriUpload extends Component {
   state = {
@@ -117,7 +91,7 @@ class DetgoriUpload extends Component {
     }
 
     if (this.state.opened === true) {
-      const sessionOptions = this.state.seasonInfo.session.map(
+      const sessionOptions = this.state.seasonInfo.session.slice().reverse().map(
         (sessionUrl, idx) => <SessionOption url={sessionUrl} key={idx} />,
       );
       return (

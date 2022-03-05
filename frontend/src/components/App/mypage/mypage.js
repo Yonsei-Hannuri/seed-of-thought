@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import DetgoriUpload from './detgoriUpload';
+import DetgoriUpload from './detgoriUpload/detgoriUpload';
 import ProfileColor from './profileColor';
 import WordCloud from './wordcloud';
 import axios from 'axios';
