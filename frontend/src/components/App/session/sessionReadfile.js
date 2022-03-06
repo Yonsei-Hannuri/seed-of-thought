@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import httpsfy from '../../../modules/httpsfy';
 import address from '../../../config/address.json';
 import { Page, Document } from 'react-pdf';
 import { pdfjs } from 'react-pdf';
@@ -19,8 +20,8 @@ class SessionReadfile extends Component {
   };
 
   handleClick = (e) => {
-    let url = e.target.value;
-    fetch(url, {
+    const url = e.target.value;
+    fetch(httpsfy(url, process.env.NODE_ENV), {
       credentials: 'include',
     })
       .then((res) => res.json())

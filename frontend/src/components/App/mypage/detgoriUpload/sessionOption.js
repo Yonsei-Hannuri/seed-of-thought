@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import axios from 'axios';
+import httpsfy from '../../../../modules/httpsfy';
 import errorReport from '../../../../modules/errorReport';
 
 export default class SessionOption extends Component {
@@ -10,10 +11,10 @@ export default class SessionOption extends Component {
       info: {},
     };
     componentDidMount() {
-      let url = this.props.url;
+      const url = this.props.url;
       axios({
         method: 'GET',
-        url: url,
+        url: httpsfy(url, process.env.NODE_ENV),
         withCredentials: true,
       })
         .then((res) => res.data)

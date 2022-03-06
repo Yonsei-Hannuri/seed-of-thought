@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import httpsfy from '../../../modules/httpsfy';
 import axios from 'axios';
 
 class NameCard extends Component {
@@ -13,15 +14,9 @@ class NameCard extends Component {
     };
   
     componentDidMount() {
-      let httpsUrl;
-      if (process.env.NODE_ENV === 'development'){
-        httpsUrl = this.props.detgoriUrl;
-      } else{
-        httpsUrl = this.props.detgoriUrl.replace('http://', 'https://');
-      }
       axios({
         method: 'GET',
-        url: httpsUrl,
+        url: httpsfy(this.props.detgoriUrl, process.env.NODE_ENV),
         withCredentials: true,
       })
         .then((res) => res.data)
