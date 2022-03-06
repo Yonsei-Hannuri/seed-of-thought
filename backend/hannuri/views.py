@@ -304,8 +304,9 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         userDetgoriSeason_li = [detgori.parentSession.season.pk for detgori in userDetgoris]
         removingDetgoriSeason = instance.parentSession.season.pk
         if userDetgoriSeason_li.count(removingDetgoriSeason) == 1:
-            self.request.user.actingSeason = \
-                ' '.join(self.request.user.actingSeason.split().remove(str(removingDetgoriSeason)))
+            actingSeason = self.request.user.actingSeason.split()
+            actingSeason.remove(str(removingDetgoriSeason))
+            self.request.user.actingSeason = ' '.join(actingSeason)
             self.request.user.save()
 
         if os.path.exists('uploads/detgori/'+instance.googleId+'.pdf'):
