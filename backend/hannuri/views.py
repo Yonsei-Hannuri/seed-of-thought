@@ -233,8 +233,12 @@ class SessionViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         
         current = self.request.query_params.get('current', None)
+        seasonSessionInfos = self.request.query_params.get('seasonSessionInfos', None)
         if current:
             queryset = queryset.filter(is_current=True)
+        elif seasonSessionInfos:
+            current_season = Season.objects.get(is_current=True)
+            queryset = queryset.filter(season=current_season).order_by('id')
 
         return queryset
 

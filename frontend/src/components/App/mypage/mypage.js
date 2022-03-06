@@ -84,7 +84,6 @@ class Mypage extends Component {
     if (this.state.ajaxError) {
       return <div>Error!</div>;
     }
-    console.log(this.state.seasonDetgoris);
     if (this.state.loaded) {
       const seasonOptions = this.state.userInfo.seasons.map((season, idx) => (
         <option value={season.id} key={season.id}>
