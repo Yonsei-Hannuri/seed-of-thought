@@ -235,6 +235,14 @@ a {
   width: 60%;
 }
 
+.w-10 {
+  width:10% !important;
+}
+
+.w-90{
+  width: 90% !important;
+}
+
 /*sizing*/
 @media screen and (max-width: 800px) {
   .responsiveWidth {

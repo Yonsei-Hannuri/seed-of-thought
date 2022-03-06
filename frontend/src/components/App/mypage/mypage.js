@@ -58,35 +58,55 @@ class Mypage extends Component {
       });
   };
 
+  deleteRequest = (e) => {
+    const reply = window.confirm("댓거리 삭제 시, 복구할 수 없습니다. 삭제하시겠습니까?");
+    const csrfToken_ = document.cookie;
+    const csrfToken = csrfToken_.split('=')[1];
+    const csrfHeader = {
+       'X-CSRFToken':  csrfToken
+    };
+    if (reply){
+      axios({
+        method: 'DELETE',
+        url: address.back + 'detgori/'+ e.currentTarget.getAttribute('val')+'/',
+        withCredentials: true,
+        headers: csrfHeader,
+      })
+        .then(() => {
+          this.getUserInfo();
+          alert("댓거리가 삭제되었습니다.");
+        })
+        
+    }
+  }
+
   render() {
     if (this.state.ajaxError) {
       return <div>Error!</div>;
     }
+    console.log(this.state.seasonDetgoris);
     if (this.state.loaded) {
-      const seasonOptions = [];
-      const seasons = this.state.userInfo.seasons;
-      for (var i = 0; i < seasons.length; i++) {
-        seasonOptions.push(
-          <option value={seasons[i].id} key={seasons[i].id}>
-            {seasons[i].year} - {seasons[i].semester}
-          </option>,
-        );
-      }
-      const detgoriList = [];
-      const detgoris = this.state.seasonDetgoris;
-      for (i = 1; i < detgoris.length; i++) {
-        detgoriList.push(
-          <li className="list-group-item" key={detgoris[i].googleId}>
-            <a
-              rel="noreferrer"
-              href={`https://drive.google.com/file/d/${detgoris[i].googleId}/view`}
-              target="_blank"
-            >
-              {detgoris[i].sessionTitle}: {detgoris[i].detgoriTitle}
-            </a>
-          </li>,
-        );
-      }
+      const seasonOptions = this.state.userInfo.seasons.map((season, idx) => (
+        <option value={season.id} key={season.id}>
+            {season.year} - {season.semester}
+        </option>
+      ));
+      const detgoriList = this.state.seasonDetgoris.slice(1,).map((detgori, idx) => (
+        <div className='d-flex' key={detgori.detgoriId}>
+          <li className="list-group-item align-bottom w-90">
+              <a
+                rel="noreferrer"
+                href={`https://drive.google.com/file/d/${detgori.googleId}/view`}
+                target="_blank"
+              >
+                {detgori.sessionTitle}: {detgori.detgoriTitle}
+              </a>
+          </li>
+          <li className="list-group-item p-0 pt-2 w-10 border text-center">
+            <span val={detgori.detgoriId} onClick={this.deleteRequest} className="material-icons-outlined align-middle">delete_forever</span>
+          </li>
+        </div>
+      ));
       return (
         <div className={this.props.active === true ? '' : 'blank'}>
           <div className="d-flex m-3" id="profile_box">

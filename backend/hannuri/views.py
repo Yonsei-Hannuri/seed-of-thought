@@ -126,6 +126,7 @@ def myDetgoriInfos(userId, currentSeason):
         myDetgoriInfos.append(currentSeason.title)
         for i in range(len(currentDetgoris)):
             myDetgoriInfos.append({
+                'detgoriId': currentDetgoris[i].id,
                 'sessionTitle': currentDetgoris[i].parentSession.title,
                 'detgoriTitle': currentDetgoris[i].title,
                 'googleId': currentDetgoris[i].googleId,
@@ -293,7 +294,6 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             googleDriveAPI.deletePDF(instance.googleId)
         except:
             pass
-
         #check whether was a detgori was the only detgori of the season
         #if so erase this acting season.
         userDetgoris = Detgori.objects.filter(author=self.request.user)
