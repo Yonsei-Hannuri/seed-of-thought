@@ -43,14 +43,15 @@ class DetgoriSerializer(serializers.ModelSerializer):
         model = Detgori
         fields = ['id', 'parentSession', 'title', 'authorId', 'authorColor','authorName', 'date', 'googleId',]
 
+
+class FreeNoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = FreeNote
+        fields = ['id', 'text', 'page', 'position']
+        
 #class SocialActivityImgSerializer(serializers.ModelSerializer):
 #    googleId = serializers.ReadOnlyField()
 #    class Meta:
 #        model = SocialActivityImg
 #        fields = ['id', 'googleId']
 #
-
-class FreeNoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FreeNote
-        fields = ['id', 'text', 'page', 'position']

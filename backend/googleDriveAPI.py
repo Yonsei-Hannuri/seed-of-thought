@@ -20,7 +20,7 @@ def getCreds():
         else: 
             flow = InstalledAppFlow.from_client_secrets_file(
                 './config/googleDrive/credentials.json', SCOPES)
-            creds = flow.run_local_server(port=0)
+            creds = flow.run_local_server(port=57893)
         #Save the credentials for the next run
         with open('./config/googleDrive/token.json', 'w') as token:
             token.write(creds.to_json())
@@ -65,7 +65,6 @@ def registerWriter(email, folderId):
         headers=headers,
         data=json.dumps(params)
     )
-    print(r.text)
     permissionId = json.loads(r.text)['id']
 
     return permissionId
