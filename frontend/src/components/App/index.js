@@ -2,41 +2,22 @@ import React, { Component } from 'react';
 import Main from './main/main';
 import Mypage from './mypage/mypage';
 import MetaSpace from './metaSpace/metaSpace';
-import axios from 'axios';
-import errorReport from '../../modules/errorReport';
+import getCookieValue from '../../modules/getCookieValue';
+import delay from '../../modules/delay'
 import address from '../../config/address.json';
-function delay(time) {
-  return new Promise((resolve) => setTimeout(resolve, time));
-}
 
 class Index extends Component {
   state = {
     main: true,
     metaSpace: false,
     mypage: false,
-    userInfo: null,
   };
 
   componentDidMount() {
-    axios({
-      method: 'GET',
-      url: address.back + 'user/',
-      params: { userInfo: true },
-      withCredentials: true,
-      validateStatus: function (status) {
-        if (!(status < 300 && status >= 200)) {
-          delay(1000).then(() => (window.location.href = '/login'));
-          return false;
-        }
-        return true;
-      },
-    })
-      .then((res) => res.data[0])
-      .then((data) => {
-        this.setState({ userInfo: data });
-      })
-      .catch((e) => errorReport(e, 'App.js'));
-
+    const isLogined = getCookieValue(document.cookie, 'isLogin')
+    if(isLogined===null || isLogined === 'false'){
+      delay(1000).then(() => (window.location.href = '/login'));
+    }
     const urlSearchParams = new URLSearchParams(window.location.search);
     const params = Object.fromEntries(urlSearchParams.entries());
     if (params.section === 'meta') {
@@ -54,7 +35,8 @@ class Index extends Component {
   };
 
   render() {
-    if (!this.state.userInfo) {
+    const isLogined = getCookieValue(document.cookie, 'isLogin');
+    if (isLogined===null || isLogined === 'false') {
       return (
         <div className="container h-100">
           <div className="row align-items-center h-100">

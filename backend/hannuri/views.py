@@ -55,7 +55,9 @@ def Login(request):
     try: 
         user = User.objects.get(email=email)
         login(request, user)
-        return redirect(address['front'])
+        response = redirect(address['front'])
+        response.set_cookie('isLogin', 'true')
+        return response
     except:
         return redirect(address['front']+'?login=error')
     return redirect(address['front']+'?login=error')
@@ -92,7 +94,9 @@ def Signin(request):
 
 def Logout(request):
     logout(request)
-    return redirect(address['front'])
+    response = redirect(address['front'])
+    response.set_cookie('isLogin', 'false')
+    return response
 
 def ProfileColor(request):
     if request.user:
