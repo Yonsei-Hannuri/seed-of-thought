@@ -272,15 +272,7 @@ class DetgoriViewSet(viewsets.ModelViewSet):
 
 
     def perform_create(self, serializer): # Detgori 관련 create가 발생했을 때 호출되는 메쏘드의 일부분 custom
-        #check users acting season, if first detgori add current season as his acting season.
-        actingSeason_Str = self.request.user.actingSeason
-        actingSeason_li = tuple(map(int,actingSeason_Str.split()))
-        currentSeason = Season.objects.get(is_current=True).pk
-        if not currentSeason in actingSeason_li:
-            self.request.user.actingSeason += ' '+str(currentSeason)
-        self.request.user.save()
             
-
         #parse nouns of a detgori and upload on the google drive
         parentSession = Session.objects.get(pk=self.request.POST['parentSession'])
         parentFolderId = parentSession.googleFolderId
@@ -291,12 +283,20 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             text = wordcloud.read_pdf(PDF.file)
             words = wordcloud.tokenizer(text)  
         except:
+            text = ''
             words = '{ }'
-
         googleId = googleDriveAPI.savePDF(fileName, parentFolderId, self.request.FILES['pdf'])
         self.request.FILES['pdf'].name = googleId+'.pdf'
-        serializer.save(googleId=googleId, author=self.request.user, words=words, pdf=self.request.FILES['pdf'])
-    
+        serializer.save(googleId=googleId, pureText=text, author=self.request.user, words=words, pdf=self.request.FILES['pdf'])
+
+        #check users acting season, if first detgori add current season as his acting season.
+        actingSeason_Str = self.request.user.actingSeason
+        actingSeason_li = tuple(map(int,actingSeason_Str.split()))
+        currentSeason = Season.objects.get(is_current=True).pk
+        if not currentSeason in actingSeason_li:
+            self.request.user.actingSeason += ' '+str(currentSeason)
+        self.request.user.save()
+
     def perform_destroy(self, instance):
         try:
             googleDriveAPI.deletePDF(instance.googleId)

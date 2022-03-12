@@ -165,6 +165,7 @@ class Detgori(models.Model):
     date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
     pdf = models.FileField(upload_to='detgori/', blank=True)
     words = models.TextField(blank=True)
+    pureText = models.TextField(blank=True)
     googleId = models.CharField(max_length=200, blank=True, verbose_name="구글id")
 
     def __str__(self):
