@@ -12,7 +12,10 @@ function errorReport(e, from) {
       errorMessage: e,
       from: from,
     },
-    headers: { 'X-CSRFToken': csrfToken },
+    headers: { 
+      'Content-Type': 'Application/json',
+      'X-CSRFToken': csrfToken 
+    },
   });
 }
 
