@@ -63,41 +63,6 @@ class SessionAdmin(admin.ModelAdmin):
         formset.save_m2m()
 
 
-class SocialActivityImgInline(admin.TabularInline):
-    fields = ('img', )
-    model = SocialActivityImg
-    extra = 5
-
-class SocialActivityAdmin(admin.ModelAdmin):
-    inlines = [SocialActivityImgInline]
-    fields = ('date', 'title', 'summary',)
-    def save_model(self, request, obj, form, change):
-        obj.season = Season.objects.get(is_current=True)
-        super().save_model(request, obj, form, change)  
-
-    def save_formset(self, request, form, formset, change):
-        instances = formset.save(commit=False)
-        files = list(request.FILES.values())
-        i=0
-        for obj in formset.deleted_objects:
-            googleDriveAPI.deletePDF(obj.googleId)
-            if os.path.exists('uploads/photo/'+obj.googleId+'.jpeg'):
-                os.remove('uploads/photo/'+obj.googleId+'.jpeg')
-            obj.delete()
-
-        for instance in instances:
-            parentFolderId = instance.parentSocialActivity.googleFolderId
-            img = files[i]
-            fileName = img.name
-            if instance.googleId != '': googleDriveAPI.deletePDF(instance.googleId) #delete and upload all again for updates
-            googleId = googleDriveAPI.savePDF(fileName, parentFolderId, img, 'image/jpeg')
-            instance.googleId = googleId 
-            instance.img.name = googleId+'.jpeg'
-            instance.save()
-            i += 1        
-        formset.save_m2m()
-
-
 
 class UserAdmin(admin.ModelAdmin):
     fields = ('name', 'generation', 'email', 'is_active','is_staff', 'groups')
@@ -131,5 +96,4 @@ admin.site.register(Season, SeasonAdmin)
 admin.site.register(Notification)
 admin.site.register(User, UserAdmin)
 admin.site.register(Session, SessionAdmin)
-admin.site.register(SocialActivity, SocialActivityAdmin)
 admin.site.register(FreeNote, FreeNoteAdmin)

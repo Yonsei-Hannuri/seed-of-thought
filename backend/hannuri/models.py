@@ -152,7 +152,6 @@ class Session(models.Model):
 class SessionReadfile(models.Model):
     parentSession = models.ForeignKey(Session, related_name='readfile', on_delete=models.CASCADE)
     pdf = models.FileField(upload_to='session/', blank=True)
-    #googleLink = models.CharField(max_length=200, blank=True, verbose_name="구글링크") 
     googleId = models.CharField(max_length=200, blank=True, verbose_name="구글id")
 
     def __str__(self):
@@ -171,63 +170,6 @@ class Detgori(models.Model):
     def __str__(self):
         return f'{self.parentSession}, {self.author} 댓거리'
 
-
-class DetgoriComment(models.Model):
-    parentDetgori = models.ForeignKey(Detgori, on_delete=models.CASCADE, related_name='comments', verbose_name="댓거리")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="댓글 작성자")
-    date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
-    text = models.CharField(max_length=200, verbose_name="내용")
-
-    def __str__(self):
-        return f'{self.parentDetgori}, {self.author} 댓글'
-
-
-class DetgoriCommentReply(models.Model):
-    parentComment = models.ForeignKey(DetgoriComment, on_delete=models.CASCADE, related_name='commentReplys', verbose_name="댓글")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="대댓글 작성자")
-    date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
-    text = models.CharField(max_length=200, verbose_name="내용")
-
-    def __str__(self):
-      return f'{self.parentComment}, {self.author} 대댓글'
-
-class SocialActivity(models.Model):
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="socialActivity", verbose_name="학기")
-    title = models.CharField(max_length=100, blank=True, verbose_name="활동 제목")
-    date = models.DateField(verbose_name="날짜")
-    summary = models.TextField(verbose_name="활동 요약")
-    googleFolderId = models.CharField(max_length=200, verbose_name="구글드라이브 폴더ID")
-
-    def save(self, *args, **kargs):
-        if self.googleFolderId == '':
-            from googleapiclient.discovery import build
-            creds = googleDriveAPI.getCreds()
-            drive_service = build('drive', 'v3', credentials=creds)
-            file_metadata = {
-                'name': '기획활동: {}'.format(self.title),
-                'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [self.season.googleFolderId]
-            }
-            folder_ = drive_service.files().create(body=file_metadata, fields='id').execute()
-            self.googleFolderId=folder_.get('id')
-        super(SocialActivity, self).save(*args, **kargs)
-
-    def __str__(self):
-        return f'{self.season}, {self.title} 활동'
-
-    class Meta:
-        verbose_name        = '기획활동'
-        verbose_name_plural = '4. 기획활동'
-
-class SocialActivityImg(models.Model):
-    parentSocialActivity = models.ForeignKey(SocialActivity, default=None, related_name="imgs", on_delete=models.CASCADE, verbose_name='활동이름')
-    img = models.ImageField(upload_to='photo/', blank=True) #not saving img in local but for admin site file input
-    googleId = models.CharField(max_length=200, blank=True, verbose_name="구글id")
-
-    def __str__(self):
-        return f'{self.parentSocialActivity}, 사진'
-
-
 class FreeNote(models.Model):
     text = models.TextField(verbose_name="내용")
     page = models.IntegerField(default=1)
@@ -238,4 +180,59 @@ class FreeNote(models.Model):
 
     class Meta:
         verbose_name = '공책'
-        verbose_name_plural = '5. 메타동방-공책'
+        verbose_name_plural = '4. 메타동방-공책'
+
+# class DetgoriComment(models.Model):
+#     parentDetgori = models.ForeignKey(Detgori, on_delete=models.CASCADE, related_name='comments', verbose_name="댓거리")
+#     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="댓글 작성자")
+#     date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
+#     text = models.CharField(max_length=200, verbose_name="내용")
+
+#     def __str__(self):
+#         return f'{self.parentDetgori}, {self.author} 댓글'
+
+
+# class DetgoriCommentReply(models.Model):
+#     parentComment = models.ForeignKey(DetgoriComment, on_delete=models.CASCADE, related_name='commentReplys', verbose_name="댓글")
+#     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="대댓글 작성자")
+#     date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
+#     text = models.CharField(max_length=200, verbose_name="내용")
+
+#     def __str__(self):
+#       return f'{self.parentComment}, {self.author} 대댓글'
+
+# class SocialActivity(models.Model):
+#     season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="socialActivity", verbose_name="학기")
+#     title = models.CharField(max_length=100, blank=True, verbose_name="활동 제목")
+#     date = models.DateField(verbose_name="날짜")
+#     summary = models.TextField(verbose_name="활동 요약")
+#     googleFolderId = models.CharField(max_length=200, verbose_name="구글드라이브 폴더ID")
+
+#     def save(self, *args, **kargs):
+#         if self.googleFolderId == '':
+#             from googleapiclient.discovery import build
+#             creds = googleDriveAPI.getCreds()
+#             drive_service = build('drive', 'v3', credentials=creds)
+#             file_metadata = {
+#                 'name': '기획활동: {}'.format(self.title),
+#                 'mimeType': 'application/vnd.google-apps.folder',
+#                 'parents': [self.season.googleFolderId]
+#             }
+#             folder_ = drive_service.files().create(body=file_metadata, fields='id').execute()
+#             self.googleFolderId=folder_.get('id')
+#         super(SocialActivity, self).save(*args, **kargs)
+
+#     def __str__(self):
+#         return f'{self.season}, {self.title} 활동'
+
+#     class Meta:
+#         verbose_name        = '기획활동'
+#         verbose_name_plural = '4. 기획활동'
+
+# class SocialActivityImg(models.Model):
+#     parentSocialActivity = models.ForeignKey(SocialActivity, default=None, related_name="imgs", on_delete=models.CASCADE, verbose_name='활동이름')
+#     img = models.ImageField(upload_to='photo/', blank=True) #not saving img in local but for admin site file input
+#     googleId = models.CharField(max_length=200, blank=True, verbose_name="구글id")
+
+#     def __str__(self):
+#         return f'{self.parentSocialActivity}, 사진'
