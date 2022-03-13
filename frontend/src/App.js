@@ -37,7 +37,7 @@ class App extends Component {
     const path = window.location.pathname.trim().split('/');
     if (isLogined===null || isLogined === 'false') {
       return (
-        <div id='fadein'>
+        <div id='fadein' className='h-100'>
           <LoginPage />
         </div>
       );
