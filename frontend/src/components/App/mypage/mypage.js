@@ -5,6 +5,7 @@ import WordCloud from './wordcloud';
 import axios from 'axios';
 import address from '../../../config/address';
 import errorReport from '../../../modules/errorReport';
+import getCookieValue from '../../../modules/getCookieValue';
 
 class Mypage extends Component {
   static defaultProps = {
@@ -60,9 +61,8 @@ class Mypage extends Component {
 
   deleteRequest = (e) => {
     const reply = window.confirm("댓거리 삭제 시, 복구할 수 없습니다. 삭제하시겠습니까?");
-    const csrfToken_ = document.cookie;
-    const csrfToken = csrfToken_.split('=')[1];
-    const csrfHeader = {
+    const csrfToken = getCookieValue(document.cookie, 'csrftoken');
+    const Header = {
        'X-CSRFToken':  csrfToken
     };
     if (reply){
@@ -70,7 +70,7 @@ class Mypage extends Component {
         method: 'DELETE',
         url: address.back + 'detgori/'+ e.currentTarget.getAttribute('val')+'/',
         withCredentials: true,
-        headers: csrfHeader,
+        headers: Header,
       })
         .then(() => {
           this.getUserInfo();

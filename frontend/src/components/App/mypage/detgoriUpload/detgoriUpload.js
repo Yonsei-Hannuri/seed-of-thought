@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import SessionOption from './sessionOption';
 import errorReport from '../../../../modules/errorReport';
 import address from '../../../../config/address.json';
+import getCookieValue from '../../../../modules/getCookieValue';
 import axios from 'axios';
 
 class DetgoriUpload extends Component {
@@ -48,8 +49,7 @@ class DetgoriUpload extends Component {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', request_url);
     xhr.withCredentials = true;
-    let csrfToken_ = document.cookie;
-    let csrfToken = csrfToken_.split('=')[1];
+    const csrfToken = getCookieValue(document.cookie, 'csrftoken');
     xhr.setRequestHeader('X-CSRFToken', csrfToken);
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status === 201) {
