@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
-import errorReport from '../../../../modules/errorReport';
-import address from '../../../../config/address.json';
-import getCookieValue from '../../../../modules/getCookieValue';
+import errorReport from '../../../modules/errorReport';
+import address from '../../../config/address.json';
+import getCookieValue from '../../../modules/getCookieValue';
 
 export default class Note extends Component {
     static defaultProps = {

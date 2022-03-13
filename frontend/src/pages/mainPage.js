@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import Index from './index/mainIndex';
-import errorReport from '../../../modules/errorReport';
-import address from '../../../config/address.json';
+import SessionBanner from '../components/App/main/sessionBanner';
+import NotificationBox from '../components/App/main/notificationBox';
+import FolderUI from '../components/App/main/folderUI/folderUI';
+import errorReport from '../modules/errorReport';
+import address from '../config/address.json';
 import axios from 'axios';
 
-class Main extends Component {
+class MainPage extends Component {
   static defaultProps = {
     active: true,
   };
@@ -69,10 +71,9 @@ class Main extends Component {
     if (this.state.loaded === true) {
       return (
         <div className={this.props.active === true ? '' : 'blank'}>
-          <Index
-            recentSession={this.state.recentSession}
-            notifications={this.state.notifications}
-          />
+          <NotificationBox notifications={this.state.notifications}/>
+          <SessionBanner recentSession={this.state.recentSession}/>
+          <FolderUI/>
         </div>
       );
     }
@@ -80,4 +81,4 @@ class Main extends Component {
   }
 }
 
-export default Main;
+export default MainPage;

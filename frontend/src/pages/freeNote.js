@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import Page from './page';
-import address from '../../../../config/address.json';
-import errorReport from '../../../../modules/errorReport';
+import Page from '../components/App/freeNote/page';
+import address from '../config/address.json';
+import errorReport from '../modules/errorReport';
 
 class FreeNote extends Component {
   state = {

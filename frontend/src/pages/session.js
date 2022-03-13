@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { Bar } from 'react-chartjs-2';
-import SessionReadfile from './sessionReadfile';
-import errorReport from '../../../modules/errorReport';
-import address from '../../../config/address.json';
+import SessionReadfile from '../components/App/session/sessionReadfile';
+import errorReport from '../modules/errorReport';
+import address from '../config/address.json';
 import axios from 'axios';
 import { Page, Document } from 'react-pdf';
 import { pdfjs } from 'react-pdf';
-import NameCard from './nameCard';
+import NameCard from '../components/App/session/nameCard';
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 class Session extends Component {

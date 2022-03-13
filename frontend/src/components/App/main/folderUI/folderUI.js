@@ -1,8 +1,8 @@
 import axios from "axios";
 import React, { Component } from "react";
 import Folder from "./folder";
-import address from '../../../../../config/address.json';
-import errorReport from "../../../../../modules/errorReport";
+import address from '../../../../config/address.json';
+import errorReport from "../../../../modules/errorReport";
 
 class FolderUI extends Component {
     state = {

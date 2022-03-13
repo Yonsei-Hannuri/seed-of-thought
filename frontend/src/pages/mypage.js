@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import DetgoriUpload from './detgoriUpload/detgoriUpload';
-import ProfileColor from './profileColor';
-import WordCloud from './wordcloud';
+import DetgoriUpload from '../components/App/mypage/detgoriUpload/detgoriUpload';
+import ProfileColor from '../components/App/mypage/profileColor';
+import WordCloud from '../components/App/mypage/wordcloud';
 import axios from 'axios';
-import address from '../../../config/address';
-import errorReport from '../../../modules/errorReport';
-import getCookieValue from '../../../modules/getCookieValue';
+import address from '../config/address';
+import errorReport from '../modules/errorReport';
+import getCookieValue from '../modules/getCookieValue';
 
 class Mypage extends Component {
   static defaultProps = {
