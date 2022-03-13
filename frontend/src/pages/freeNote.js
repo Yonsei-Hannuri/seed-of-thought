@@ -5,6 +5,10 @@ import address from '../config/address.json';
 import errorReport from '../modules/errorReport';
 
 class FreeNote extends Component {
+  static defaultProps = {
+    pageSelect: '',
+  }
+
   state = {
     notes: [{}],
     page: 1,
@@ -12,8 +16,6 @@ class FreeNote extends Component {
   };
 
   componentDidMount() {
-    //const rand_0_99 = Math.floor(Math.random() * 100);
-    //this.getInfoAndPageFlip(rand_0_99)
     axios({
       method: 'GET',
       url: address.back + 'freeNote/',
@@ -85,11 +87,9 @@ class FreeNote extends Component {
         ) : (
           ''
         )}
-        <a href="/?section=meta">
-          <button className="btn col-3 border float-end mx-1 btn-light">
-            나가기
-          </button>
-        </a>
+        <button onClick={this.props.pageSelect} name='metaSpace' className="btn col-3 border float-end mx-1 btn-light">
+          나가기
+        </button>
         <Page
           info={this.state.notes}
           onUpload={this.handleUpload}
