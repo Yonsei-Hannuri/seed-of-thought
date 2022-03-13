@@ -26,10 +26,15 @@ class NameCard extends Component {
     }
   
     render() {
+      const authorColor = this.state.detgoriInfo.authorColor
       return (
         <div>
           <button
-            className="btn m-1 btn-light border"
+            style={{
+              border: `2px solid ${authorColor}`,
+              boxShadow: `0px 0px 3px ${authorColor}`
+            }}
+            className="btn m-1 btn-light"
             value={this.state.detgoriInfo.googleId}
             onClick={this.props.onClick}
           >

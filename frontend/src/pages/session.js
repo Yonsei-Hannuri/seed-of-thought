@@ -231,12 +231,13 @@ class Session extends Component {
       ));
 
       return (
-        <div>
+        <div className="mt-5">
           <h2>{this.state.info.title}</h2>
           <SessionReadfile
             urls={this.state.info.readfile}
             googleFolderId={this.state.info.googleFolderId}
-          />
+            />
+          <hr/>
           <div className="row">
             <span className="fw-bolder fs-4 py-1"> 댓거리</span>
             <div
@@ -325,6 +326,7 @@ class Session extends Component {
               </ul>
             </div>
           </div>
+          <hr/>
           {this.state.chartDiv}
           <hr />
           <div className="text-end m-3">
