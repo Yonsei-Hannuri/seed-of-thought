@@ -1,6 +1,5 @@
 function Header(props){
-    // selected, handleToggle, address
-    console.log(props.selected);
+    // selected, pageSelect, address
     return (
         <div name="header">
         <div className="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
@@ -14,8 +13,8 @@ function Header(props){
             <li className="nav-item">
               <button
                 name="main"
-                className={'nav-link ' + (props.selected.main ? 'active' : '')}
-                onClick={props.handleToggle}
+                className={'nav-link ' + (props.selected === 'main' ? 'active' : '')}
+                onClick={props.pageSelect}
               >
                 메인
               </button>
@@ -24,9 +23,9 @@ function Header(props){
               <button
                 name="metaSpace"
                 className={
-                  'nav-link ' + (props.selected.metaSpace ? 'active' : '')
+                  'nav-link ' + (['metaSpace', 'freeNote'].includes(props.selected) ? 'active' : '')
                 }
-                onClick={props.handleToggle}
+                onClick={props.pageSelect}
               >
                 메타동방
               </button>
@@ -34,8 +33,8 @@ function Header(props){
             <li className="nav-item">
               <button
                 name="mypage"
-                className={'nav-link ' + (props.selected.mypage ? 'active' : '')}
-                onClick={props.handleToggle}
+                className={'nav-link ' + (props.selected === 'mypage' ? 'active' : '')}
+                onClick={props.pageSelect}
               >
                 마이페이지
               </button>

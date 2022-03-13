@@ -3,57 +3,57 @@ import MainPage from './pages/mainPage';
 import Mypage from './pages/mypage';
 import MetaSpace from './pages/metaSpace';
 import Session from './pages/session';
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import FreeNote from './pages/freeNote';
 import LoginPage from './pages/loginPage';
 import getCookieValue from './modules/getCookieValue';
-import Header from './components/App/header';
+import HeaderNav from './components/App/headerNav';
 import Footer from './components/App/footer';
 import address from './config/address.json';
 
 class App extends Component {
   state = {
-    selected: {
-      main: true,
-      metaSpace: false,
-      mypage: false,
-    }
+    selected: 'main',
+    e: ''
   };
 
-  handleToggle = (e) => {
+  pageSelect = (e) => {
     this.setState({
-      selected: {
-        main: false,
-        metaSpace: false,
-        mypage: false,
-        [e.target.name]: true,
-      }
+      selected: e.target.name,
+      e : e
     });
-    window.location.href = `/${e.target.name}`;
   };
 
   render() {
     const isLogined = getCookieValue(document.cookie, 'isLogin');
+    const path = window.location.pathname.trim().split('/');
+    console.log(path);
     if (isLogined===null || isLogined === 'false') {
       return (
         <LoginPage />
       );
-    }
-    return (
-      <>
-        <BrowserRouter>
+    } else if (path[1] === 'session'){
+      return (
         <div className="container">
-          <Header selected={this.state.selected} handleToggle={this.handleToggle} address={address}/>
-          <Switch>
-            <Route exact path="/metaSpace" component={MetaSpace}/>
-            <Route exact path="/mypage" component={Mypage}/>
-            <Route exact path="/session" component={Session} />
-            <Route exact path="/freeNote" component={FreeNote} />
-            <Route path={['/', '/main']} component={MainPage} />
-          </Switch>
+          <Session/>
+        </div>
+      );
+    }
+    return (   
+      <>
+        <div className="container">
+          <HeaderNav selected={this.state.selected} pageSelect={this.pageSelect} address={address}/>
+          {this.state.selected === 'main' ? 
+            <MainPage/> : 
+            this.state.selected === 'metaSpace' ? 
+            <MetaSpace pageSelect={this.pageSelect}/> : 
+            this.state.selected === 'mypage' ? 
+            <Mypage/> :
+            this.state.selected === 'freeNote' ?
+            <FreeNote/> :
+            <MainPage/>
+          }
           <Footer/>
         </div>
-        </BrowserRouter>
       </>
     );
   }

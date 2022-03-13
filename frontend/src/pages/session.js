@@ -54,7 +54,7 @@ class Session extends Component {
       validateStatus: function (status) {
         // 상태 코드가 200대가 아닐 경우 //이부분 반드시 필요 없는듯
         if (!(status < 300 && status >= 200)) {
-          window.location.href = address.front;
+          //window.location.href = address.front;
           return false;
         }
         return true;
