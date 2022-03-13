@@ -1,9 +1,9 @@
 import axios from 'axios';
 import address from '../config/address.json';
+import getCookieValue from './getCookieValue'
 
 function errorReport(e, from) {
-  let csrfToken_ = document.cookie;
-  let csrfToken = csrfToken_.split('=')[1];
+  const csrfToken = getCookieValue(document.cookie, 'csrftoken')
   axios({
     method: 'POST',
     url: address.back + 'frontError/',
