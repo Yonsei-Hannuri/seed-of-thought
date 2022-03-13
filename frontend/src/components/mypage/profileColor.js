@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import address from '../../../config/address.json';
+import address from '../../config/address.json';
 
 class ProfileColor extends Component {
   static defaultProps = {

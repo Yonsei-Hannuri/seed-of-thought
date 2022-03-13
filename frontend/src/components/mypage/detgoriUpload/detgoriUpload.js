@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
 import SessionOption from './sessionOption';
-import errorReport from '../../../../modules/errorReport';
-import address from '../../../../config/address.json';
-import getCookieValue from '../../../../modules/getCookieValue';
+import errorReport from '../../../modules/errorReport';
+import address from '../../../config/address.json';
+import getCookieValue from '../../../modules/getCookieValue';
 import axios from 'axios';
 
 class DetgoriUpload extends Component {

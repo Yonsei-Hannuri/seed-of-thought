@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import SessionBanner from '../components/App/main/sessionBanner';
-import NotificationBox from '../components/App/main/notificationBox';
-import FolderUI from '../components/App/main/folderUI/folderUI';
+import SessionBanner from '../components/main/sessionBanner';
+import NotificationBox from '../components/main/notificationBox';
+import FolderUI from '../components/main/folderUI/folderUI';
 import errorReport from '../modules/errorReport';
 import address from '../config/address.json';
 import axios from 'axios';

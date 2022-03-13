@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import Page from '../components/App/freeNote/page';
+import Page from '../components/freeNote/page';
 import address from '../config/address.json';
 import errorReport from '../modules/errorReport';
 

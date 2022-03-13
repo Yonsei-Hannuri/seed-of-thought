@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import axios from 'axios';
-import httpsfy from '../../../../modules/httpsfy';
-import errorReport from '../../../../modules/errorReport';
+import httpsfy from '../../../modules/httpsfy';
+import errorReport from '../../../modules/errorReport';
 
 export default class SessionOption extends Component {
     static defaultProps = {

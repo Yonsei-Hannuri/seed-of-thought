@@ -5,8 +5,8 @@ import MetaSpace from './pages/metaSpace';
 import Session from './pages/session';
 import FreeNote from './pages/freeNote';
 import LoginPage from './pages/loginPage';
-import HeaderNav from './components/App/headerNav';
-import Footer from './components/App/footer';
+import HeaderNav from './components/headerNav';
+import Footer from './components/footer';
 import getCookieValue from './modules/getCookieValue';
 import address from './config/address.json';
 import delay from './modules/delay'

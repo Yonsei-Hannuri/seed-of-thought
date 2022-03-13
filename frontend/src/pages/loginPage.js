@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import emailOauth from '../config/emailOauth.json';
-import LoginForm from '../components/App/login/loginForm';
-import SignInForm from '../components/App/login/signinForm';
+import LoginForm from '../components/login/loginForm';
+import SignInForm from '../components/login/signinForm';
 
 class Login extends Component {
   state = {

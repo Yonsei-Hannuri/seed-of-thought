@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import DetgoriUpload from '../components/App/mypage/detgoriUpload/detgoriUpload';
-import ProfileColor from '../components/App/mypage/profileColor';
-import WordCloud from '../components/App/mypage/wordcloud';
+import DetgoriUpload from '../components/mypage/detgoriUpload/detgoriUpload';
+import ProfileColor from '../components/mypage/profileColor';
+import WordCloud from '../components/mypage/wordcloud';
 import axios from 'axios';
 import address from '../config/address';
 import errorReport from '../modules/errorReport';

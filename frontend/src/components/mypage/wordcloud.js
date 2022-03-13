@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactWordcloud from 'react-wordcloud';
-import errorReport from '../../../modules/errorReport';
-import address from '../../../config/address.json';
+import errorReport from '../../modules/errorReport';
+import address from '../../config/address.json';
 
 class WordCloud extends Component {
   state = {
