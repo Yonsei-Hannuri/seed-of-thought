@@ -71,8 +71,11 @@ class Session extends Component {
           .then((res) => res.json())
           .then((data_) => {
             let data = data_.wordList;
-            if (data.length === 0) return;
-            this.setState({ chartDiv: <WordChart data={data}/>, info: sessionData });
+            if (data.length === 0){
+              this.setState({ info: sessionData });
+            } else{
+              this.setState({ chartDiv: <WordChart data={data}/>, info: sessionData });
+            }
           })
           .catch((e) => errorReport(e, 'front-session'));
       })
