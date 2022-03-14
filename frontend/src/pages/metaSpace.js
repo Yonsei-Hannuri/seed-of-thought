@@ -1,3 +1,4 @@
+import EasterEgg from "../components/easterEgg";
 function MetaSpace(props) {
   return (
     <div>
@@ -10,6 +11,7 @@ function MetaSpace(props) {
           alt="Notebook  free icon"
           title="Notebook free icon"
         />
+        <EasterEgg/>
     </div>
   ); 
 }
