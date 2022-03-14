@@ -122,7 +122,7 @@ class Notification(models.Model):
 
 class Session(models.Model):
     is_current = models.BooleanField(default=False, verbose_name="현재 진행 세션(메인 화면 표시)")
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="session", verbose_name="학기")
+    season = models.ForeignKey(Season, on_delete=models.PROTECT, related_name="session", verbose_name="학기")
     date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
     week = models.IntegerField(default=1, verbose_name="주차")
     title = models.CharField(max_length=200, verbose_name="제목")
@@ -159,8 +159,8 @@ class SessionReadfile(models.Model):
 
 
 class Detgori(models.Model):
-    parentSession = models.ForeignKey(Session, on_delete=models.CASCADE, related_name='detgori', verbose_name="세션")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='detgori', verbose_name="댓거리 작성자")
+    parentSession = models.ForeignKey(Session, on_delete=models.PROTECT, related_name='detgori', verbose_name="세션")
+    author = models.ForeignKey(User, on_delete=models.PROTECT, related_name='detgori', verbose_name="댓거리 작성자")
     title = models.CharField(max_length=200, verbose_name="제목")
     date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
     pdf = models.FileField(upload_to='detgori/', blank=True)
@@ -184,8 +184,8 @@ class FreeNote(models.Model):
         verbose_name_plural = '4. 메타동방-공책'
 
 # class DetgoriComment(models.Model):
-#     parentDetgori = models.ForeignKey(Detgori, on_delete=models.CASCADE, related_name='comments', verbose_name="댓거리")
-#     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="댓글 작성자")
+#     parentDetgori = models.ForeignKey(Detgori, on_delete=models.PROTECT, related_name='comments', verbose_name="댓거리")
+#     author = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="댓글 작성자")
 #     date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
 #     text = models.CharField(max_length=200, verbose_name="내용")
 
@@ -194,8 +194,8 @@ class FreeNote(models.Model):
 
 
 # class DetgoriCommentReply(models.Model):
-#     parentComment = models.ForeignKey(DetgoriComment, on_delete=models.CASCADE, related_name='commentReplys', verbose_name="댓글")
-#     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="대댓글 작성자")
+#     parentComment = models.ForeignKey(DetgoriComment, on_delete=models.PROTECT, related_name='commentReplys', verbose_name="댓글")
+#     author = models.ForeignKey(User, on_delete=models.PROTECT, verbose_name="대댓글 작성자")
 #     date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
 #     text = models.CharField(max_length=200, verbose_name="내용")
 
@@ -203,7 +203,7 @@ class FreeNote(models.Model):
 #       return f'{self.parentComment}, {self.author} 대댓글'
 
 # class SocialActivity(models.Model):
-#     season = models.ForeignKey(Season, on_delete=models.CASCADE, related_name="socialActivity", verbose_name="학기")
+#     season = models.ForeignKey(Season, on_delete=models.PROTECT, related_name="socialActivity", verbose_name="학기")
 #     title = models.CharField(max_length=100, blank=True, verbose_name="활동 제목")
 #     date = models.DateField(verbose_name="날짜")
 #     summary = models.TextField(verbose_name="활동 요약")
@@ -231,7 +231,7 @@ class FreeNote(models.Model):
 #         verbose_name_plural = '4. 기획활동'
 
 # class SocialActivityImg(models.Model):
-#     parentSocialActivity = models.ForeignKey(SocialActivity, default=None, related_name="imgs", on_delete=models.CASCADE, verbose_name='활동이름')
+#     parentSocialActivity = models.ForeignKey(SocialActivity, default=None, related_name="imgs", on_delete=models.PROTECT, verbose_name='활동이름')
 #     img = models.ImageField(upload_to='photo/', blank=True) #not saving img in local but for admin site file input
 #     googleId = models.CharField(max_length=200, blank=True, verbose_name="구글id")
 
