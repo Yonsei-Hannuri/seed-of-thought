@@ -56,7 +56,7 @@ def Login(request):
         user = User.objects.get(email=email)
         login(request, user)
         response = redirect(address['front'])
-        response.set_cookie('isLogin', 'true', domain=address['common'])
+        response.set_cookie('isLogin', 'true', domain=address['common'], max_age=60*60*4)
         return response
     except:
         return redirect(address['front']+'?login=error')
