@@ -71,13 +71,13 @@ class FreeNote extends Component {
           className="btn col-3 border mx-1 btn-light"
           onClick={this.handlePreviousPage}
         >
-          이전
+          {"<"}
         </button>
         <button
           className="btn col-3 border mx-1 btn-light"
           onClick={this.handleNextPage}
         >
-          다음
+          {">"}
         </button>
         <span className="col-3 mx-1">페이지 {this.state.page}</span>
         {this.state.ajaxError ? (

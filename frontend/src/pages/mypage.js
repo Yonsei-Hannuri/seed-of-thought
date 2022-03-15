@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import DetgoriUpload from '../components/mypage/detgoriUpload/detgoriUpload';
 import ProfileColor from '../components/mypage/profileColor';
 import WordCloud from '../components/mypage/wordcloud';
+import Detgori from '../components/mypage/detgori';
 import axios from 'axios';
 import address from '../config/address';
 import errorReport from '../modules/errorReport';
@@ -91,20 +92,7 @@ class Mypage extends Component {
         </option>
       ));
       const detgoriList = this.state.seasonDetgoris.slice(1,).map((detgori, idx) => (
-        <div className='d-flex' key={detgori.detgoriId}>
-          <li className="list-group-item align-bottom w-90">
-              <a
-                rel="noreferrer"
-                href={`https://drive.google.com/file/d/${detgori.googleId}/view`}
-                target="_blank"
-              >
-                {detgori.sessionTitle}: {detgori.detgoriTitle}
-              </a>
-          </li>
-          <li className="list-group-item p-0 pt-2 w-10 border text-center">
-            <span val={detgori.detgoriId} onClick={this.deleteRequest} className="material-icons-outlined align-middle">delete_forever</span>
-          </li>
-        </div>
+        <Detgori key={detgori.id} detgori={detgori} deleteRequest={this.deleteRequest}/>
       ));
       return (
         <div className={this.props.active === true ? '' : 'blank'}>
