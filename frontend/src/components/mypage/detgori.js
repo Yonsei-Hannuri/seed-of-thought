@@ -1,6 +1,6 @@
 function Detgori(props){
     return(
-        <div className='d-flex' key={props.detgori.detgoriId}>
+        <div className='d-flex'>
             <li className="list-group-item align-bottom w-90">
                 <a
                 rel="noreferrer"

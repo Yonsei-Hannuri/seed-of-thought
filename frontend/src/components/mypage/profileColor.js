@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import address from '../../config/address.json';
+import getCookieValue from '../../modules/getCookieValue';
 
 class ProfileColor extends Component {
   static defaultProps = {
@@ -24,9 +25,7 @@ class ProfileColor extends Component {
     const xhr = new XMLHttpRequest();
     xhr.open('POST', request_url);
     xhr.withCredentials = true;
-    let csrfToken_ = document.cookie;
-    let csrfToken = csrfToken_.split('=')[1];
-    xhr.setRequestHeader('X-CSRFToken', csrfToken);
+    xhr.setRequestHeader('X-CSRFToken', getCookieValue(document.cookie, 'csrftoken'));
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status === 200) {
         this.setState({ update: false });

@@ -92,7 +92,7 @@ class Mypage extends Component {
         </option>
       ));
       const detgoriList = this.state.seasonDetgoris.slice(1,).map((detgori, idx) => (
-        <Detgori key={detgori.id} detgori={detgori} deleteRequest={this.deleteRequest}/>
+        <Detgori key={detgori.detgoriId} detgori={detgori} deleteRequest={this.deleteRequest}/>
       ));
       return (
         <div className={this.props.active === true ? '' : 'blank'}>
