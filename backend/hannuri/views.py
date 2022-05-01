@@ -10,8 +10,8 @@ import datetime
 import os
 from django.conf import settings
 
-import googleDriveAPI
-import wordcloud
+from lib import googleDriveAPI
+from lib import wordcloud
 
 #custom permission
 from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly

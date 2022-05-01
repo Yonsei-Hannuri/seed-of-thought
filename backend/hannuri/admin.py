@@ -1,6 +1,6 @@
 from django.contrib import admin
 from hannuri.models import *
-import googleDriveAPI
+from lib import googleDriveAPI
 import os
 with open('./config/googleDrive/folderId.json') as json_file:
     googleFolderId = json.load(json_file)
