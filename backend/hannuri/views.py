@@ -123,50 +123,48 @@ def WordList(request, type, sessionId):
         return HttpResponse(json.dumps({'wordList':wordList})) 
     return HttpResponse('')
 
-def myDetgoriInfos(userId, currentSeason):
-        myDetgoriInfos = list()
+def my_detgori_infos(userId, currentSeason):
+        my_detgori_infos = list()
         currentSessions = currentSeason.session.all()
         currentDetgoris = Detgori.objects.filter(author=userId, parentSession__in=currentSessions)
-        myDetgoriInfos.append(currentSeason.title)
+        my_detgori_infos.append(currentSeason.title)
         for i in range(len(currentDetgoris)):
-            myDetgoriInfos.append({
+            my_detgori_infos.append({
                 'detgoriId': currentDetgoris[i].id,
                 'sessionTitle': currentDetgoris[i].parentSession.title,
                 'detgoriTitle': currentDetgoris[i].title,
                 'googleId': currentDetgoris[i].googleId,
             })
-        return myDetgoriInfos
+        return my_detgori_infos
 
 def MypageInfo(request):
     if not(request.user):
         return HttpResponse('')
     else:
         try:
-            seasonId =  request.GET['seasonId'] 
+            season_id =  request.GET['seasonId'] 
         except:
-            seasonId = None
-        if seasonId:
-            requestedSeason = Season.objects.get(id=seasonId)
-            seasonDetgoriInfos = myDetgoriInfos(request.user.id, requestedSeason)
+            season_id = None
+        if season_id:
+            requested_season = Season.objects.get(id=season_id)
+            season_detgori_infos = my_detgori_infos(request.user.id, requested_season)
             response_data = dict()
-            response_data['seasonDetgoris'] = seasonDetgoriInfos
+            response_data['seasonDetgoris'] = season_detgori_infos
             return HttpResponse(json.dumps(response_data)) 
-        response_data = dict()
-        userSeasons_pk = list(map(int, request.user.actingSeason.split()))
-        userSeasons = Season.objects.filter(id__in=userSeasons_pk)
+        
+
+        user_seasons = [season for season in request.user.act_seasons.order_by('-id')]
+        current_infos = my_detgori_infos(request.user.id,  user_seasons[0])
         seasons = list()
-        currentInfos = []
-        len_userSeaons= len(userSeasons)
-        for i in range(len_userSeaons-1, -1,-1):
-            if i == len_userSeaons-1:
-                currentInfos = myDetgoriInfos(request.user.id, userSeasons[i])
-            seasonInfo = {
-                'id' : userSeasons[i].id,
-                'year' : userSeasons[i].year,
-                'semester' : userSeasons[i].semester
-                }
-            seasons.append(seasonInfo)
-        response_data['seasonDetgoris'] = currentInfos
+        for season in user_seasons:
+            season_info = {
+                'id' : season.id,
+                'year' : season.year,
+                'semester' : season.semester
+            }
+            seasons.append(season_info)
+        response_data = dict()
+        response_data['seasonDetgoris'] = current_infos
         response_data['seasons'] = seasons
         response_data['name'] = request.user.name
         response_data['color'] = request.user.color
@@ -290,11 +288,10 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         serializer.save(googleId=googleId, pureText=text, author=self.request.user, words=words, pdf=self.request.FILES['pdf'])
 
         #check users acting season, if first detgori add current season as his acting season.
-        actingSeason_Str = self.request.user.actingSeason
-        actingSeason_li = tuple(map(int,actingSeason_Str.split()))
-        currentSeason = Season.objects.get(is_current=True).pk
-        if not currentSeason in actingSeason_li:
-            self.request.user.actingSeason += ' '+str(currentSeason)
+        act_seasons = [season.id for season in self.request.user.act_seasons.all()]
+        current_season = Season.objects.get(is_current=True).pk
+        if not current_season in act_seasons:
+            self.request.user.act_seasons.add(current_season)
         self.request.user.save()
 
     def perform_destroy(self, instance):
@@ -304,13 +301,11 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             pass
         #check whether was a detgori was the only detgori of the season
         #if so erase this acting season.
-        userDetgoris = Detgori.objects.filter(author=self.request.user)
-        userDetgoriSeason_li = [detgori.parentSession.season.pk for detgori in userDetgoris]
-        removingDetgoriSeason = instance.parentSession.season.pk
-        if userDetgoriSeason_li.count(removingDetgoriSeason) == 1:
-            actingSeason = self.request.user.actingSeason.split()
-            actingSeason.remove(str(removingDetgoriSeason))
-            self.request.user.actingSeason = ' '.join(actingSeason)
+        user_detgoris = Detgori.objects.filter(author=self.request.user)
+        user_detgori_seasons = [detgori.parentSession.season.pk for detgori in user_detgoris]
+        removing_detgori_season = instance.parentSession.season.pk
+        if user_detgori_seasons.count(removing_detgori_season) == 1:
+            self.request.user.act_seasons.remove(removing_detgori_season)
             self.request.user.save()
 
         if os.path.exists('uploads/detgori/'+instance.googleId+'.pdf'):
