@@ -34,36 +34,6 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-class User(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(default='', max_length=100, null=False, blank=False, unique=True, verbose_name='구글 이메일')
-    name = models.CharField(default='', max_length=100, null=False, blank=False, verbose_name='이름')
-    generation = models.IntegerField(default=20, blank=True, verbose_name='기수')
-    color = models.CharField(default='#000080', max_length=200, null=True, blank=True)
-    permissionId = models.CharField(blank=True, max_length=100)
-    writerPermissioned = models.BooleanField(default=False)
-    actingSeason = models.CharField(default='', max_length=20, null=True, blank=True)
-
-    # User 모델의 필수 field
-    is_active = models.BooleanField(default=False, verbose_name='활동 허가')   
-    is_superuser = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False, verbose_name='임원진') 
-    
-    # 헬퍼 클래스 사용
-    objects = UserManager()
-
-    # 사용자의 username field는 email로 설정
-    USERNAME_FIELD = 'email'
-    # 필수로 작성해야하는 field
-    REQUIRED_FIELDS = ['name']
-
-    def __str__(self):
-        return '{}기 {}: {}'.format(self.generation, self.name, self.email)
-
-    class Meta:
-        verbose_name        = '학회원'
-        verbose_name_plural = '0. 학회원'
-
 class Season(models.Model):
     is_current = models.BooleanField(default=False, verbose_name="현재 진행 학기")
     year = models.PositiveIntegerField(default=2020, verbose_name="연도")
@@ -96,6 +66,36 @@ class Season(models.Model):
         verbose_name_plural = '2. 학기'
 
 
+class User(AbstractBaseUser, PermissionsMixin):
+    email = models.EmailField(default='', max_length=100, null=False, blank=False, unique=True, verbose_name='구글 이메일')
+    name = models.CharField(default='', max_length=100, null=False, blank=False, verbose_name='이름')
+    generation = models.IntegerField(default=20, blank=True, verbose_name='기수')
+    color = models.CharField(default='#000080', max_length=200, null=True, blank=True)
+    permissionId = models.CharField(blank=True, max_length=100)
+    writerPermissioned = models.BooleanField(default=False)
+    actingSeason = models.CharField(default='', max_length=20, null=True, blank=True)
+    act_seasons = models.ManyToManyField(Season)
+
+    # User 모델의 필수 field
+    is_active = models.BooleanField(default=False, verbose_name='활동 허가')   
+    is_superuser = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False, verbose_name='임원진') 
+    
+    # 헬퍼 클래스 사용
+    objects = UserManager()
+
+    # 사용자의 username field는 email로 설정
+    USERNAME_FIELD = 'email'
+    # 필수로 작성해야하는 field
+    REQUIRED_FIELDS = ['name']
+
+    def __str__(self):
+        return '{}기 {}: {}'.format(self.generation, self.name, self.email)
+
+    class Meta:
+        verbose_name        = '학회원'
+        verbose_name_plural = '0. 학회원'
 
 
 class Notification(models.Model):
@@ -182,6 +182,8 @@ class FreeNote(models.Model):
     class Meta:
         verbose_name = '공책'
         verbose_name_plural = '4. 메타동방-공책'
+
+
 
 # class DetgoriComment(models.Model):
 #     parentDetgori = models.ForeignKey(Detgori, on_delete=models.PROTECT, related_name='comments', verbose_name="댓거리")
