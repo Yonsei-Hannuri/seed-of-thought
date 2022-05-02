@@ -152,9 +152,11 @@ def MypageInfo(request):
             response_data['seasonDetgoris'] = season_detgori_infos
             return HttpResponse(json.dumps(response_data)) 
         
-
         user_seasons = [season for season in request.user.act_seasons.order_by('-id')]
-        current_infos = my_detgori_infos(request.user.id,  user_seasons[0])
+        current_infos = []
+        if len(user_seasons) != 0 :
+            current_infos = my_detgori_infos(request.user.id,  user_seasons[0])
+
         seasons = list()
         for season in user_seasons:
             season_info = {
