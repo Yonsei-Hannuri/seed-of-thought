@@ -10,8 +10,7 @@ import datetime
 import os
 from django.conf import settings
 
-from lib import googleDriveAPI
-from lib import wordcloud
+from lib import googleDriveAPI, wordcloud, validate
 
 #custom permission
 from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
@@ -261,18 +260,21 @@ class DetgoriViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs): 
         serializer = self.get_serializer(data=request.data) 
         serializer.is_valid(raise_exception=True) 
-        
+
         try: 
             self.perform_create(serializer) 
-        except:
-            return Response('', status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
 
         headers = self.get_success_headers(serializer.data) 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
 
     def perform_create(self, serializer): # Detgori 관련 create가 발생했을 때 호출되는 메쏘드의 일부분 custom
-            
+
+        if not validate.is_PDF(self.request.FILES['pdf'].name): 
+            raise Exception('pdf 파일이 아닙니다.')
+
         #parse nouns of a detgori and upload on the google drive
         parentSession = Session.objects.get(pk=self.request.POST['parentSession'])
         parentFolderId = parentSession.googleFolderId
