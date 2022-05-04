@@ -11,6 +11,7 @@ class NameCard extends Component {
     state = {
       detgoriInfo: { authorName: '', googleId: '' },
       currentDetgoriId: null,
+      clicked: false,
     };
   
     componentDidMount() {
@@ -25,6 +26,11 @@ class NameCard extends Component {
         });
     }
   
+    handleClick() {
+      setTimeout(() => this.setState({clicked: true}), 2000);
+    }
+
+
     render() {
       const authorColor = this.state.detgoriInfo.authorColor
       return (
@@ -32,11 +38,12 @@ class NameCard extends Component {
           <button
             style={{
               border: `2px solid ${authorColor}`,
-              boxShadow: `0px 0px 3px ${authorColor}`
+              boxShadow: `0px 0px 3px ${authorColor}`,
+              color: `${this.state.clicked ? 'Gainsboro' : 'black'}`,
             }}
             className="btn m-1 btn-light"
             value={this.state.detgoriInfo.googleId}
-            onClick={this.props.onClick}
+            onClick={(e)=>{this.props.onClick(e); this.handleClick();}}
           >
             {this.state.detgoriInfo.authorName}
           </button>
