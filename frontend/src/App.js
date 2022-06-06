@@ -4,6 +4,7 @@ import Mypage from './pages/mypage';
 import MetaSpace from './pages/metaSpace';
 import Session from './pages/session';
 import FreeNote from './pages/freeNote';
+import Archive from './pages/archive';
 import LoginPage from './pages/loginPage';
 import HeaderNav from './components/headerNav';
 import Footer from './components/footer';
@@ -45,6 +46,12 @@ class App extends Component {
       return (
         <div id='fadein' className="container">
           <Session/>
+        </div>
+      );
+    } else if (path[1] === 'test' && process.env.NODE_ENV === 'development'){
+      return (
+        <div id='fadein' className="container">
+          <Archive/>
         </div>
       );
     }
