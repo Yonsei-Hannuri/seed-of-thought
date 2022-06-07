@@ -1,12 +1,14 @@
-import Slide from './seasonSlide';
+import SeasonSlide from './seasonSlide';
 
-export default function SeasonSlides(props){
-    const slides = props.seasons.map(season => {
-        <Slide info={season}/>
-    });
+export default function SeasonSlideUI(props){
+    const slides = props.seasons.map((season, idx) => 
+        <div onClick={()=>props.clickhandler(season.id)}>
+            <SeasonSlide info={season} key={idx}/>
+        </div>
+    );
 
     return (
-        <div style={{display: 'flex'}}>
+        <div style={{display: 'flex', justifyContent: 'space-around'}}>
             {slides}
         </div>
     )

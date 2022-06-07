@@ -1,13 +1,16 @@
 import axios from 'axios';
 import address from '../config/address.json';
+import SeasonSlideUI from '../components/archive/seasonSlideUI';
+import SeasonPage from '../components/archive/seasonPage';
+import XButton from '../components/common/XButton';
 import { useEffect, useState } from 'react';
 
-const SLIDE = 0;
-const SEASONPAGE = 1;
+const SLIDEPAGE = -1;
 
 export default function Archive(){
     const [seasons, setSeasons] = useState([]);
-    const [selected, setSelected] = useState(SLIDE);
+    const [selectSeason, setSelectSeason] = useState(SLIDEPAGE);
+    const [seasonInfo, setSeasonInfo] = useState({});
 
     useEffect(() => {
         (async function(){
@@ -20,10 +23,37 @@ export default function Archive(){
             setSeasons(data);
         })();
     }, []);
-    
-    return(
-        <div>
-            {seasons.length === 0 ? '' : seasons[0].year}
-        </div>
-    )
+
+
+    useEffect(() => {
+        if (selectSeason !== SLIDEPAGE){
+            (async function(){
+                const res = await axios({
+                                method: 'GET',
+                                url: address.back + 'season/' + selectSeason + '/',
+                                withCredentials: true,
+                            });
+                const data = res.data;
+                setSeasonInfo(data);
+            }())
+        }
+    }, [selectSeason]);
+
+    if (selectSeason === SLIDEPAGE){
+        return(
+            <>
+                <SeasonSlideUI 
+                    seasons={seasons} 
+                    clickhandler={(arg)=> setSelectSeason(arg)}
+                />
+            </>
+        )
+    } else {
+        return (
+            <>
+                <XButton clickhandler={setSelectSeason} args={[-1]}/>
+                <SeasonPage info={seasonInfo}/>
+            </>
+        )
+    }
 }
