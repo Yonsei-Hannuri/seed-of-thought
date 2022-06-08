@@ -6,6 +6,7 @@ import XButton from '../components/common/XButton';
 import { useEffect, useState } from 'react';
 
 const SLIDEPAGE = -1;
+const SEASONLOADED = -2;
 
 export default function Archive(){
     const [seasons, setSeasons] = useState([]);
@@ -26,7 +27,7 @@ export default function Archive(){
 
 
     useEffect(() => {
-        if (selectSeason !== SLIDEPAGE){
+        if (selectSeason !== SLIDEPAGE && selectSeason !== SEASONLOADED){
             (async function(){
                 const res = await axios({
                                 method: 'GET',
@@ -35,11 +36,12 @@ export default function Archive(){
                             });
                 const data = res.data;
                 setSeasonInfo(data);
+                setSelectSeason(SEASONLOADED);
             }())
         }
     }, [selectSeason]);
 
-    if (selectSeason === SLIDEPAGE){
+    if (selectSeason !== SEASONLOADED){
         return(
             <>
                 <SeasonSlideUI 
