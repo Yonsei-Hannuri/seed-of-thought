@@ -1,6 +1,6 @@
 import axios from 'axios';
 import address from '../config/address.json';
-import SeasonSlideUI from '../components/archive/seasonSlideUI';
+import SeasonMenu from '../components/archive/seasonMenu';
 import SeasonPage from '../components/archive/seasonPage';
 import XButton from '../components/common/XButton';
 import { useEffect, useState } from 'react';
@@ -44,7 +44,7 @@ export default function Archive(){
     if (selectSeason !== SEASONLOADED){
         return(
             <>
-                <SeasonSlideUI 
+                <SeasonMenu 
                     seasons={seasons} 
                     clickhandler={(arg)=> setSelectSeason(arg)}
                 />
