@@ -3,6 +3,7 @@ import SessionOption from './sessionOption';
 import errorReport from '../../../modules/errorReport';
 import address from '../../../config/address.json';
 import getCookieValue from '../../../modules/getCookieValue';
+import Loading from '../../common/loading';
 import axios from 'axios';
 
 class DetgoriUpload extends Component {
@@ -67,26 +68,7 @@ class DetgoriUpload extends Component {
   render() {
     if (this.state.uploading) {
       return (
-        <div className="text-center my-5">
-          <div className="spinner-grow text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-secondary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-success" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-danger" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-warning" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-info" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-        </div>
+        <Loading/>
       );
     }
 
