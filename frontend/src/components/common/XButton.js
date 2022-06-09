@@ -1,6 +1,6 @@
-export default function XButton(props){
+export default function XButton({ clickhandler }){
     return(
-        <div onClick={()=>props.clickhandler(...props.args)}>
+        <div onClick={clickhandler}>
             X
         </div>
     )

@@ -1,7 +1,7 @@
 import axios from 'axios';
 import address from '../config/address.json';
 import SeasonMenu from '../components/archive/seasonMenu';
-import SeasonPage from '../components/archive/seasonPage';
+import SeasonPage from './seasonPage';
 import XButton from '../components/common/XButton';
 import { useEffect, useState } from 'react';
 
@@ -53,7 +53,7 @@ export default function Archive(){
     } else {
         return (
             <>
-                <XButton clickhandler={setSelectSeason} args={[-1]}/>
+                <XButton clickhandler={()=>setSelectSeason(-1)}/>
                 <SeasonPage info={seasonInfo}/>
             </>
         )
