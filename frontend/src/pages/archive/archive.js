@@ -1,8 +1,8 @@
 import axios from 'axios';
-import address from '../config/address.json';
-import SeasonMenu from '../components/archive/seasonMenu';
+import address from '../../config/address.json';
+import SeasonMenu from '../../components/archive/seasonMenu';
 import SeasonPage from './seasonPage';
-import XButton from '../components/common/XButton';
+import XButton from '../../components/common/XButton';
 import { useEffect, useState } from 'react';
 
 const SLIDEPAGE = -1;

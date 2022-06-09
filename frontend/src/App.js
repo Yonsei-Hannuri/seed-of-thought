@@ -4,7 +4,7 @@ import Mypage from './pages/mypage';
 import MetaSpace from './pages/metaSpace';
 import Session from './pages/session';
 import FreeNote from './pages/freeNote';
-import Archive from './pages/archive';
+import Archive from './pages/archive/archive';
 import LoginPage from './pages/loginPage';
 import HeaderNav from './components/headerNav';
 import Footer from './components/footer';

@@ -1,7 +1,7 @@
-export default function SessionItem({info}){
+export default function SessionItem({info, selectHandler}){
     return(
-        <div>
-            {info}
+        <div onClick={selectHandler}>
+            {info.title}
         </div>
     );
 }
