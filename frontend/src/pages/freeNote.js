@@ -24,7 +24,7 @@ class FreeNote extends Component {
     })
       .then((res) => res.data)
       .then((data) => {
-        this.setState({ page: data[0].page, notes: data });
+        if (data.length !== 0) this.setState({ page: data[0].page, notes: data });
       })
       .catch((e) => {
         this.setState({ ajaxError: true });
