@@ -92,7 +92,7 @@ class DetgoriUpload extends Component {
 
     if (this.state.opened === true) {
       const sessionOptions = this.state.seasonInfo.session.slice().reverse().map(
-        (sessionUrl, idx) => <SessionOption url={sessionUrl} key={idx} />,
+        (sessionInfo, idx) => <SessionOption info={sessionInfo} key={idx} />,
       );
       return (
         <div className="border rounded mb-3">
