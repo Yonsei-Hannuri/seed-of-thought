@@ -24,9 +24,17 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = '__all__'
 
+class DetgoriSerializerForSession(serializers.ModelSerializer):
+    authorName = serializers.ReadOnlyField(source='author.name')
+    authorColor = serializers.ReadOnlyField(source='author.color')
+
+    class Meta:
+        model = Detgori
+        fields = ['id', 'title', 'author', 'authorName', 'authorColor', 'googleId'] 
+
 class SessionSerializer(serializers.ModelSerializer):
     readfile = serializers.HyperlinkedRelatedField(many=True, view_name='sessionreadfile-detail', read_only=True)
-    detgori = serializers.HyperlinkedRelatedField(many=True, view_name='detgori-detail', read_only=True)
+    detgori = DetgoriSerializerForSession(many=True)
     googleFolderId = serializers.ReadOnlyField()
 
     class Meta:
