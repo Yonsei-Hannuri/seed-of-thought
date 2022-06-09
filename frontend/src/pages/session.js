@@ -124,11 +124,11 @@ class Session extends Component {
     this.setState({ numPages: numPages, load_left_pdf: true });
   };
 
-  onNameClick = (e) => {
+  onNameClick = (googleId) => {
     document.body.scrollTop = document.documentElement.scrollTop = 0;
     setTimeout(() => {
       this.setState({
-        currentDetgoriId: e.target.value,
+        currentDetgoriId: googleId,
         pdf_pages: [],
         loading: true,
       });
@@ -148,11 +148,11 @@ class Session extends Component {
 
   render() {
     if (this.state.info != null) {
-      const name_list = this.state.info.detgori.map((detgoriUrl) => (
+      const name_list = this.state.info.detgori.map((detgoriInfo) => (
         <NameCard
-          onClick={this.onNameClick}
-          detgoriUrl={detgoriUrl}
-          key={detgoriUrl}
+          clickhandler={this.onNameClick}
+          info={detgoriInfo}
+          key={detgoriInfo.id}
         />
       ));
 

@@ -1,55 +1,21 @@
-import React, { Component } from 'react';
-import httpsfy from '../../modules/httpsfy';
-import axios from 'axios';
+import { useState } from 'react';
 
-class NameCard extends Component {
-    static defaultProps = {
-      onClick: null,
-      detgoriUrl: null,
-    };
-  
-    state = {
-      detgoriInfo: { authorName: '', googleId: '' },
-      currentDetgoriId: null,
-      clicked: false,
-    };
-  
-    componentDidMount() {
-      axios({
-        method: 'GET',
-        url: httpsfy(this.props.detgoriUrl, process.env.NODE_ENV),
-        withCredentials: true,
-      })
-        .then((res) => res.data)
-        .then((data) => {
-          this.setState({ detgoriInfo: data });
-        });
-    }
-  
-    handleClick() {
-      setTimeout(() => this.setState({clicked: true}), 2000);
-    }
-
-
-    render() {
-      const authorColor = this.state.detgoriInfo.authorColor
+export default function NameCard({ info, clickhandler }){
+    const [ clicked, setClicked ] = useState(false);
       return (
         <div>
           <button
             style={{
-              border: `2px solid ${authorColor}`,
-              boxShadow: `0px 0px 3px ${authorColor}`,
-              color: `${this.state.clicked ? 'Gainsboro' : 'black'}`,
+              border: `2px solid ${info.authorColor}`,
+              boxShadow: `0px 0px 3px ${info.authorColor}`,
+              color: `${clicked ? 'Gainsboro' : 'black'}`,
             }}
             className="btn m-1 btn-light"
-            value={this.state.detgoriInfo.googleId}
-            onClick={(e)=>{this.props.onClick(e); this.handleClick();}}
+            value={info.googleId}
+            onClick={()=>{clickhandler(info.googleId); setClicked(true);}}
           >
-            {this.state.detgoriInfo.authorName}
+            {info.authorName}
           </button>
         </div>
       );
-    }
-  }
-
-  export default NameCard;
+}
