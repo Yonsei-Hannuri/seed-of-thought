@@ -15,7 +15,7 @@ export default function SeasonItm(props){
             <div>
                 {props.info.year}-{props.info.semester}:
             </div>
-            <div>
+            <div style={{padding: '0 30% 0 30%'}}>
                 {props.info.title}
             </div>
         </div>
