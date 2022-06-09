@@ -6,8 +6,13 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'name', 'email', 'generation' ,'color','is_staff']
 
+class SessionSerializerForSeason(serializers.ModelSerializer):
+    class Meta:
+        model = Session
+        fields = ['id', 'week', 'title']
+
 class SeasonSerializer(serializers.ModelSerializer):
-    session = serializers.HyperlinkedRelatedField(many=True, view_name='session-detail', read_only=True)
+    session = SessionSerializerForSeason(many=True)
     googleFolderId = serializers.ReadOnlyField()
 
     class Meta:
