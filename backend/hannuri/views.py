@@ -240,9 +240,12 @@ class SessionViewSet(viewsets.ModelViewSet):
         if current:
             queryset = queryset.filter(is_current=True)
         elif seasonSessionInfos:
-            current_season = Season.objects.get(is_current=True)
-            queryset = queryset.filter(season=current_season).order_by('id')
-
+            try:
+                current_season = Season.objects.get(is_current=True)
+                if current_season:
+                    queryset = queryset.filter(season=current_season).order_by('id')
+            except:
+                pass
         return queryset
 
 
@@ -330,8 +333,9 @@ class FreeNoteViewSet(viewsets.ModelViewSet):
         if notePage:
             queryset = queryset.filter(page=notePage)
         elif recentNotePage:
-            recentNote = queryset[0]
-            queryset = queryset.filter(page=recentNote.page)
+            if len(queryset) != 0:
+                recentNote = queryset[0]
+                queryset = queryset.filter(page=recentNote.page)
 
         return queryset
 
