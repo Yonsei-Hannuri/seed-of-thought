@@ -5,6 +5,7 @@ import address from '../../config/address.json';
 import SessionModal from "../../components/archive/sessionModal";
 
 const NOSELECT = -1
+const SESSIONLOAD = -2
 
 export default function SeasonPage(props){
     const [selectSession, setSelectSession] = useState(NOSELECT);
@@ -19,6 +20,7 @@ export default function SeasonPage(props){
     )
 
     useEffect(()=>{
+        if (selectSession === NOSELECT || selectSession === SESSIONLOAD) return;
         (async function(){
             const res = await axios({
                 method: 'GET',
@@ -27,14 +29,15 @@ export default function SeasonPage(props){
             });
             const data = res.data;
             setSessionInfo(data);
+            setSelectSession(SESSIONLOAD);
         }())
     },[selectSession])
 
     return(
         <div>
+            {selectSession === SESSIONLOAD ? 
+                <SessionModal info={sessionInfo} xhandler={()=>setSelectSession(NOSELECT)}/> : ''}
             <div>
-                {selectSession !== NOSELECT ? 
-                    <SessionModal info={sessionInfo} xhandler={()=>setSelectSession(NOSELECT)}/> :''}
                 <h2 style={{textAlign: 'center'}}>{props.info.title}</h2>
                 <p style={{textAlign: 'center'}}>{props.info.year}년도 {props.info.semester}학기</p>
                 <div style={{display:'flex', flexDirection:'row', justifyContent:'space-around'}}>
@@ -42,9 +45,9 @@ export default function SeasonPage(props){
                     <div>{props.info.leader} 회장</div>
                     <div>{props.info.socializer} 기획부장</div>
                 </div>
-                <div>
-                    {sessions}
-                </div>
+            </div>
+            <div style={{display: 'flex', widht:'30%', margin: '2%'}}>
+                {sessions}
             </div>
         </div>
     );
