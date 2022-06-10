@@ -10,7 +10,7 @@ import datetime
 import os
 from django.conf import settings
 
-from lib import googleDriveAPI, wordcloud, validate
+from lib import googleDriveAPI, wordcount, validate
 
 #custom permission
 from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
@@ -285,8 +285,8 @@ class DetgoriViewSet(viewsets.ModelViewSet):
 
         try: # if deep copy not working (this happens when pdf file is too big)
             PDF = copy.deepcopy(self.request.FILES['pdf'])
-            text = wordcloud.read_pdf(PDF.file)
-            words = wordcloud.tokenizer(text)  
+            text = wordcount.read_pdf(PDF.file)
+            words = wordcount.tokenizer(text)  
         except:
             text = ''
             words = '{ }'
