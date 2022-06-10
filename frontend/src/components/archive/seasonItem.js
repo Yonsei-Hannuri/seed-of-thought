@@ -6,6 +6,7 @@ const style = {
     width: '30%',
     height: '10rem',
     textAlign: 'center',
+    minWidth: '200px',
     clipPath: 'circle(35%)',
 }
 
