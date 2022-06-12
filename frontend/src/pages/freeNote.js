@@ -3,6 +3,7 @@ import axios from 'axios';
 import Page from '../components/freeNote/page';
 import address from '../config/address.json';
 import errorReport from '../modules/errorReport';
+import postRequest from '../requests/postRequest';
 
 class FreeNote extends Component {
   static defaultProps = {
@@ -44,13 +45,14 @@ class FreeNote extends Component {
         this.setState({ page: this.state.page + flip, notes: data });
       })
       .catch((e) => {
-        this.setState({ ajaxError: true });
+        this.setState({ ajaxError: 1 });
         errorReport(e, 'FreeNote_getInfoAndPageFlip');
       });
   };
 
-  handleUpload = () => {
-    this.getInfoAndPageFlip(0);
+  handleUpload = async (e) => {
+    const res = await postRequest(e, 'freeNote/', ()=>this.getInfoAndPageFlip(0));
+    if (res === false) this.setState({ ajaxError: 2 });
   };
 
   handleNextPage = () => {
@@ -80,13 +82,18 @@ class FreeNote extends Component {
           {">"}
         </button>
         <span className="col-3 mx-1">페이지 {this.state.page}</span>
-        {this.state.ajaxError ? (
+        {
+        this.state.ajaxError === false ? '' : 
+        this.state.ajaxError === 1 ?
           <span className="text-danger">
             페이지 불러오는 중 오류가 발생했습니다.
-          </span>
-        ) : (
-          ''
-        )}
+          </span> :
+        this.state.ajaxError === 2 ?
+          <span className="text-danger">
+            페이지 불러오는 중 오류가 발생했습니다.
+          </span>:  
+        ''
+        }
         <button onClick={this.props.pageSelect} name='metaSpace' className="btn col-3 border float-end mx-1 btn-light">
           나가기
         </button>

@@ -64,9 +64,9 @@ export default class Page extends Component {
               <Note
                 info={this.state.info[idx]}
                 onClick={this.handleClick}
-                onUpload={this.props.onUpload}
                 page={this.props.page}
                 position={idx}
+                onUpload={this.props.onUpload}
                 writing={this.state.writing[idx]}
               />
             </div>
