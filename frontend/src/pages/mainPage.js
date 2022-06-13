@@ -13,55 +13,34 @@ class MainPage extends Component {
 
   state = {
     notifications: [],
-    recentSession: { detgori: [], week: '', title: '', readfile: [] },
+    sessions: [],
     ajaxError: false,
     loaded: false,
   };
 
   componentDidMount() {
-    axios({
-      method: 'GET',
-      url: address.back + 'notification/',
-      withCredentials: true,
-    })
-      .then((res) => res.data)
-      .then((data) => {
-        if (data.length) {
-          this.setState({
-            notifications: data,
-          });
-        } else {
-          this.setState({ notifications: [] });
-        }
-      })
-      .catch((e) => {
+    (async () => { 
+      try {
+        const [notificationData, seasonData] = await Promise.all([
+          axios({ method: 'GET',
+                  url: address.back + 'notification/',
+                  withCredentials: true }),
+          axios({ method: 'GET',
+                  url: address.back + 'season/?current=True',
+                  withCredentials: true })
+        ]);
+        this.setState({
+          notifications: notificationData.data.length > 0 ? 
+            notificationData.data : this.state.notifications,
+          sessions: seasonData.data[0].session.length > 0 ? 
+            seasonData.data[0].session : this.state.sessions,
+          loaded: true
+        })
+      } catch (e) {
         this.setState({ ajaxError: true });
-        errorReport(e, 'main_notification');
-      });
-
-    axios({
-      method: 'GET',
-      url: address.back + 'session/?current=true',
-      withCredentials: true,
-    })
-      .then((res) => res.data)
-      .then((data) => {
-        if (data.length > 0) {
-          this.setState({
-            recentSession: data[0],
-            loaded: true,
-          });
-        } else {
-          this.setState({
-            recentSession: { detgori: [], week: '', title: '', readfile: [] },
-            loaded: true,
-          });
-        }
-      })
-      .catch((e) => {
-        this.setState({ ajaxError: true, loaded: true });
-        errorReport(e, 'main_session');
-      });
+        errorReport(e, 'mainPage');
+      }
+    })();
   }
 
   render() {
@@ -72,8 +51,8 @@ class MainPage extends Component {
       return (
         <div className={this.props.active === true ? '' : 'blank'}>
           <NotificationBox notifications={this.state.notifications}/>
-          <SessionBanner recentSession={this.state.recentSession}/>
-          <FolderUI/>
+          <SessionBanner recentSession={this.state.sessions[this.state.sessions.length-1]}/>
+          <FolderUI seasonSessionInfos={this.state.sessions}/>
         </div>
       );
     }
