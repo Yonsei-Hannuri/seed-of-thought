@@ -19,30 +19,39 @@ class Mypage extends Component {
     userSeasons: [],
     loaded: false,
     ajaxError: false,
+    seasonInfo: { session: [] },
   };
 
   componentDidMount() {
-    this.getUserInfo();
+    this.getMypageInfo();
   }
 
-  getUserInfo = () => {
-    axios({
-      method: 'GET',
-      url: address.back + 'mypageInfo',
-      withCredentials: true,
-    })
-      .then((res) => res.data)
-      .then((data) => {
-        this.setState({
-          userInfo: data,
-          seasonDetgoris: data.seasonDetgoris,
-          loaded: true,
-        });
-      })
-      .catch((e) => {
-        this.setState({ ajaxError: true });
-        errorReport(e, 'Mypage_getUserInfo');
-      });
+  getMypageInfo = async () => {
+    try{
+      const [myPageData, seasonData] = await Promise.all([
+          axios({
+          method: 'GET',
+          url: address.back + 'mypageInfo',
+          withCredentials: true,
+          }),
+          axios({
+            method: 'GET',
+            url: address.back + 'season/',
+            params: { current: true },
+            withCredentials: true,
+          })
+        ]); 
+
+      this.setState({
+        userInfo: myPageData.data,
+        seasonDetgoris: myPageData.data.seasonDetgoris,
+        seasonInfo: seasonData.data.length > 0 ? seasonData.data[0] : this.state.seasonInfo,
+        loaded: true,
+    });
+    } catch(e){
+      this.setState({ ajaxError: true});
+      errorReport(e, 'mypage');
+    }
   };
 
   getSeasonDetgori = (e) => {
@@ -140,7 +149,7 @@ class Mypage extends Component {
           </ul>
           <div>{this.state.userInfo.detgori}</div>
           <div className="mt-3">
-            <DetgoriUpload onUpload={this.getUserInfo} />
+            <DetgoriUpload seasonInfo={this.state.seasonInfo} onUpload={this.getMypageInfo} />
           </div>
           <div>
             <WordCloud />

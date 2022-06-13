@@ -4,13 +4,14 @@ import errorReport from '../../../modules/errorReport';
 import address from '../../../config/address.json';
 import getCookieValue from '../../../modules/getCookieValue';
 import Loading from '../../common/loading';
-import axios from 'axios';
 
 class DetgoriUpload extends Component {
+  static defaultProps={
+    seasonInfo: { session: [] }
+  }
   state = {
     opened: false,
     onUpload: null,
-    seasonInfo: { session: [] },
     uploading: false,
     uploadError: false,
   };
@@ -21,23 +22,6 @@ class DetgoriUpload extends Component {
 
   componentDidUpdate = (prevProps, prevState) => {
     if (prevState.opened === false && this.state.opened === true) {
-      axios({
-        method: 'GET',
-        url: address.back + 'season/',
-        params: { current: true },
-        withCredentials: true,
-      })
-        .then((res) => res.data)
-        .then((data) => {
-          if (data.length > 0) {
-            this.setState({ seasonInfo: data[0] });
-          } else {
-            this.setState({ seasonInfo: { session: [] } });
-          }
-        })
-        .catch((e) =>
-          errorReport(e, 'DetgoriUpload_componentDidupdate_sessionSelect'),
-        );
     }
   };
 
@@ -73,7 +57,7 @@ class DetgoriUpload extends Component {
     }
 
     if (this.state.opened === true) {
-      const sessionOptions = this.state.seasonInfo.session.slice().reverse().map(
+      const sessionOptions = this.props.seasonInfo.session.slice().reverse().map(
         (sessionInfo, idx) => <SessionOption info={sessionInfo} key={idx} />,
       );
       return (
