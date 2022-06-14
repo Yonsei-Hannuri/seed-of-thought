@@ -9,7 +9,7 @@ from pdfminer.pdfparser import PDFParser
 from konlpy.tag import Mecab
 import json
 
-meaningless_words = ('한누리', '아무것', '누구', '거기', '그것', '이것', '거리', '생각', '우리', '사람')
+meaningless_words = ('한누리', '아무것', '누구', '거기', '그것', '이것', '거리',)
 
 def read_pdf(f):
     output_string = StringIO()
