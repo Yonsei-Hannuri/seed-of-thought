@@ -1,6 +1,8 @@
 from django.contrib import admin
 from hannuri.models import *
-from lib import googleDriveAPI
+from lib import googleDriveAPI, utils
+import json
+from collections import defaultdict
 import os
 with open('./config/googleDrive/folderId.json') as json_file:
     googleFolderId = json.load(json_file)
@@ -10,9 +12,25 @@ class SeasonAdmin(admin.ModelAdmin):
     
     def save_model(self, request, obj, form, change):
         if obj.is_current==True:
+
             pre_current_season = Season.objects.all().filter(is_current=True)
+
             for season in pre_current_season:
+                season_sessions = season.session.all()
+                season_detgoris = Detgori.objects.all().filter(parentSession__in=season_sessions)
+
+                season_total_count = defaultdict(int)
+                for detgori in season_detgoris:
+                    detgori_words = json.loads(detgori.words)
+                    for key, value in detgori_words.items():
+                        season_total_count[key] += int(value)
+
+                season_total_count_filtered = \
+                    utils.filter_dict(season_total_count, lambda x: x[1] > 30)
+                season.words = json.dumps(season_total_count_filtered)
+
                 season.is_current = False
+
                 season.save()
         super().save_model(request, obj, form, change)   
 

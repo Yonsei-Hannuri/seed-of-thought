@@ -43,6 +43,7 @@ class Season(models.Model):
     sessioner = models.CharField(max_length=50, verbose_name="학술부장")
     socializer = models.CharField(max_length=50, verbose_name="기획부장")
     googleFolderId = models.CharField(max_length=200, blank=True, verbose_name="구글드라이브 폴더ID")
+    words = models.TextField(default='', verbose_name="단어 언급 횟수")
 
     def save(self, *args, **kargs):
         if self.googleFolderId == '':
