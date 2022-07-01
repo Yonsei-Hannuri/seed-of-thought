@@ -12,6 +12,10 @@ import getCookieValue from './modules/getCookieValue';
 import address from './config/address.json';
 import delay from './modules/delay'
 
+import {
+  RecoilRoot,
+} from 'recoil';
+
 class App extends Component {
   state = {
     selected: 'main',
@@ -47,14 +51,7 @@ class App extends Component {
         <div id='fadein' className="container">
           <Session/>
         </div>
-      );
-    } else if (path[1] === 'test' && process.env.NODE_ENV === 'development'){
-      return (
-        <div id='fadein' className="container">
-          <Archive/>
-        </div>
-      );
-    }
+      )};
     return (   
       <>
         <div className="container">
@@ -68,6 +65,11 @@ class App extends Component {
               <Mypage/> :
               this.state.selected === 'freeNote' ?
               <FreeNote pageSelect={this.pageSelect}/> :
+              this.state.selected === 'archive'? 
+              <RecoilRoot>
+                <Archive pageSelect={this.pageSelect}/>
+              </RecoilRoot>
+              :
               <MainPage/>
             }
           <Footer/>

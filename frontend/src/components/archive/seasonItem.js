@@ -2,22 +2,21 @@ const style = {
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'center',
-    backgroundColor: 'orange',
-    width: '30%',
-    height: '10rem',
+    backgroundColor: '#BCD2E8',
+    border: "2px solid #73A5C6",
     textAlign: 'center',
-    minWidth: '200px',
-    clipPath: 'circle(35%)',
+    width: '40%',
 }
 
-export default function SeasonItm(props){
+export default function SeasonItem({info, clickhandler}){
     return(
-        <div style={style} onClick={()=>props.clickhandler(props.info.id)}>
+
+        <div className='cursor2Pointer w-100 rounded border border-dark p-2 mb-2 border-opacity-75' style={style} onClick={()=>clickhandler(info.id)}>
             <div>
-                {props.info.year}-{props.info.semester}:
+                {info.year}-{info.semester}:
             </div>
-            <div style={{padding: '0 30% 0 30%'}}>
-                {props.info.title}
+            <div>
+                {info.title}
             </div>
         </div>
     )

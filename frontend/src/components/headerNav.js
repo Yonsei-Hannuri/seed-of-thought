@@ -23,7 +23,7 @@ function Header(props){
               <button
                 name="metaSpace"
                 className={
-                  'nav-link ' + (['metaSpace', 'freeNote'].includes(props.selected) ? 'active' : '')
+                  'nav-link ' + (['metaSpace', 'freeNote', 'archive'].includes(props.selected) ? 'active' : '')
                 }
                 onClick={props.pageSelect}
               >

@@ -1,61 +1,75 @@
-import axios from 'axios';
-import address from '../../config/address.json';
+
 import SeasonMenu from '../../components/archive/seasonMenu';
-import SeasonPage from './seasonPage';
-import XButton from '../../components/common/XButton';
-import { useEffect, useState } from 'react';
+import SeasonDetail from '../../components/archive/seasonDetail';
+import BalloonBubbleChart from '../../components/archive/balloon-bubble-chart/balloon-bubble-chart';
+import { useArchiveData } from './hook';
+import Loading from '../../components/common/loading';
 
-const SLIDEPAGE = -1;
-const SEASONLOADED = -2;
-
-export default function Archive(){
-    const [seasons, setSeasons] = useState([]);
-    const [selectSeason, setSelectSeason] = useState(SLIDEPAGE);
-    const [seasonInfo, setSeasonInfo] = useState({});
-
-    useEffect(() => {
-        (async function(){
-            const res = await axios({
-                            method: 'GET',
-                            url: address.back + 'season/',
-                            withCredentials: true,
-                        });
-            const data = res.data;
-            setSeasons(data);
-        })();
-    }, []);
+export default function Archive({pageSelect}){
+    const {allSeasonData, selection, setSelection, selectionData, wordCount, setLoadWait, loadWait} = useArchiveData();
 
 
-    useEffect(() => {
-        if (selectSeason !== SLIDEPAGE && selectSeason !== SEASONLOADED){
-            (async function(){
-                const res = await axios({
-                                method: 'GET',
-                                url: address.back + 'season/' + selectSeason + '/',
-                                withCredentials: true,
-                            });
-                const data = res.data;
-                setSeasonInfo(data);
-                setSelectSeason(SEASONLOADED);
-            }())
-        }
-    }, [selectSeason]);
+    return(
+            <div className='d-flex flex-row justify-content-evenly h-100' style={{flexWrap:'wrap'}}>
+                {   
+                    <div  style={{width:'40%', minWidth:'300px', minHeight:'400px', overflow:'scroll'}}> 
+                    {
+                        loadWait.load ? 
+                        ''
+                        :
+                        selection.state === 0 ?
+                        <>
+                            <div className='cursor2Pointer' onClick={()=>pageSelect({target:{name:'metaSpace'}})}>X</div>
+                            <SeasonMenu 
+                                seasons={allSeasonData} 
+                                clickhandler={
+                                    loadWait.wait? 
+                                    ()=>{} 
+                                    : 
+                                    (arg)=> {setLoadWait({load: true, wait: true}); setSelection({season: arg, state:1});}}
+                            />
+                        </> :
+                        selection.state === 1 |  selection.state === 2 ?
+                        <>
+                            <div 
+                                className='cursor2Pointer' 
+                                onClick={
+                                    loadWait.wait? 
+                                    ()=>{} 
+                                    : 
+                                    ()=>setSelection({state:0})
+                                }
+                            >
+                                X
+                            </div>
+                            <SeasonDetail 
+                                info={selectionData} 
+                                clickhandler={  
+                                    loadWait.wait? 
+                                    ()=>{} 
+                                    : 
+                                    (arg) => {setLoadWait({load: true, wait: true}); setSelection({author: arg.author, season:arg.season, state:2});}}
+                            />
+                        </>
+                        :
+                        ''
+                    }
+                    </div>  
 
-    if (selectSeason !== SEASONLOADED){
-        return(
-            <>
-                <SeasonMenu 
-                    seasons={seasons} 
-                    clickhandler={(arg)=> setSelectSeason(arg)}
-                />
-            </>
-        )
-    } else {
-        return (
-            <>
-                <XButton clickhandler={()=>setSelectSeason(-1)}/>
-                <SeasonPage info={seasonInfo}/>
-            </>
-        )
-    }
+                }
+                <div  className='m-2' style={{width: '40%', minWidth:'300px', height: '100%', minHeight:'400px'}}>
+                    <div className='border border-secondary rounded'>
+                        <BalloonBubbleChart 
+                            loading={loadWait.load}
+                            wordCount={selection.state === 0 ? {...allSeasonData.wordCount} : {...wordCount}}
+                        />
+                    </div>
+                    {
+                        loadWait.wait ?
+                        <Loading/>:
+                        ''
+                    }
+                </div>
+            </div>
+    )
 }
