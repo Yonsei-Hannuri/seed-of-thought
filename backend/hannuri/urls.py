@@ -21,5 +21,6 @@ urlpatterns = [
     path('profileColor/', views.ProfileColor),
     path('wordList/<str:type>/<int:sessionId>', views.WordList),
     path('mypageInfo', views.MypageInfo),
-    path('frontError/', views.FrontError)
+    path('frontError/', views.FrontError),
+    path('archive/', views.ArchiveView)
 ]

@@ -11,6 +11,7 @@ class SessionSerializerForSeason(serializers.ModelSerializer):
         model = Session
         fields = ['id', 'week', 'title']
 
+
 class SeasonSerializer(serializers.ModelSerializer):
     session = SessionSerializerForSeason(many=True)
     googleFolderId = serializers.ReadOnlyField()

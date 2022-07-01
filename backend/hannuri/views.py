@@ -9,6 +9,7 @@ import copy
 import datetime
 import os
 from django.conf import settings
+from collections import defaultdict
 
 from lib import googleDriveAPI, wordcount, validate
 
@@ -23,6 +24,8 @@ from django.contrib.auth import login, logout
 from django.shortcuts import redirect
 import requests
 import google_auth_oauthlib.flow
+
+from lib.utils import filter_dict
 
 
 # load config data
@@ -194,6 +197,38 @@ def FrontError(request):
     except: pass
     return HttpResponse('')
 
+def ArchiveView(request):
+    if not(request.user):
+        return HttpResponse('')
+    if 'target' in request.GET.keys(): target = request.GET['target']
+    if 'id' in request.GET.keys(): target_id = request.GET['id']
+    if 'id2' in request.GET.keys(): target_id_2 = request.GET['id2']
+    word_count = defaultdict(int)
+    if target == 'hannuri':
+        seasons = Season.objects.filter(is_current=False)
+        for season in seasons:
+            season_words = json.loads(season.words)
+            for key, val in season_words.items():
+                word_count[key] += val
+    elif target == 'season':
+        season = Season.objects.filter(id=int(target_id))
+        word_count = json.loads(season[0].words)
+    elif target == 'author':
+        season_sessions = Session.objects.filter(season=int(target_id_2))
+        author_season_detgori = \
+            Detgori.objects.filter(author=int(target_id), parentSession__in=season_sessions)
+        for detgori in author_season_detgori:
+            detgori_word = json.loads(detgori.words)
+            for key, val in detgori_word.items():
+                word_count[key] += val
+
+    word_number = 80
+    words_ranked = sorted(word_count.items(), key=lambda x: -x[1])
+    if len(words_ranked) > word_number : keys_ranked = [key for key, val in words_ranked[0:word_number]]
+    else: keys_ranked = [key for key, val in words_ranked]
+    word_count_ranked = filter_dict(word_count, lambda item: item[0] in keys_ranked)
+
+    return HttpResponse(json.dumps(word_count_ranked))
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.order_by('-id')
@@ -207,6 +242,10 @@ class UserViewSet(viewsets.ModelViewSet):
         if is_userInfo_requested == 'true':
             queryset = queryset.filter(id=self.request.user.id)
 
+        season_active_user = self.request.query_params.get('seasonActiveUser', None)
+        if season_active_user != None:
+            queryset = queryset.filter(act_seasons__in=[int(season_active_user)])
+
         return queryset
 
 class SeasonViewSet(viewsets.ModelViewSet):
@@ -218,8 +257,11 @@ class SeasonViewSet(viewsets.ModelViewSet):
         queryset = self.queryset
         
         current = self.request.query_params.get('current', None)
+        condition = self.request.query_params.get('condition', None)
         if current:
             queryset = queryset.filter(is_current=True)
+        if condition == 'no_current':
+            queryset = queryset.filter(is_current=False)
         return queryset
 
 class NotificationViewSet(viewsets.ModelViewSet):
@@ -319,6 +361,14 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             os.remove('uploads/detgori/'+instance.googleId+'.pdf')
         
         instance.delete()
+
+        def get_queryset(self):
+
+            season = self.request.query_params.get('season', None)
+            author = self.request.query_params.get('author', None)
+            if season != None and author != None:
+                queryset = queryset.filter(author=int(author), season=int(season))
+            return queryset
 
 class FreeNoteViewSet(viewsets.ModelViewSet):
     queryset = FreeNote.objects.order_by('-id')
