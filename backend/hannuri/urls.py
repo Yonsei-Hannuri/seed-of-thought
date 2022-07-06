@@ -22,5 +22,6 @@ urlpatterns = [
     path('wordList/<str:type>/<int:sessionId>', views.WordList),
     path('mypageInfo', views.MypageInfo),
     path('frontError/', views.FrontError),
+    path('logEverything/', views.LogEverything),
     path('archive/', views.ArchiveView)
 ]

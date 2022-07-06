@@ -40,6 +40,20 @@ with open('./config/address.json') as json_file:
 if(settings.DEBUG==True):
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
+
+def LogEverything(request):
+    data = json.loads(request.body.decode('utf-8'))
+    now = datetime.datetime.now()
+    fileName = './log/everything/{}'.format(str(now.year)+'-'+str(now.month))
+    is_existed = os.path.exists(fileName)
+    with open(fileName, "a" if is_existed else "w") as log:
+        log.write(str(now.day)+'일, '+str(now.hour)+'시\n')
+        log.write('{} \n'.format(data))
+        log.write('\n==================================================== \n')
+        log.close()
+    return HttpResponse('')
+
+
 def Login(request):
     #google 에서 code 받고 그 code로 token을 받아서 그 token에 해당하는 email 받기
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
