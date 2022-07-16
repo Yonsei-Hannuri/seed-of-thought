@@ -1,27 +1,27 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from hannuri import views
+from hannuri import view
 
 
 router = DefaultRouter()
-router.register(r'user', views.UserViewSet)
-router.register(r'season', views.SeasonViewSet)
-router.register(r'notification', views.NotificationViewSet)
-router.register(r'session', views.SessionViewSet)
-router.register(r'sessionReadfile', views.SessionReadfileViewSet)
-router.register(r'detgori', views.DetgoriViewSet)
-router.register(r'freeNote', views.FreeNoteViewSet)
+router.register(r'user', view.UserViewSet)
+router.register(r'season', view.SeasonViewSet)
+router.register(r'notification', view.NotificationViewSet)
+router.register(r'session', view.SessionViewSet)
+router.register(r'sessionReadfile', view.SessionReadfileViewSet)
+router.register(r'detgori', view.DetgoriViewSet)
+router.register(r'freeNote', view.FreeNoteViewSet)
 
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('login/', views.Login),
-    path('signin/', views.Signin),
-    path('logout/', views.Logout),
-    path('profileColor/', views.ProfileColor),
-    path('wordList/<str:type>/<int:sessionId>', views.WordList),
-    path('mypageInfo', views.MypageInfo),
-    path('frontError/', views.FrontError),
-    path('logEverything/', views.LogEverything),
-    path('archive/', views.ArchiveView)
+    path('login/', view.Login),
+    path('signin/', view.Signin),
+    path('logout/', view.Logout),
+    path('profileColor/', view.ProfileColor),
+    path('wordList/<str:type>/<int:sessionId>', view.WordList),
+    path('mypageInfo', view.MypageInfo),
+    path('frontError/', view.FrontError),
+    path('logEverything/', view.LogEverything),
+    path('archive/', view.ArchiveView)
 ]
