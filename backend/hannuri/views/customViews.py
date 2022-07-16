@@ -1,19 +1,5 @@
 from hannuri.views.viewDependencies import *
 
-
-def LogEverything(request):
-    data = json.loads(request.body.decode('utf-8'))
-    now = datetime.datetime.now()
-    fileName = './log/everything/{}'.format(str(now.year)+'-'+str(now.month))
-    is_existed = os.path.exists(fileName)
-    with open(fileName, "a" if is_existed else "w") as log:
-        log.write(str(now.day)+'일, '+str(now.hour)+'시\n')
-        log.write('{} \n'.format(data))
-        log.write('\n==================================================== \n')
-        log.close()
-    return HttpResponse('')
-
-
 def Login(request):
     #google 에서 code 받고 그 code로 token을 받아서 그 token에 해당하는 email 받기
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
@@ -75,16 +61,17 @@ def Logout(request):
     return response
 
 def ProfileColor(request):
-    if request.user:
-        request.user.color = request.POST['color']
-        request.user.save()
-        return HttpResponse('true')
+    if not request.user:
+        return HttpResponse('Unauthorized', status=401)
 
-    return HttpResponse('false')
+    request.user.color = request.POST['color']
+    request.user.save()
+    return HttpResponse('true')
 
 def WordList(request, type, sessionId):
     if not(request.user):
-        return HttpResponse('')
+        return HttpResponse('Unauthorized', status=401)
+
     if type=='mypage':
         wordList = []
         for detgori in request.user.detgori.all():
@@ -97,7 +84,8 @@ def WordList(request, type, sessionId):
         for detgori in session_detgori:
             wordList.append(detgori.words)
         return HttpResponse(json.dumps({'wordList':wordList})) 
-    return HttpResponse('')
+
+    return HttpResponse('Not Found', status=404)
 
 def my_detgori_infos(userId, currentSeason):
         my_detgori_infos = list()
@@ -115,92 +103,100 @@ def my_detgori_infos(userId, currentSeason):
 
 def MypageInfo(request):
     if not(request.user):
-        return HttpResponse('')
-    else:
-        try:
-            season_id =  request.GET['seasonId'] 
-        except:
-            season_id = None
-        if season_id:
-            requested_season = Season.objects.get(id=season_id)
-            season_detgori_infos = my_detgori_infos(request.user.id, requested_season)
-            response_data = dict()
-            response_data['seasonDetgoris'] = season_detgori_infos
-            return HttpResponse(json.dumps(response_data)) 
-        
-        user_seasons = [season for season in request.user.act_seasons.order_by('-id')]
-        current_infos = []
-        if len(user_seasons) != 0 :
-            current_infos = my_detgori_infos(request.user.id,  user_seasons[0])
+        return HttpResponse('Unauthorized', status=401)
 
-        seasons = list()
-        for season in user_seasons:
-            season_info = {
-                'id' : season.id,
-                'year' : season.year,
-                'semester' : season.semester
-            }
-            seasons.append(season_info)
+
+    try:
+        season_id =  request.GET['seasonId'] 
+    except:
+        season_id = None
+    if season_id:
+        requested_season = Season.objects.get(id=season_id)
+        season_detgori_infos = my_detgori_infos(request.user.id, requested_season)
         response_data = dict()
-        response_data['seasonDetgoris'] = current_infos
-        response_data['seasons'] = seasons
-        response_data['name'] = request.user.name
-        response_data['color'] = request.user.color
-        response_data['generation'] = request.user.generation
-        response_data['is_staff'] = request.user.is_staff
-
+        response_data['seasonDetgoris'] = season_detgori_infos
         return HttpResponse(json.dumps(response_data)) 
+    
+    user_seasons = [season for season in request.user.act_seasons.order_by('-id')]
+    current_infos = []
+    if len(user_seasons) != 0 :
+        current_infos = my_detgori_infos(request.user.id,  user_seasons[0])
+
+    seasons = list()
+    for season in user_seasons:
+        season_info = {
+            'id' : season.id,
+            'year' : season.year,
+            'semester' : season.semester
+        }
+        seasons.append(season_info)
+    response_data = dict()
+    response_data['seasonDetgoris'] = current_infos
+    response_data['seasons'] = seasons
+    response_data['name'] = request.user.name
+    response_data['color'] = request.user.color
+    response_data['generation'] = request.user.generation
+    response_data['is_staff'] = request.user.is_staff
+
+    return HttpResponse(json.dumps(response_data), status=200) 
 
 def FrontError(request):
+    if not request.user:
+        return HttpResponse('Unauthorized', status=401)
+
     try:
-        if request.user:
-            data = json.loads(request.body.decode('utf-8'))
-            error_log = data['errorMessage']['message']
-            error_componet = data['from']
-            now = datetime.datetime.now()
-            fileName = './log/error-front/{}'.format(str(now.year)+'-'+str(now.month))
-            is_existed = os.path.exists(fileName)
-            with open(fileName, "a" if is_existed else "w") as log:
-                log.write(str(now.day)+'일, '+str(now.hour)+'시\n')
-                log.write('{} \n'.format(error_componet))
-                log.write('{} \n'.format(error_log))
-                try: log.write('{}님 이용중 발생 \n'.format(request.user.name))
-                except: pass
-                log.write('\n==================================================== \n')
-                log.close()
+        data = json.loads(request.body.decode('utf-8'))
+        error_log = data['errorMessage']['message']
+        error_componet = data['from']
+        now = datetime.datetime.now()
+        fileName = './log/error-front/{}'.format(str(now.year)+'-'+str(now.month))
+        is_existed = os.path.exists(fileName)
+        with open(fileName, "a" if is_existed else "w") as log:
+            log.write(str(now.day)+'일, '+str(now.hour)+'시\n')
+            log.write('{} \n'.format(error_componet))
+            log.write('{} \n'.format(error_log))
+            try: log.write('{}님 이용중 발생 \n'.format(request.user.name))
+            except: pass
+            log.write('\n==================================================== \n')
+            log.close()
     except: pass
-    return HttpResponse('')
+    return HttpResponse('FronError logged', status=200)
 
 def ArchiveView(request):
     if not(request.user):
-        return HttpResponse('')
-    if 'target' in request.GET.keys(): target = request.GET['target']
-    if 'id' in request.GET.keys(): target_id = request.GET['id']
-    if 'id2' in request.GET.keys(): target_id_2 = request.GET['id2']
-    word_count = defaultdict(int)
-    if target == 'hannuri':
-        seasons = Season.objects.filter(is_current=False)
-        for season in seasons:
-            season_words = json.loads(season.words)
-            for key, val in season_words.items():
-                word_count[key] += val
-    elif target == 'season':
-        season = Season.objects.filter(id=int(target_id))
-        word_count = json.loads(season[0].words)
-    elif target == 'author':
-        season_sessions = Session.objects.filter(season=int(target_id_2))
-        author_season_detgori = \
-            Detgori.objects.filter(author=int(target_id), parentSession__in=season_sessions)
-        for detgori in author_season_detgori:
-            detgori_word = json.loads(detgori.words)
-            for key, val in detgori_word.items():
-                word_count[key] += val
+        return HttpResponse('Unauthorized', status=401)
 
-    word_number = 80
-    words_ranked = sorted(word_count.items(), key=lambda x: -x[1])
-    if len(words_ranked) > word_number : keys_ranked = [key for key, val in words_ranked[0:word_number]]
-    else: keys_ranked = [key for key, val in words_ranked]
-    word_count_ranked = filter_dict(word_count, lambda item: item[0] in keys_ranked)
+    try:
+        if 'target' in request.GET.keys(): target = request.GET['target']
+        if 'id' in request.GET.keys(): target_id = request.GET['id']
+        if 'id2' in request.GET.keys(): target_id_2 = request.GET['id2']
+        word_count = defaultdict(int)
+        if target == 'hannuri':
+            seasons = Season.objects.filter(is_current=False)
+            for season in seasons:
+                season_words = json.loads(season.words)
+                for key, val in season_words.items():
+                    word_count[key] += val
+        elif target == 'season':
+            season = Season.objects.filter(id=int(target_id))
+            word_count = json.loads(season[0].words)
+        elif target == 'author':
+            season_sessions = Session.objects.filter(season=int(target_id_2))
+            author_season_detgori = \
+                Detgori.objects.filter(author=int(target_id), parentSession__in=season_sessions)
+            for detgori in author_season_detgori:
+                detgori_word = json.loads(detgori.words)
+                for key, val in detgori_word.items():
+                    word_count[key] += val
 
-    return HttpResponse(json.dumps(word_count_ranked))
+        word_number = 80
+        words_ranked = sorted(word_count.items(), key=lambda x: -x[1])
+        if len(words_ranked) > word_number : keys_ranked = [key for key, val in words_ranked[0:word_number]]
+        else: keys_ranked = [key for key, val in words_ranked]
+        word_count_ranked = filter_dict(word_count, lambda item: item[0] in keys_ranked)
+
+        return HttpResponse(json.dumps(word_count_ranked), status=200)
+
+    except:
+        return HttpResponse('Internal Server Error', status=500)
 
