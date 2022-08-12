@@ -74,7 +74,7 @@ export default function BalloonBubbleChart({wordCount, loading}){
       }
   }   
     return(
-      <div ref={div} style={{ minHeight:'400px'}}>
+      <div ref={div} style={{ minHeight:'600px', minWidth: "420px"}}>
         <svg width={width} height={height}>
         </svg>
       </div>

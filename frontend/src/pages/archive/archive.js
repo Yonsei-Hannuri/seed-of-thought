@@ -57,7 +57,7 @@ export default function Archive({pageSelect}){
                     </div>  
 
                 }
-                <div  className='m-2' style={{width: '40%', minWidth:'300px', height: '100%', minHeight:'400px'}}>
+                <div  className='m-2' style={{width: '40%', minWidth:'420px', height: '100%', minHeight:'420px'}}>
                     <div className='border border-secondary rounded'>
                         <BalloonBubbleChart 
                             loading={loadWait.load}
