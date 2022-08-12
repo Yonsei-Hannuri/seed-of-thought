@@ -3,7 +3,7 @@ import contrast from 'contrast';
 export default function ballonDataMaker(wordCount={}, nodes={}, width=400, height=400){
     const newNodes = {};
     const countTotal = Object.values(wordCount).reduce((pre, cur) => pre + cur, 0);
-    const circleSizeCoeff = 1500;
+    const circleSizeCoeff = 1000;
     Object.keys(nodes).forEach((key)=> {
         newNodes[key] = {...nodes[key], radius: 0}; 
     });

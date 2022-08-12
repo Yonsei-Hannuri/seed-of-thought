@@ -34,7 +34,7 @@ export default function SeasonDetail(props){
                     <div>{props.info.socializer} 기획부장</div>
                 </div>
             </div>
-            <div className='d-flex flex-row'>
+            <div className='d-flex flex-row' style={{flexWrap:"wrap", justifyContent:"center"}}>
                 {authors}
             </div>
             <>

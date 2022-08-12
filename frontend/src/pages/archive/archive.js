@@ -12,7 +12,7 @@ export default function Archive({pageSelect}){
     return(
             <div className='d-flex flex-row justify-content-evenly h-100' style={{flexWrap:'wrap'}}>
                 {   
-                    <div  style={{width:'40%', minWidth:'300px', minHeight:'400px', overflow:'scroll'}}> 
+                    <div  style={{width:'40%', minWidth:'300px', minHeight:'500px', overflow:'scroll'}}> 
                     {
                         loadWait.load ? 
                         ''
@@ -23,9 +23,9 @@ export default function Archive({pageSelect}){
                             <SeasonMenu 
                                 seasons={allSeasonData} 
                                 clickhandler={
-                                    loadWait.wait? 
-                                    ()=>{} 
-                                    : 
+                                    // loadWait.wait? 
+                                    // ()=>{} 
+                                    // : 
                                     (arg)=> {setLoadWait({load: true, wait: true}); setSelection({season: arg, state:1});}}
                             />
                         </> :
@@ -34,9 +34,9 @@ export default function Archive({pageSelect}){
                             <div 
                                 className='cursor2Pointer' 
                                 onClick={
-                                    loadWait.wait? 
-                                    ()=>{} 
-                                    : 
+                                    // loadWait.wait? 
+                                    // ()=>{} 
+                                    // : 
                                     ()=>setSelection({state:0})
                                 }
                             >
@@ -45,9 +45,9 @@ export default function Archive({pageSelect}){
                             <SeasonDetail 
                                 info={selectionData} 
                                 clickhandler={  
-                                    loadWait.wait? 
-                                    ()=>{} 
-                                    : 
+                                    // loadWait.wait? 
+                                    // ()=>{} 
+                                    // : 
                                     (arg) => {setLoadWait({load: true, wait: true}); setSelection({author: arg.author, season:arg.season, state:2});}}
                             />
                         </>

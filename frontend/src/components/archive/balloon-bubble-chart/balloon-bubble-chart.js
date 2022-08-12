@@ -17,7 +17,7 @@ export default function BalloonBubbleChart({wordCount, loading}){
     const timeT = Date.now();
     let idx = 0;
     const simulation = d3.forceSimulation()
-        .force('charge', d3.forceManyBody().strength(11))
+        .force('charge', d3.forceManyBody().strength(15))
         .force('center', d3.forceCenter(width / 2, height / 2))
         .on('tick', ()=>{
           tick(idx);
