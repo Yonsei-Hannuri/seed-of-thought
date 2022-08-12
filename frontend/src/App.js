@@ -21,7 +21,6 @@ class App extends Component {
     selected: 'main',
   };
 
-
   componentDidMount(){
     document.getElementById('fadein').classList.remove('fadeinElem')
     document.getElementById('fadein').classList += ' fadeinElem';

@@ -95,13 +95,15 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         parentFolderId = parentSession.googleFolderId
         fileName = '댓거리' + str(parentSession.week) + '주차_'+ self.request.user.name + '.pdf'
 
+        text = ''
+        words = '{ }'
         try: # if deep copy not working (this happens when pdf file is too big)
             PDF = copy.deepcopy(self.request.FILES['pdf'])
             text = wordcount.read_pdf(PDF.file)
             words = wordcount.tokenizer(text)  
         except:
-            text = ''
-            words = '{ }'
+            pass
+        
         googleId = googleDriveAPI.savePDF(fileName, parentFolderId, self.request.FILES['pdf'])
         self.request.FILES['pdf'].name = googleId+'.pdf'
         serializer.save(googleId=googleId, pureText=text, author=self.request.user, words=words, pdf=self.request.FILES['pdf'])
@@ -132,13 +134,13 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         
         instance.delete()
 
-        def get_queryset(self):
+    def get_queryset(self):
 
-            season = self.request.query_params.get('season', None)
-            author = self.request.query_params.get('author', None)
-            if season != None and author != None:
-                queryset = queryset.filter(author=int(author), season=int(season))
-            return queryset
+        season = self.request.query_params.get('season', None)
+        author = self.request.query_params.get('author', None)
+        if season != None and author != None:
+            queryset = queryset.filter(author=int(author), season=int(season))
+        return queryset
 
 class FreeNoteViewSet(viewsets.ModelViewSet):
     queryset = FreeNote.objects.order_by('-id')

@@ -189,7 +189,7 @@ def ArchiveView(request):
                 for key, val in detgori_word.items():
                     word_count[key] += val
 
-        word_number = 80
+        word_number = 30
         words_ranked = sorted(word_count.items(), key=lambda x: -x[1])
         if len(words_ranked) > word_number : keys_ranked = [key for key, val in words_ranked[0:word_number]]
         else: keys_ranked = [key for key, val in words_ranked]

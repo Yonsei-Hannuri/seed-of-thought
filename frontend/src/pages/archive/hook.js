@@ -11,7 +11,7 @@ export const useArchiveData = () => {
     const [wordCount, setWordCount] = useState({});
     const [loadWait, setLoadWait] = useState({load: true, wait: true});
 
-    const tolerance = 10000;
+    const waitTolerance = 10000; 
     useEffect(() => {
         if (selection.state === 0 && allSeasonData.initalized === false){
             (async function(){
@@ -36,7 +36,7 @@ export const useArchiveData = () => {
                 allSeasonData.wordCount = resWords.data;
                 setAllSeasonData(allSeasonData);
                 setLoadWait({load: false, wait: true});
-                setTimeout(()=>setLoadWait({load: false, wait: false}), tolerance);
+                setTimeout(()=>setLoadWait({load: false, wait: false}), waitTolerance);
             })();
         } else if (selection.state === 1) {
             (async function(){
@@ -69,7 +69,7 @@ export const useArchiveData = () => {
                 setSelectionData(SeasonData);
                 setWordCount( wordsData );
                 setLoadWait({load: false, wait: true});
-                setTimeout(()=>setLoadWait({load: false, wait: false}), tolerance);
+                setTimeout(()=>setLoadWait({load: false, wait: false}), waitTolerance);
             }())
         } else if (selection.state === 2) {
             (async function(){
@@ -86,7 +86,7 @@ export const useArchiveData = () => {
                 const wordData = resWords.data;
                 setWordCount(wordData);
                 setLoadWait({load: false, wait: true});
-                setTimeout(()=>setLoadWait({load: false, wait: false}), tolerance);
+                setTimeout(()=>setLoadWait({load: false, wait: false}), waitTolerance);
             }())
         }
     }, [selection]);
