@@ -157,7 +157,7 @@ class Session extends Component {
       ));
 
       return (
-        <div className="mt-5">
+        <div className="container p-5">
           <h2>{this.state.info.title}</h2>
           <SessionReadfile
             urls={this.state.info.readfile}
@@ -166,6 +166,7 @@ class Session extends Component {
           <hr/>
           <div className="row">
             <span className="fw-bolder fs-4 py-1"> 댓거리</span>
+            <span className="">X</span>
             <div
               id="pdfLoading"
               className={this.state.loading ? 'blankBox250 ' : 'blank'}
@@ -239,16 +240,8 @@ class Session extends Component {
               </div>
             </div>
             <div>
-              <ul className="d-flex p-0 clear-fix overflow-auto">
+              <ul className="d-flex p-0 clear-fix overflow-auto justify-content-start flex-wrap">
                 {name_list}
-                {name_list.length === 0 ? 
-                '' :
-                <button
-                  className="btn m-1 btn-primary border"
-                  onClick={this.onClickCloseDetgori}
-                >
-                  닫기
-                </button>}
               </ul>
             </div>
           </div>
