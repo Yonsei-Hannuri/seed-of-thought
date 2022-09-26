@@ -157,7 +157,7 @@ class Session extends Component {
       ));
 
       return (
-        <div className="container p-5">
+        <div className="container pt-3">
           <h2>{this.state.info.title}</h2>
           <SessionReadfile
             urls={this.state.info.readfile}
@@ -166,7 +166,6 @@ class Session extends Component {
           <hr/>
           <div className="row">
             <span className="fw-bolder fs-4 py-1"> 댓거리</span>
-            <span className="">X</span>
             <div
               id="pdfLoading"
               className={this.state.loading ? 'blankBox250 ' : 'blank'}
