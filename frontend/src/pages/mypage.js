@@ -83,7 +83,7 @@ class Mypage extends Component {
         headers: Header,
       })
         .then(() => {
-          this.getUserInfo();
+          this.getMypageInfo();
           alert("댓거리가 삭제되었습니다.");
         })
         

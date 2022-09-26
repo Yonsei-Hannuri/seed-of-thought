@@ -135,6 +135,7 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         instance.delete()
 
     def get_queryset(self):
+        queryset = self.queryset
 
         season = self.request.query_params.get('season', None)
         author = self.request.query_params.get('author', None)
