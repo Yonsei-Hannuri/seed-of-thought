@@ -7,7 +7,7 @@ import { Page, Document } from 'react-pdf';
 import { pdfjs } from 'react-pdf';
 import NameCard from '../components/session/nameCard';
 import WordChart from '../components/session/wordChart/wordChart';
-pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 class Session extends Component {
   state = {
@@ -106,7 +106,7 @@ class Session extends Component {
                 <Document
                   file={blob}
                   options={{
-                    cMapUrl: `//cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                    cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/cmaps/`,
                     cMapPacked: true,
                   }}
                 >
@@ -202,7 +202,7 @@ class Session extends Component {
                         }
                         onLoadSuccess={this.onDocumentLoadSuccess}
                         options={{
-                          cMapUrl: `//cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/cmaps/`,
+                          cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/cmaps/`,
                           cMapPacked: true,
                         }}
                       >
