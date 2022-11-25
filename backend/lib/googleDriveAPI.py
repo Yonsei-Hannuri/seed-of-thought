@@ -6,6 +6,12 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 
+def validateResponse(response):
+    if response.status_code == 500:
+        googlErrorNotification = "구글 드라이브 사용자 등록 중 에러가 발생했습니다. 이메일이 정확한지 확인해주세요."
+        raise Exception(googlErrorNotification + "\n" +json.loads(response.text)['error']['message'])
+
+
 def getCreds():
     SCOPES = ['https://www.googleapis.com/auth/drive']
     creds = None
@@ -31,9 +37,7 @@ def getCreds():
 def registerReader(email, folderId):
     creds = getCreds()
     access_token = json.loads(creds.to_json())['token']
-
     headers = {"Authorization": "Bearer "+access_token, "Content-Type": "application/json"}
-
     params = {
             'role': 'reader', 
             'type': 'user',
@@ -44,17 +48,14 @@ def registerReader(email, folderId):
         headers=headers,
         data=json.dumps(params)
     )
-
+    validateResponse(r);
     permissionId = json.loads(r.text)['id']
-
     return permissionId
 
 def registerWriter(email, folderId):
     creds = getCreds()
     access_token = json.loads(creds.to_json())['token']
-
     headers = {"Authorization": "Bearer "+access_token, "Content-Type": "application/json"}
-
     params = {
             'role': 'writer', 
             'type': 'user',
@@ -65,8 +66,8 @@ def registerWriter(email, folderId):
         headers=headers,
         data=json.dumps(params)
     )
+    validateResponse(r);
     permissionId = json.loads(r.text)['id']
-
     return permissionId
 
 def deleteMember(permissionId, folderId):
@@ -79,7 +80,6 @@ def deleteMember(permissionId, folderId):
         "https://www.googleapis.com/drive/v3/files/{}/permissions/{}".format(folderId, permissionId),
         headers=headers,
     )
-
     return r
 
 def savePDF(fileName, parentFolderId, PDF, mimeType="application/pdf"):
@@ -93,14 +93,11 @@ def savePDF(fileName, parentFolderId, PDF, mimeType="application/pdf"):
         "parents": [parentFolderId],
         "mimeType": mimeType,
     }
-
     r = requests.post(
         "https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable",
         headers=headers,
         data=json.dumps(params)
     )
-
-
     location = r.headers['Location']
 
     # 2. Upload the file
