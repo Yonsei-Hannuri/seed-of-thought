@@ -1,13 +1,12 @@
 import React, { Component } from 'react';
 import DetgoriUpload from '../components/mypage/detgoriUpload/detgoriUpload';
 import ProfileColor from '../components/mypage/profileColor';
-import WordCloud from '../components/wordCloud/WordCloud';
-import WordCloudButton from '../components/wordCloud/WordCloudButton';
 import Detgori from '../components/mypage/detgori';
 import axios from 'axios';
 import address from '../config/address';
 import errorReport from '../modules/errorReport';
 import getCookieValue from '../modules/getCookieValue';
+import WordChart from '../components/wordChart/WordChart';
 
 class Mypage extends Component {
   static defaultProps = {
@@ -22,6 +21,7 @@ class Mypage extends Component {
     ajaxError: false,
     seasonInfo: { session: [] },
     showWordCloud: false,
+    userWords: null,
   };
 
   componentDidMount() {
@@ -30,7 +30,7 @@ class Mypage extends Component {
 
   getMypageInfo = async () => {
     try {
-      const [myPageData, seasonData] = await Promise.all([
+      const [myPageData, seasonData, userWords] = await Promise.all([
         axios({
           method: 'GET',
           url: address.back + 'mypageInfo',
@@ -40,6 +40,11 @@ class Mypage extends Component {
           method: 'GET',
           url: address.back + 'season/',
           params: { current: true },
+          withCredentials: true,
+        }),
+        axios({
+          method: 'GET',
+          url: `${address.back}wordList/mypage/0`,
           withCredentials: true,
         }),
       ]);
@@ -52,6 +57,7 @@ class Mypage extends Component {
             ? seasonData.data[0]
             : this.state.seasonInfo,
         loaded: true,
+        userWords: userWords.data.wordList,
       });
     } catch (e) {
       this.setState({ ajaxError: true });
@@ -168,7 +174,10 @@ class Mypage extends Component {
             />
           </div>
           <div className="row m-0">
-            <div className="col-sm-9"></div>
+            {this.state.userWords !== null && (
+              <WordChart data={this.state.userWords} />
+            )}
+            {/* <div className="col-sm-9"></div>
             <WordCloudButton
               className="col-sm-3"
               onClick={() => {
@@ -177,7 +186,7 @@ class Mypage extends Component {
             />
             {this.state.showWordCloud && (
               <WordCloud src={`${address.back}wordList/mypage/0`} />
-            )}
+            )} */}
           </div>
         </div>
       );

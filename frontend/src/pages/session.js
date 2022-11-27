@@ -4,8 +4,8 @@ import errorReport from '../modules/errorReport';
 import address from '../config/address.json';
 import axios from 'axios';
 import NameCard from '../components/session/nameCard';
-import WordChart from '../components/wordChart/WordChart';
 import PDFViewer from '../components/session/PDFViewer';
+import WordCloud from '../components/wordCloud/WordCloud';
 class Session extends Component {
   state = {
     info: null, //{}
@@ -13,7 +13,6 @@ class Session extends Component {
     chartData: null,
     currentDetgoriId: null,
     loading: false,
-    chartDiv: '',
   };
 
   componentDidMount() {
@@ -59,22 +58,7 @@ class Session extends Component {
         if (sessionData === undefined) {
           window.location.href = address.front;
         }
-        fetch(`${address.back}wordList/session/${sessionData.id}`, {
-          credentials: 'include',
-        })
-          .then((res) => res.json())
-          .then((data_) => {
-            let data = data_.wordList;
-            if (data.length === 0) {
-              this.setState({ info: sessionData });
-            } else {
-              this.setState({
-                chartDiv: <WordChart data={data} />,
-                info: sessionData,
-              });
-            }
-          })
-          .catch((e) => errorReport(e, 'front-session'));
+        this.setState({ info: sessionData });
       })
       .catch((e) => errorReport(e, 'front-session'));
   }
@@ -129,7 +113,11 @@ class Session extends Component {
             </div>
           </div>
           <hr />
-          {this.state.chartDiv}
+          {this.state.info && (
+            <WordCloud
+              src={`${address.back}wordList/session/${this.state.info.id}`}
+            />
+          )}
           <hr />
           <div className="text-end m-3">
             <a href="/">
