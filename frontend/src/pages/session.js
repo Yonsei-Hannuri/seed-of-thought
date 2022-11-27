@@ -118,6 +118,7 @@ class Session extends Component {
             <span className="fw-bolder fs-4 py-1"> 댓거리</span>
             {this.state.currentDetgoriId !== null && (
               <PDFViewer
+                key={this.state.currentDetgoriId}
                 src={`${address.back}uploads/detgori/${this.state.currentDetgoriId}.pdf`}
               />
             )}

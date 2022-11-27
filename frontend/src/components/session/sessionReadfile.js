@@ -75,6 +75,7 @@ class SessionReadfile extends Component {
         </div>
         {this.state.opened && (
           <PDFViewer
+            key={this.state.info.googleId}
             src={`${address.back}uploads/session/${this.state.info.googleId}.pdf`}
           />
         )}
