@@ -5,21 +5,18 @@ pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pd
 
 function PDFViewer(props) {
   const [numPages, setNumpages] = useState(1);
+  const [curPage, setCurPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [height, setHeight] = useState(null);
   const onDocumentLoadSuccess = ({ numPages }) => {
     setNumpages(numPages);
     setLoading(false);
   };
-
-  const pdfPages = Array(numPages - 1)
-    .fill()
-    .map((_, idx) => {
-      return (
-        <div className="carousel-item" key={props.src + idx}>
-          <Page pageNumber={idx + 2} scale={1.88} />
-        </div>
-      );
-    });
+  const calculateHeight = () => {
+    if (height === null) {
+      setHeight(document.querySelector('#pdfDocument').offsetHeight);
+    }
+  };
 
   return (
     <div id="pdf">
@@ -31,9 +28,8 @@ function PDFViewer(props) {
         </div>
       </div>
       <div
-        id={`pdfDetgoriControl`}
-        data-bs-touch="false"
-        data-bs-interval="false"
+        id="pdfDocument"
+        style={{ height: height }}
         className={loading ? 'blank carousel slide' : 'carousel slide'}
       >
         <div className="carousel-inner">
@@ -45,34 +41,43 @@ function PDFViewer(props) {
               cMapPacked: true,
             }}
           >
-            <div id="firstPage" className="carousel-item active">
-              <Page pageNumber={1} scale={1.88} />
+            <div className="carousel-item active">
+              <Page
+                pageNumber={curPage}
+                scale={1.88}
+                onRenderSuccess={calculateHeight}
+              />
             </div>
-            {pdfPages}
           </Document>
         </div>
-        <button
-          className="carousel-control-prev"
-          type="button"
-          data-bs-target={`#pdfDetgoriControl`}
-          data-bs-slide="prev"
-        >
-          <span
-            className="carousel-control-prev-icon"
-            aria-hidden="true"
-          ></span>
-        </button>
-        <button
-          className="carousel-control-next"
-          type="button"
-          data-bs-target={`#pdfDetgoriControl`}
-          data-bs-slide="next"
-        >
-          <span
-            className="carousel-control-next-icon"
-            aria-hidden="true"
-          ></span>
-        </button>
+        {numPages > 1 && (
+          <>
+            <button
+              className="carousel-control-prev"
+              onClick={() => {
+                setCurPage(curPage - 1 > 0 ? curPage - 1 : numPages);
+              }}
+              type="button"
+            >
+              <span
+                className="carousel-control-prev-icon"
+                aria-hidden="true"
+              ></span>
+            </button>
+            <button
+              className="carousel-control-next"
+              onClick={() => {
+                setCurPage((curPage % numPages) + 1);
+              }}
+              type="button"
+            >
+              <span
+                className="carousel-control-next-icon"
+                aria-hidden="true"
+              ></span>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
