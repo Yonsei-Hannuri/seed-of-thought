@@ -1,7 +1,8 @@
 import React, { Component } from 'react';
 import DetgoriUpload from '../components/mypage/detgoriUpload/detgoriUpload';
 import ProfileColor from '../components/mypage/profileColor';
-import WordCloud from '../components/mypage/wordcloud';
+import WordCloud from '../components/wordCloud/WordCloud';
+import WordCloudButton from '../components/wordCloud/WordCloudButton';
 import Detgori from '../components/mypage/detgori';
 import axios from 'axios';
 import address from '../config/address';
@@ -20,6 +21,7 @@ class Mypage extends Component {
     loaded: false,
     ajaxError: false,
     seasonInfo: { session: [] },
+    showWordCloud: false,
   };
 
   componentDidMount() {
@@ -27,29 +29,32 @@ class Mypage extends Component {
   }
 
   getMypageInfo = async () => {
-    try{
+    try {
       const [myPageData, seasonData] = await Promise.all([
-          axios({
+        axios({
           method: 'GET',
           url: address.back + 'mypageInfo',
           withCredentials: true,
-          }),
-          axios({
-            method: 'GET',
-            url: address.back + 'season/',
-            params: { current: true },
-            withCredentials: true,
-          })
-        ]); 
+        }),
+        axios({
+          method: 'GET',
+          url: address.back + 'season/',
+          params: { current: true },
+          withCredentials: true,
+        }),
+      ]);
 
       this.setState({
         userInfo: myPageData.data,
         seasonDetgoris: myPageData.data.seasonDetgoris,
-        seasonInfo: seasonData.data.length > 0 ? seasonData.data[0] : this.state.seasonInfo,
+        seasonInfo:
+          seasonData.data.length > 0
+            ? seasonData.data[0]
+            : this.state.seasonInfo,
         loaded: true,
-    });
-    } catch(e){
-      this.setState({ ajaxError: true});
+      });
+    } catch (e) {
+      this.setState({ ajaxError: true });
       errorReport(e, 'mypage');
     }
   };
@@ -70,25 +75,26 @@ class Mypage extends Component {
   };
 
   deleteRequest = (e) => {
-    const reply = window.confirm("댓거리 삭제 시, 복구할 수 없습니다. 삭제하시겠습니까?");
+    const reply = window.confirm(
+      '댓거리 삭제 시, 복구할 수 없습니다. 삭제하시겠습니까?',
+    );
     const csrfToken = getCookieValue(document.cookie, 'csrftoken');
     const Header = {
-       'X-CSRFToken':  csrfToken
+      'X-CSRFToken': csrfToken,
     };
-    if (reply){
+    if (reply) {
       axios({
         method: 'DELETE',
-        url: address.back + 'detgori/'+ e.currentTarget.getAttribute('val')+'/',
+        url:
+          address.back + 'detgori/' + e.currentTarget.getAttribute('val') + '/',
         withCredentials: true,
         headers: Header,
-      })
-        .then(() => {
-          this.getMypageInfo();
-          alert("댓거리가 삭제되었습니다.");
-        })
-        
+      }).then(() => {
+        this.getMypageInfo();
+        alert('댓거리가 삭제되었습니다.');
+      });
     }
-  }
+  };
 
   render() {
     if (this.state.ajaxError) {
@@ -97,12 +103,18 @@ class Mypage extends Component {
     if (this.state.loaded) {
       const seasonOptions = this.state.userInfo.seasons.map((season, idx) => (
         <option value={season.id} key={season.id}>
-            {season.year} - {season.semester}
+          {season.year} - {season.semester}
         </option>
       ));
-      const detgoriList = this.state.seasonDetgoris.slice(1,).map((detgori, idx) => (
-        <Detgori key={detgori.detgoriId} detgori={detgori} deleteRequest={this.deleteRequest}/>
-      ));
+      const detgoriList = this.state.seasonDetgoris
+        .slice(1)
+        .map((detgori, idx) => (
+          <Detgori
+            key={detgori.detgoriId}
+            detgori={detgori}
+            deleteRequest={this.deleteRequest}
+          />
+        ));
       return (
         <div className={this.props.active === true ? '' : 'blank'}>
           <div className="d-flex m-3" id="profile_box">
@@ -131,16 +143,17 @@ class Mypage extends Component {
               <span className="d-inline fw-bolder fs-4 mt-3">
                 &nbsp;&nbsp;댓거리
               </span>
-              {this.state.userInfo.seasons.length === 0 ?
-              '' :
-              <select
-                className="d-inline form-select small-dropdown"
-                onChange={this.getSeasonDetgori}
-                name="학기"
-              >
-                {seasonOptions}
-              </select>
-              }
+              {this.state.userInfo.seasons.length === 0 ? (
+                ''
+              ) : (
+                <select
+                  className="d-inline form-select small-dropdown"
+                  onChange={this.getSeasonDetgori}
+                  name="학기"
+                >
+                  {seasonOptions}
+                </select>
+              )}
             </div>
             <div className="fw-bolder fs-4 mt-1">
               &nbsp;&nbsp;{this.state.seasonDetgoris[0]}
@@ -149,10 +162,22 @@ class Mypage extends Component {
           </ul>
           <div>{this.state.userInfo.detgori}</div>
           <div className="mt-3">
-            <DetgoriUpload seasonInfo={this.state.seasonInfo} onUpload={this.getMypageInfo} />
+            <DetgoriUpload
+              seasonInfo={this.state.seasonInfo}
+              onUpload={this.getMypageInfo}
+            />
           </div>
-          <div>
-            <WordCloud />
+          <div className="row m-0">
+            <div className="col-sm-9"></div>
+            <WordCloudButton
+              className="col-sm-3"
+              onClick={() => {
+                this.setState({ showWordCloud: !this.state.showWordCloud });
+              }}
+            />
+            {this.state.showWordCloud && (
+              <WordCloud src={`${address.back}wordList/mypage/0`} />
+            )}
           </div>
         </div>
       );

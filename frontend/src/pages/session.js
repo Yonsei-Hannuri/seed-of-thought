@@ -4,7 +4,7 @@ import errorReport from '../modules/errorReport';
 import address from '../config/address.json';
 import axios from 'axios';
 import NameCard from '../components/session/nameCard';
-import WordChart from '../components/session/wordChart/wordChart';
+import WordChart from '../components/wordChart/WordChart';
 import PDFViewer from '../components/session/PDFViewer';
 class Session extends Component {
   state = {
