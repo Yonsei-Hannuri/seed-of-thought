@@ -3,12 +3,12 @@ import axios from 'axios';
 import Page from '../components/freeNote/page';
 import address from '../config/address.json';
 import errorReport from '../modules/errorReport';
-import postRequest from '../requests/postRequest';
+import postRequest from '../api/postRequest';
 
 class FreeNote extends Component {
   static defaultProps = {
     pageSelect: '',
-  }
+  };
 
   state = {
     notes: [{}],
@@ -25,7 +25,8 @@ class FreeNote extends Component {
     })
       .then((res) => res.data)
       .then((data) => {
-        if (data.length !== 0) this.setState({ page: data[0].page, notes: data });
+        if (data.length !== 0)
+          this.setState({ page: data[0].page, notes: data });
       })
       .catch((e) => {
         this.setState({ ajaxError: true });
@@ -51,7 +52,9 @@ class FreeNote extends Component {
   };
 
   handleUpload = async (e) => {
-    const res = await postRequest(e, 'freeNote/', ()=>this.getInfoAndPageFlip(0));
+    const res = await postRequest(e, 'freeNote/', () =>
+      this.getInfoAndPageFlip(0),
+    );
     if (res === false) this.setState({ ajaxError: 2 });
   };
 
@@ -73,28 +76,33 @@ class FreeNote extends Component {
           className="btn col-3 border mx-1 btn-light"
           onClick={this.handlePreviousPage}
         >
-          {"<"}
+          {'<'}
         </button>
         <button
           className="btn col-3 border mx-1 btn-light"
           onClick={this.handleNextPage}
         >
-          {">"}
+          {'>'}
         </button>
         <span className="col-3 mx-1">페이지 {this.state.page}</span>
-        {
-        this.state.ajaxError === false ? '' : 
-        this.state.ajaxError === 1 ?
+        {this.state.ajaxError === false ? (
+          ''
+        ) : this.state.ajaxError === 1 ? (
           <span className="text-danger">
             페이지 불러오는 중 오류가 발생했습니다.
-          </span> :
-        this.state.ajaxError === 2 ?
+          </span>
+        ) : this.state.ajaxError === 2 ? (
           <span className="text-danger">
             페이지 불러오는 중 오류가 발생했습니다.
-          </span>:  
-        ''
-        }
-        <button onClick={this.props.pageSelect} name='metaSpace' className="btn col-3 border float-end mx-1 btn-light">
+          </span>
+        ) : (
+          ''
+        )}
+        <button
+          onClick={this.props.pageSelect}
+          name="metaSpace"
+          className="btn col-3 border float-end mx-1 btn-light"
+        >
           나가기
         </button>
         <Page
