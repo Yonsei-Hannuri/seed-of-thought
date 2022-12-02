@@ -13,7 +13,7 @@ export default function NameCard({ info, clickhandler }) {
         className="btn m-1 btn-light"
         value={info.googleId}
         onClick={() => {
-          clickhandler(info.googleId);
+          clickhandler(info.googleId, info.id);
           setClicked(true);
         }}
       >

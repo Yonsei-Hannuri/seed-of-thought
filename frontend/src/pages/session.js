@@ -5,6 +5,14 @@ import NameCard from '../components/session/nameCard';
 import PDFViewer from '../components/session/PDFViewer';
 import WordCloud from '../components/wordCloud/WordCloud';
 import useSession from '../hooks/session/useSession';
+import useOnMount from '../hooks/common/useOnMount';
+import DurationLogger from '../modules/DurationLogger';
+import { POST_DETGORI_READ_LOG } from '../api/log';
+
+const durationThreshold = 0;
+const durationLogger = new DurationLogger((id, duration) => {
+  POST_DETGORI_READ_LOG(id, duration);
+}, durationThreshold);
 
 function Session() {
   const urlSearchParams = new URLSearchParams(window.location.search);
@@ -12,19 +20,29 @@ function Session() {
   const session = useSession(params.sessionID);
   const [currentDetgoriId, setCurrentDetgoriId] = useState(null);
 
-  const onNameClick = (googleId) => {
+  const onNameClick = (googleId, detgoriId) => {
+    durationLogger.changeTarget(detgoriId);
     document.body.scrollTop = document.documentElement.scrollTop = 0;
     setTimeout(() => {
       setCurrentDetgoriId(googleId);
     }, 500);
   };
 
-  const onClickCloseDetgori = () => {
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
-    setTimeout(() => {
-      setCurrentDetgoriId(null);
-    }, 500);
-  };
+  useOnMount(() => {
+    const unloadhandler = () => durationLogger.close();
+    window.addEventListener('beforeunload', unloadhandler);
+    return () => {
+      window.removeEventListener('beforeunload', unloadhandler);
+    };
+  });
+
+  // const onClickCloseDetgori = () => {
+  //   document.body.scrollTop = document.documentElement.scrollTop = 0;
+  //   durationLogger.close();
+  //   setTimeout(() => {
+  //     setCurrentDetgoriId(null);
+  //   }, 500);
+  // };
 
   if (session === null) return '';
 
