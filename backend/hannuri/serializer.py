@@ -63,6 +63,13 @@ class FreeNoteSerializer(serializers.ModelSerializer):
         model = FreeNote
         fields = ['id', 'text', 'page', 'position']
         
+
+class DetgoriReadTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DetgoriReadTime
+        fields = '__all__'
+
+        
 #class SocialActivityImgSerializer(serializers.ModelSerializer):
 #    googleId = serializers.ReadOnlyField()
 #    class Meta:

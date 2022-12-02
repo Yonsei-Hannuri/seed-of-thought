@@ -1,10 +1,4 @@
-from django.db import models
-from lib import googleDriveAPI
-import requests
-import json
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-with open('./config/googleDrive/folderId.json') as json_file:
-    googleFolderId = json.load(json_file)
+from hannuri.model.dependencies import *
 
 class UserManager(BaseUserManager):
     def create_user(self, email, name, password=None):

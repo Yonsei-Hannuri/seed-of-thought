@@ -162,3 +162,13 @@ class FreeNoteViewSet(viewsets.ModelViewSet):
 
         return queryset
 
+class DetgoriReadTimeViewSet(viewsets.ModelViewSet):
+    queryset = DetgoriReadTime.objects.order_by('-id')
+    serializer_class = DetgoriReadTimeSerializer
+    permission_classes = [IsAuthenticated, AppendOnly]
+    http_method_names = ['post']
+
+    def create(self, request, *args, **kwargs): 
+        request.data['reader'] = request.user.id
+        return super().create(request, *args, **kwargs)
+       
