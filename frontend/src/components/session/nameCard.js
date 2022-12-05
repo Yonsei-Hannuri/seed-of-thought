@@ -11,9 +11,8 @@ export default function NameCard({ info, clickhandler }) {
           color: `${clicked ? 'Gainsboro' : 'black'}`,
         }}
         className="btn m-1 btn-light"
-        value={info.googleId}
         onClick={() => {
-          clickhandler(info.googleId, info.id);
+          clickhandler();
           setClicked(true);
         }}
       >

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import SessionReadfile from '../components/session/sessionReadfile';
 import address from '../config/address.json';
 import NameCard from '../components/session/nameCard';
@@ -8,6 +7,7 @@ import useSession from '../hooks/session/useSession';
 import useOnMount from '../hooks/common/useOnMount';
 import DurationLogger from '../modules/DurationLogger';
 import { POST_DETGORI_READ_LOG } from '../api/log';
+import ShowSelection from '../components/ShowSelection';
 
 const durationThreshold = 0;
 const durationLogger = new DurationLogger((id, duration) => {
@@ -18,15 +18,6 @@ function Session() {
   const urlSearchParams = new URLSearchParams(window.location.search);
   const params = Object.fromEntries(urlSearchParams.entries());
   const session = useSession(params.sessionID);
-  const [currentDetgoriId, setCurrentDetgoriId] = useState(null);
-
-  const onNameClick = (googleId, detgoriId) => {
-    durationLogger.changeTarget(detgoriId);
-    document.body.scrollTop = document.documentElement.scrollTop = 0;
-    setTimeout(() => {
-      setCurrentDetgoriId(googleId);
-    }, 500);
-  };
 
   useOnMount(() => {
     const unloadhandler = () => durationLogger.close();
@@ -36,24 +27,7 @@ function Session() {
     };
   });
 
-  // const onClickCloseDetgori = () => {
-  //   document.body.scrollTop = document.documentElement.scrollTop = 0;
-  //   durationLogger.close();
-  //   setTimeout(() => {
-  //     setCurrentDetgoriId(null);
-  //   }, 500);
-  // };
-
   if (session === null) return '';
-
-  const name_list = session.detgori.map((detgoriInfo) => (
-    <NameCard
-      clickhandler={onNameClick}
-      info={detgoriInfo}
-      key={detgoriInfo.id}
-    />
-  ));
-
   return (
     <div className="container pt-3">
       <h2>{session.title}</h2>
@@ -62,21 +36,27 @@ function Session() {
         googleFolderId={session.googleFolderId}
       />
       <hr />
-      <div className="row">
-        <span className="fw-bolder fs-4 py-1"> 댓거리</span>
-        {currentDetgoriId !== null && (
+      <ShowSelection
+        title={'댓거리'}
+        panel={(detgoriId) => (
           <PDFViewer
-            key={currentDetgoriId}
-            src={`${address.back}uploads/detgori/${currentDetgoriId}.pdf`}
+            key={detgoriId}
+            src={`${address.back}uploads/detgori/${detgoriId}.pdf`}
           />
         )}
-        <div>
-          <ul className="d-flex p-0 clear-fix overflow-auto justify-content-start flex-wrap">
-            {name_list}
-          </ul>
-        </div>
-      </div>
-      <hr />
+        options={(setDetgori) =>
+          session.detgori.map((detgoriInfo) => (
+            <NameCard
+              info={detgoriInfo}
+              clickhandler={() => {
+                setDetgori(detgoriInfo.googleId);
+                durationLogger.changeTarget(detgoriInfo.id);
+              }}
+              key={detgoriInfo.id}
+            />
+          ))
+        }
+      />
       {session && (
         <WordCloud src={`${address.back}wordList/session/${session.id}`} />
       )}
