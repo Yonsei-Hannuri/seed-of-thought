@@ -1,6 +1,5 @@
 import SessionReadfile from '../components/session/sessionReadfile';
 import address from '../config/address.json';
-import NameCard from '../components/session/nameCard';
 import PDFViewer from '../components/session/PDFViewer';
 import WordCloud from '../components/wordCloud/WordCloud';
 import useSession from '../hooks/session/useSession';
@@ -8,6 +7,7 @@ import useOnMount from '../hooks/common/useOnMount';
 import DurationLogger from '../modules/DurationLogger';
 import { POST_DETGORI_READ_LOG } from '../api/log';
 import ShowSelection from '../components/ShowSelection';
+import ColorButton from '../components/session/ColorButton';
 
 const durationThreshold = 0;
 const durationLogger = new DurationLogger((id, duration) => {
@@ -46,13 +46,15 @@ function Session() {
         )}
         options={(setDetgori) =>
           session.detgori.map((detgoriInfo) => (
-            <NameCard
-              info={detgoriInfo}
-              clickhandler={() => {
+            <ColorButton
+              key={detgoriInfo.id}
+              color={detgoriInfo.authorColor}
+              text={detgoriInfo.authorName}
+              onClick={() => {
                 setDetgori(detgoriInfo.googleId);
                 durationLogger.changeTarget(detgoriInfo.id);
               }}
-              key={detgoriInfo.id}
+              clicked={false}
             />
           ))
         }
