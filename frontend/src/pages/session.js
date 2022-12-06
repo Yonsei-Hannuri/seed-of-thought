@@ -8,6 +8,7 @@ import DurationLogger from '../modules/DurationLogger';
 import { POST_DETGORI_READ_LOG } from '../api/log';
 import ShowSelection from '../components/ShowSelection';
 import ColorButton from '../components/session/ColorButton';
+import getQueryParams from '../modules/getQueryParams';
 
 const durationThreshold = 0;
 const durationLogger = new DurationLogger((id, duration) => {
@@ -15,9 +16,7 @@ const durationLogger = new DurationLogger((id, duration) => {
 }, durationThreshold);
 
 function Session() {
-  const urlSearchParams = new URLSearchParams(window.location.search);
-  const params = Object.fromEntries(urlSearchParams.entries());
-  const session = useSession(params.sessionID);
+  const [session, detgoris] = useSession(getQueryParams().sessionID);
 
   useOnMount(() => {
     const unloadhandler = () => durationLogger.close();
@@ -45,14 +44,14 @@ function Session() {
           />
         )}
         options={(setDetgori) =>
-          session.detgori.map((detgoriInfo) => (
+          detgoris.map((detgori) => (
             <ColorButton
-              key={detgoriInfo.id}
-              color={detgoriInfo.authorColor}
-              text={detgoriInfo.authorName}
+              key={detgori.id}
+              color={detgori.authorColor}
+              text={detgori.authorName}
               onClick={() => {
-                setDetgori(detgoriInfo.googleId);
-                durationLogger.changeTarget(detgoriInfo.id);
+                setDetgori(detgori.googleId);
+                durationLogger.changeTarget(detgori.id);
               }}
               clicked={false}
             />
