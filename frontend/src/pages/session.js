@@ -9,6 +9,7 @@ import { POST_DETGORI_READ_LOG } from '../api/log';
 import ShowSelection from '../components/ShowSelection';
 import ColorButton from '../components/session/ColorButton';
 import getQueryParams from '../modules/getQueryParams';
+import LocalstorageObject from '../modules/LocalstorageObject';
 
 const durationThreshold = 0;
 const durationLogger = new DurationLogger((id, duration) => {
@@ -16,8 +17,9 @@ const durationLogger = new DurationLogger((id, duration) => {
 }, durationThreshold);
 
 function Session() {
-  const [session, detgoris] = useSession(getQueryParams().sessionID);
-
+  const sessionId = getQueryParams().sessionID;
+  const [session, detgoris] = useSession(sessionId);
+  const readRecord = new LocalstorageObject(`session-${sessionId}-read-record`);
   useOnMount(() => {
     const unloadhandler = () => durationLogger.close();
     window.addEventListener('beforeunload', unloadhandler);
@@ -35,29 +37,32 @@ function Session() {
         googleFolderId={session.googleFolderId}
       />
       <hr />
-      <ShowSelection
-        title={'댓거리'}
-        panel={(detgoriId) => (
-          <PDFViewer
-            key={detgoriId}
-            src={`${address.back}uploads/detgori/${detgoriId}.pdf`}
-          />
-        )}
-        options={(setDetgori) =>
-          detgoris.map((detgori) => (
-            <ColorButton
-              key={detgori.id}
-              color={detgori.authorColor}
-              text={detgori.authorName}
-              onClick={() => {
-                setDetgori(detgori.googleId);
-                durationLogger.changeTarget(detgori.id);
-              }}
-              clicked={false}
+      {detgoris && (
+        <ShowSelection
+          title={'댓거리'}
+          panel={(detgoriId) => (
+            <PDFViewer
+              key={detgoriId}
+              src={`${address.back}uploads/detgori/${detgoriId}.pdf`}
             />
-          ))
-        }
-      />
+          )}
+          options={(setDetgori) =>
+            detgoris.map((detgori) => (
+              <ColorButton
+                key={detgori.id}
+                color={detgori.authorColor}
+                text={detgori.authorName}
+                onClick={() => {
+                  setDetgori(detgori.googleId);
+                  durationLogger.changeTarget(detgori.id);
+                  readRecord.setValue(detgori.id, true);
+                }}
+                clicked={readRecord.getValue(detgori.id)}
+              />
+            ))
+          }
+        />
+      )}
       {session && (
         <WordCloud src={`${address.back}wordList/session/${session.id}`} />
       )}
