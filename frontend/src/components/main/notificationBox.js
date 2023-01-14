@@ -1,6 +1,6 @@
-import { useState } from "react";
+import PageWithModal from '../PageWithModal';
 
-export default function NotificationBox({notifications=[]}) {
+export default function NotificationBox({ notifications = [] }) {
   const notification_list = notifications.map((info, idx) => (
     <Notification index={idx + 1} info={info} key={info.id} />
   ));
@@ -11,9 +11,7 @@ export default function NotificationBox({notifications=[]}) {
           <div className="text-start">
             <h4>공지사항</h4>
           </div>
-          <table className="table">
-            <tbody>{notification_list}</tbody>
-          </table>
+          <div>{notification_list}</div>
         </div>
       </div>
     );
@@ -22,39 +20,40 @@ export default function NotificationBox({notifications=[]}) {
   }
 }
 
-function Notification({index, info}){
-  const [clicked, setClicked] = useState(false);
-    if (clicked === true) {
-      return (
-        <tr>
-          <th className="col-3 text-center">{index}</th>
-          <td>
-            <h3>
-              {info.title}
-              <button
-                className="float-end link-button"
-                onClick={()=>setClicked(!clicked)}
-              >
-                X
-              </button>
-            </h3>
-            <p>{info.date.slice(0, 10)}</p>
-            <p>{info.description}</p>
-          </td>
-        </tr>
-      );
-    }
-    return (
-      <tr>
-        <th className="col-3 text-center">{index}</th>
-        <td>
-          <div
-            className="col-9 text-start link-button"
-            onClick={()=>setClicked(!clicked)}
+function Notification({ index, info }) {
+  return (
+    <PageWithModal
+      main={(toggleModal) => (
+        <div className="p-1">
+          <span className="col-4 text-center p-1 m-1 mx-3">{index}</span>
+          <span
+            className="p-1 m-1 col-8 text-center link-button"
+            onClick={() => toggleModal()}
           >
             {info.title}
-          </div>
-        </td>
-      </tr>
-    );
+          </span>
+        </div>
+      )}
+      modal={(toggleModal) => (
+        <div className="m-3 text-start" style={{ width: '100%' }}>
+          <h3>
+            {info.title}
+            <span
+              className=" float-end mx-3 cursor2Pointer"
+              onClick={() => toggleModal()}
+              style={{
+                color: 'tomato',
+                fontSize: 'x-large',
+                fontWeight: 'bold',
+              }}
+            >
+              X
+            </span>
+          </h3>
+          <p>{info.date.slice(0, 10)}</p>
+          <p>{info.description}</p>
+        </div>
+      )}
+    />
+  );
 }
