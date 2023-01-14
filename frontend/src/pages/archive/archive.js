@@ -12,7 +12,7 @@ export default function Archive({pageSelect}){
     return(
             <div className='d-flex flex-row justify-content-evenly h-100' style={{flexWrap:'wrap'}}>
                 {   
-                    <div  style={{width:'40%', minWidth:'300px', minHeight:'500px', overflow:'scroll'}}> 
+                    <div  style={{width:'40%', minWidth:'300px', minHeight:'500px', overflow:'auto'}}> 
                     {
                         loadWait.load ? 
                         ''

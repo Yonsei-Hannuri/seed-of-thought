@@ -330,8 +330,8 @@ textarea {
 }
 
 .textDiv {
-  white-space: pre-wrap;
-  overflow-y: scroll;
+  line-break: anywhere;
+  overflow-y: auto;
 }
 
 .bg-theme {
