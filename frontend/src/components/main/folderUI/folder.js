@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom";
+
 export default function Folder({idx, sessionInfo}) {
     const clickFolderTagText = (e) => {
         const topAdjustCoeff = idx;
@@ -33,11 +35,9 @@ export default function Folder({idx, sessionInfo}) {
                 </div>
             </div>
             <div className="folderBody" style={folderBodyStyle}>
-                <div className="folderBodyText">
-                    <a className="folderUI_link" href={'session/?sessionID='+sessionInfo.id}>
-                        {sessionInfo.title}
-                    </a>
-                </div>
+                <Link className="folderBodyText" to={'session/?sessionID='+sessionInfo.id}>
+                    {sessionInfo.title}
+                </Link>
             </div>
         </div>
     )

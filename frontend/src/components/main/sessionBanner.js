@@ -1,4 +1,4 @@
-export default function SessionBanner({recentSession={}}) {
+export default function SessionBanner({recentSession={}, children}) {
     if (recentSession.week){
         return (
         <div>
@@ -11,14 +11,7 @@ export default function SessionBanner({recentSession={}}) {
             </h1>
             <div className="col-lg-6 mx-auto">
                 <div className="d-grid gap-2 d-sm-flex justify-content-sm-center">
-                <a href={'/session/?sessionID=' + recentSession.id}>
-                    <button
-                    type="button"
-                    className="btn btn-light border btn-lg px-4 gap-3"
-                    >
-                    세션 입장하기
-                    </button>
-                </a>
+                {children}
                 </div>
             </div>
             </div>

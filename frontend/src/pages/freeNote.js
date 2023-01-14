@@ -4,6 +4,7 @@ import Page from '../components/freeNote/page';
 import address from '../config/address.json';
 import errorReport from '../modules/errorReport';
 import postRequest from '../api/postRequest';
+import { Link } from "react-router-dom";
 
 class FreeNote extends Component {
   static defaultProps = {
@@ -98,13 +99,9 @@ class FreeNote extends Component {
         ) : (
           ''
         )}
-        <button
-          onClick={this.props.pageSelect}
-          name="metaSpace"
-          className="btn col-3 border float-end mx-1 btn-light"
-        >
-          나가기
-        </button>
+        <Link to="/metaspace" className=" float-end mx-3">
+            <span style={{color: "tomato", fontSize: "x-large", fontWeight:"bold"}}>X</span>
+        </Link>
         <Page
           info={this.state.notes}
           onUpload={this.handleUpload}

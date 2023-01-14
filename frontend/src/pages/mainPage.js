@@ -51,7 +51,17 @@ class MainPage extends Component {
       return (
         <div className={this.props.active === true ? '' : 'blank'}>
           <NotificationBox notifications={this.state.notifications}/>
-          <SessionBanner recentSession={this.state.sessions[this.state.sessions.length-1]}/>
+          <SessionBanner recentSession={this.state.sessions[this.state.sessions.length-1]}>
+            <button
+              type="button"
+              className="btn btn-light border btn-lg px-4 gap-3"
+              onClick={() => {
+                this.props.history.push({pathname: '/session/?sessionID=' + this.state.sessions[this.state.sessions.length-1].id})
+              }}
+            >
+            세션 입장하기
+            </button>
+          </SessionBanner>
           <FolderUI seasonSessionInfos={this.state.sessions}/>
         </div>
       );

@@ -24,6 +24,7 @@ function Session() {
     const unloadhandler = () => durationLogger.close();
     window.addEventListener('beforeunload', unloadhandler);
     return () => {
+      unloadhandler();
       window.removeEventListener('beforeunload', unloadhandler);
     };
   });
@@ -66,12 +67,6 @@ function Session() {
       {session && (
         <WordCloud src={`${address.back}wordList/session/${session.id}`} />
       )}
-      <hr />
-      <div className="text-end m-3">
-        <a href="/">
-          <button className="btn btn-light border">나가기</button>
-        </a>
-      </div>
     </div>
   );
 }

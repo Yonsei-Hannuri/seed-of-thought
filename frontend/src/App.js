@@ -1,80 +1,83 @@
 import React, { Component } from 'react';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import MainPage from './pages/mainPage';
 import Mypage from './pages/mypage';
 import MetaSpace from './pages/metaSpace';
 import Session from './pages/session';
-import FreeNote from './pages/freeNote';
-import Archive from './pages/archive/archive';
 import LoginPage from './pages/loginPage';
 import HeaderNav from './components/headerNav';
 import Footer from './components/footer';
 import getCookieValue from './modules/getCookieValue';
 import address from './config/address.json';
-import delay from './modules/delay'
 
-import {
-  RecoilRoot,
-} from 'recoil';
 
 class App extends Component {
-  state = {
-    selected: 'main',
-  };
-
-  componentDidMount(){
-    document.getElementById('fadein').classList.remove('fadeinElem')
-    document.getElementById('fadein').classList += ' fadeinElem';
-    delay(700).then(() => document.getElementById('fadein').classList.remove('fadeinElem'));
-  }
-
-  pageSelect = (e) => {
-    this.setState({
-      selected: e.target.name,
-    });
-    document.getElementById('fadein').classList.remove('fadeinElem')
-    document.getElementById('fadein').classList += 'fadeinElem';
-    delay(700).then(() => document.getElementById('fadein').classList.remove('fadeinElem'));
-  };
-
   render() {
     const isLogined = getCookieValue(document.cookie, 'isLogin');
-    const path = window.location.pathname.trim().split('/');
-    if (isLogined===null || isLogined === 'false') {
+    if (isLogined === null || isLogined === 'false') {
       return (
-        <div id='fadein' className='h-100'>
+        <div id="fadein" className="h-100">
           <LoginPage />
         </div>
       );
-    } else if (path[1] === 'session'){
-      return (
-        <div id='fadein' className="container">
-          <Session/>
-        </div>
-      )};
-    return (   
-      <>
+    }
+    return (
         <div className="container">
-          <HeaderNav selected={this.state.selected} pageSelect={this.pageSelect} address={address}/>
-          <div id="fadein">
-            {this.state.selected === 'main' ? 
-              <MainPage/> : 
-              this.state.selected === 'metaSpace' ? 
-              <MetaSpace pageSelect={this.pageSelect}/> : 
-              this.state.selected === 'mypage' ? 
-              <Mypage/> :
-              this.state.selected === 'freeNote' ?
-              <FreeNote pageSelect={this.pageSelect}/> :
-              this.state.selected === 'archive'? 
-              <RecoilRoot>
-                <Archive pageSelect={this.pageSelect}/>
-              </RecoilRoot>
-              :
-              <MainPage/>
-            }
-          <Footer/>
-          </div>
+        <Router>
+          <Switch>
+              <Route path="/session" component={Session}/>
+              <Route>
+                  <HeaderNav
+                    defaultLinkState={'/' + window.location.pathname.split("/")[1]}
+                    links={(link, onNavClick)=>{
+                      return(
+                        <>
+                          <li className="nav-item">
+                            <button
+                              name="main"
+                              className={'nav-link ' + (link === "/" ? 'active' : '')}
+                              onClick={()=>onNavClick("/")}
+                            >
+                              메인
+                            </button>
+                          </li>
+                          <li className="nav-item">
+                            <button
+                              name="metaspace"
+                              className={'nav-link ' + (link === "/metaspace" ? 'active' : '')}
+                              onClick={()=>onNavClick("/metaspace")}
+                            >
+                              메타
+                            </button>
+                          </li>
+                          <li className="nav-item">
+                            <button
+                              name="mypage"
+                              className={'nav-link ' + (link === "/mypage" ? 'active' : '')}
+                              onClick={()=>onNavClick("/mypage")}
+                            >
+                              마이페이지
+                            </button>
+                          </li>
+                          <li className="nav-item">
+                            <a href={address.back + 'logout/'} className="nav-link">
+                              로그아웃
+                            </a>
+                          </li>
+                    </>
+                      )
+                    }}
+                  />
+                  <Switch>
+                    <Route exact path="/" component={MainPage}/>
+                    <Route exact path="/metaspace" component={MetaSpace}/>
+                    <Route exact path="/mypage" component={Mypage}/>
+                  </Switch>
+              </Route>
+            </Switch>
+          </Router>
+          <Footer />
         </div>
-      </>
     );
   }
 }
