@@ -4,7 +4,7 @@ files:
   - source: /build
     destination: /home/hannuri/static/frontend
 
-file_exists_behavior: RETAIN
+file_exists_behavior: OVERWRITE
 
 permissions:
   - object: /

@@ -13,7 +13,7 @@ on:
 
 env:
   S3_BUCKET_NAME: hannuri
-  CODE_DEPLOY_APPLICATION_NAME: hannuri-code-deploy
+  CODE_DEPLOY_APPLICATION_NAME: deploy-hannuri-server
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: hannuri-server
 
 jobs:
