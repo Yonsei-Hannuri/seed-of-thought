@@ -13,7 +13,7 @@ env:
   CODE_DEPLOY_APPLICATION_NAME: hannuri-code-deploy
   CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: hannuri-server
 
-obs:
+jobs:
   build:
     runs-on: ubuntu-latest
 
