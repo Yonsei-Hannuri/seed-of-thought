@@ -43,7 +43,7 @@ jobs:
       - name: Make zip file
         working-directory: ./frontend
         run: |
-          cp ../deploy/appspec/front.yml ./appspec.yml
+          cp ../.deploy/appspec/front.yml ./appspec.yml
           zip -r ./deploy-frontend.zip ./build appspec.yml
         shell: bash
 
