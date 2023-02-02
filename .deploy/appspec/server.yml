@@ -25,6 +25,9 @@ files:
   - source: docker-compose.yml
     destination: /home/hannuri
 
+  - source: .env
+    destination: /home/hannuri
+
 file_exists_behavior: OVERWRITE
 
 permissions:

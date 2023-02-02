@@ -37,7 +37,7 @@ jobs:
         run: |
           cp ./.deploy/appspec/server.yml ./appspec.yml
           cp ./.deploy/script/application-restart.sh ./script.sh
-          zip -r ./deploy-server.zip ./nginx docker-compose.yml appspec.yml script.sh
+          zip -r ./deploy-server.zip ./nginx docker-compose.yml appspec.yml .env script.sh
         shell: bash
 
       - name: Configure AWS credentials
