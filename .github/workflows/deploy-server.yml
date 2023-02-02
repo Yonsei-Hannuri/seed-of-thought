@@ -27,8 +27,8 @@ jobs:
       - name: Make envfile
         uses: SpicyPizza/create-envfile@v1.3
         with:
-          envkey_host_path_to_ssl: ${{ secrets.HOST_PATH_TO_SSL }}
-          envkey_host_path_to_static: ${{ secrets.STATIC_FILE_ROOT }}
+          envkey_HOST_PATH_TO_SSL: ${{ secrets.HOST_PATH_TO_SSL }}
+          envkey_STATIC_FILE_ROOT: ${{ secrets.STATIC_FILE_ROOT }}
           envkey_FRONT_DOMAIN: ${{ secrets.FRONT_DOMAIN }}
           envkey_API_DOMAIN: ${{ secrets.API_DOMAIN }}
           directory: ./

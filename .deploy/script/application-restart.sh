@@ -1,4 +1,4 @@
 cd /home/hannuri/
 
-docker-compose stop 
-docker-compose start 
+sudo docker-compose stop 
+sudo docker-compose start 

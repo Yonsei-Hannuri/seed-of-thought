@@ -8,12 +8,12 @@ services:
     platform: linux/amd64
     container_name: nginx
     volumes:
-      - ${host_path_to_static}:/static
-      - ${host_path_to_ssl}:/etc/letsencrypt
+      - ${STATIC_FILE_ROOT}:/static
+      - ${HOST_PATH_TO_SSL}:/etc/letsencrypt
       - ./nginx:/etc/nginx/
     environment:
-      - FRONT_DOMAIN: ${FRONT_DOMAIN}
-      - API_DOMAIN: ${API_DOMAIN}
+      - FRONT_DOMAIN=${FRONT_DOMAIN}
+      - API_DOMAIN=${API_DOMAIN}
     command: ["nginx", "-g", "daemon off;"]
     ports:
       - 80:80
