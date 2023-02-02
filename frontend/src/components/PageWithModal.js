@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 
-export default function ({ main, modal, modalContainerStyle, modalBodyStyle }) {
+export default function PageWithModal({
+  main,
+  modal,
+  modalContainerStyle,
+  modalBodyStyle,
+}) {
   const [modalShow, setModalShow] = useState(false);
   const onToggleModal = () => {
     setModalShow(!modalShow);

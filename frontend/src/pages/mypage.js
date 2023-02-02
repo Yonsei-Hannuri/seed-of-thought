@@ -3,7 +3,6 @@ import DetgoriUpload from '../components/mypage/detgoriUpload/detgoriUpload';
 import ProfileColor from '../components/mypage/profileColor';
 import Detgori from '../components/mypage/detgori';
 import axios from 'axios';
-import address from '../config/address';
 import errorReport from '../modules/errorReport';
 import getCookieValue from '../modules/getCookieValue';
 import WordChart from '../components/wordChart/WordChart';
@@ -33,18 +32,18 @@ class Mypage extends Component {
       const [myPageData, seasonData, userWords] = await Promise.all([
         axios({
           method: 'GET',
-          url: address.back + 'mypageInfo',
+          url: process.env.REACT_APP_API_DOMAIN + 'mypageInfo',
           withCredentials: true,
         }),
         axios({
           method: 'GET',
-          url: address.back + 'season/',
+          url: process.env.REACT_APP_API_DOMAIN + 'season/',
           params: { current: true },
           withCredentials: true,
         }),
         axios({
           method: 'GET',
-          url: `${address.back}wordList/mypage/0`,
+          url: `${process.env.REACT_APP_API_DOMAIN}wordList/mypage/0`,
           withCredentials: true,
         }),
       ]);
@@ -68,7 +67,7 @@ class Mypage extends Component {
   getSeasonDetgori = (e) => {
     axios({
       method: 'GET',
-      url: address.back + 'mypageInfo',
+      url: process.env.REACT_APP_API_DOMAIN + 'mypageInfo',
       withCredentials: true,
       params: {
         seasonId: e.target.value,
@@ -92,7 +91,10 @@ class Mypage extends Component {
       axios({
         method: 'DELETE',
         url:
-          address.back + 'detgori/' + e.currentTarget.getAttribute('val') + '/',
+          process.env.REACT_APP_API_DOMAIN +
+          'detgori/' +
+          e.currentTarget.getAttribute('val') +
+          '/',
         withCredentials: true,
         headers: Header,
       }).then(() => {
@@ -136,7 +138,7 @@ class Mypage extends Component {
                 &nbsp;&nbsp;&nbsp;&nbsp; {this.state.userInfo.generation}기
               </h5>
               {this.state.userInfo.is_staff ? (
-                <a href={`${address.back}admin`}>
+                <a href={`${process.env.REACT_APP_API_DOMAIN}admin`}>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 임원진 페이지
                 </a>
               ) : (
@@ -185,7 +187,7 @@ class Mypage extends Component {
               }}
             />
             {this.state.showWordCloud && (
-              <WordCloud src={`${address.back}wordList/mypage/0`} />
+              <WordCloud src={`${process.env.REACT_APP_API_DOMAIN}wordList/mypage/0`} />
             )} */}
           </div>
         </div>

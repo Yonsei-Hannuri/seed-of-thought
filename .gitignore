@@ -1,8 +1,9 @@
 .DS_Store
 /ssl_key
-/dev
+/_dev
 
 
 
 dc-develop.yml
 develop.sh
+.env

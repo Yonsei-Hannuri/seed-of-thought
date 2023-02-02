@@ -1,9 +1,8 @@
 import axios from 'axios';
-import address from '../config/address.json';
 import getCookieValue from '../modules/getCookieValue';
 
 const client = axios.create({
-  baseURL: address.back,
+  baseURL: process.env.REACT_APP_API_DOMAIN,
   withCredentials: true,
 });
 

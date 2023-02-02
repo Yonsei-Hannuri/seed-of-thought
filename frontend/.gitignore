@@ -24,3 +24,6 @@ yarn-error.log*
 
 #disregard config folder
 src/config/*
+
+
+.env

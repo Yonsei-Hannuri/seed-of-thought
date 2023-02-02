@@ -1,5 +1,4 @@
 import SessionReadfile from '../components/session/sessionReadfile';
-import address from '../config/address.json';
 import PDFViewer from '../components/session/PDFViewer';
 import WordCloud from '../components/wordCloud/WordCloud';
 import useSession from '../hooks/session/useSession';
@@ -44,7 +43,7 @@ function Session() {
           panel={(detgoriId) => (
             <PDFViewer
               key={detgoriId}
-              src={`${address.back}uploads/detgori/${detgoriId}.pdf`}
+              src={`${process.env.REACT_APP_API_DOMAIN}uploads/detgori/${detgoriId}.pdf`}
             />
           )}
           options={(setDetgori) =>
@@ -65,7 +64,9 @@ function Session() {
         />
       )}
       {session && (
-        <WordCloud src={`${address.back}wordList/session/${session.id}`} />
+        <WordCloud
+          src={`${process.env.REACT_APP_API_DOMAIN}wordList/session/${session.id}`}
+        />
       )}
     </div>
   );

@@ -31,14 +31,7 @@ import google_auth_oauthlib.flow
 
 from lib.utils import filter_dict
 
-
-# load config data
-with open('./config/googleDrive/folderId.json') as json_file:
-    googleFolderId = json.load(json_file)
-
-with open('./config/address.json') as json_file:
-    address = json.load(json_file)
-
+address = {front: os.environ.get('FRONT_DOMAIN'), back: os.environ.get('BACK_ADDRESS')}
 
 ##SSL disregards in development environment
 if(settings.DEBUG==True):

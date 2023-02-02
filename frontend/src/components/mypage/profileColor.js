@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import address from '../../config/address.json';
 import getCookieValue from '../../modules/getCookieValue';
 
 class ProfileColor extends Component {
@@ -21,11 +20,14 @@ class ProfileColor extends Component {
     e.preventDefault();
     let formElement = e.target;
     let data = new FormData(formElement);
-    let request_url = address.back + 'profileColor/';
+    let request_url = process.env.REACT_APP_API_DOMAIN + 'profileColor/';
     const xhr = new XMLHttpRequest();
     xhr.open('POST', request_url);
     xhr.withCredentials = true;
-    xhr.setRequestHeader('X-CSRFToken', getCookieValue(document.cookie, 'csrftoken'));
+    xhr.setRequestHeader(
+      'X-CSRFToken',
+      getCookieValue(document.cookie, 'csrftoken'),
+    );
     xhr.onreadystatechange = () => {
       if (xhr.readyState === 4 && xhr.status === 200) {
         this.setState({ update: false });

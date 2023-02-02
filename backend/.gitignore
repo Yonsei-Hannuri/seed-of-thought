@@ -22,3 +22,6 @@ templates/admin/*
 backend/urls.py
 
 refresh.py
+
+.env
+_dev/

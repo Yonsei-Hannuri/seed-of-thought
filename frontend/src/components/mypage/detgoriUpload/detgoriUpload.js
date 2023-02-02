@@ -1,14 +1,13 @@
 import React, { Component } from 'react';
 import SessionOption from './sessionOption';
 import errorReport from '../../../modules/errorReport';
-import address from '../../../config/address.json';
 import getCookieValue from '../../../modules/getCookieValue';
 import Loading from '../../common/loading';
 
 class DetgoriUpload extends Component {
-  static defaultProps={
-    seasonInfo: { session: [] }
-  }
+  static defaultProps = {
+    seasonInfo: { session: [] },
+  };
   state = {
     opened: false,
     onUpload: null,
@@ -30,7 +29,7 @@ class DetgoriUpload extends Component {
     e.preventDefault();
     let formElement = e.target;
     let data = new FormData(formElement);
-    let request_url = address.back + 'detgori/';
+    let request_url = process.env.REACT_APP_API_DOMAIN + 'detgori/';
     const xhr = new XMLHttpRequest();
     xhr.open('POST', request_url);
     xhr.withCredentials = true;
@@ -51,15 +50,16 @@ class DetgoriUpload extends Component {
 
   render() {
     if (this.state.uploading) {
-      return (
-        <Loading/>
-      );
+      return <Loading />;
     }
 
     if (this.state.opened === true) {
-      const sessionOptions = this.props.seasonInfo.session.slice().reverse().map(
-        (sessionInfo, idx) => <SessionOption info={sessionInfo} key={idx} />,
-      );
+      const sessionOptions = this.props.seasonInfo.session
+        .slice()
+        .reverse()
+        .map((sessionInfo, idx) => (
+          <SessionOption info={sessionInfo} key={idx} />
+        ));
       return (
         <div className="border rounded mb-3">
           <div className="m-3 row " width="100%">

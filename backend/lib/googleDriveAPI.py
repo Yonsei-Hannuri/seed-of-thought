@@ -17,18 +17,15 @@ def getCreds():
     creds = None
     #The file token.json stores the user's access and refresh tokens, and is 
     #created automatically when the authorization flow completes for the first time.None
-    if os.path.exists('./config/googleDrive/token.json'):
-        creds = Credentials.from_authorized_user_file('./config/googleDrive/token.json', SCOPES)
+    if os.path.exists('./token.json'):
+        creds = Credentials.from_authorized_user_file('./token.json', SCOPES)
     #If there are no valid credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else: 
-            flow = InstalledAppFlow.from_client_secrets_file(
-                './config/googleDrive/credentials.json', SCOPES)
-            creds = flow.run_local_server(port=57893)
-        #Save the credentials for the next run
-        with open('./config/googleDrive/token.json', 'w') as token:
+            raise Exception("구글 드라이브 인증 중에서 에러가 발생했습니다. 구글 드라이브 토큰이 만료되었습니다. 개발자에게 대응을 요청하세요")
+        with open('./token.json', 'w') as token:
             token.write(creds.to_json())
 
     return creds

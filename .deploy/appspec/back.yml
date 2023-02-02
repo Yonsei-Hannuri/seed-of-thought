@@ -1,0 +1,14 @@
+version: 0.0
+os: linux
+files:
+  - source: /backend
+    destination: /home/hannuri/backend
+    overwrite: yes
+
+permissions:
+  - object: /
+    pattern: "**"
+
+hooks:
+  ApplicationStart:
+    - location: script.sh

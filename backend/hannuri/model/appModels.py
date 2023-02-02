@@ -47,7 +47,7 @@ class Season(models.Model):
             file_metadata = {
                 'name': '한누리 {}-{}'.format(self.year, self.semester),
                 'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [googleFolderId['root']]
+                'parents': [googleFolderId]
             }
             folder_ = drive_service.files().create(body=file_metadata, fields='id').execute()
             self.googleFolderId=folder_.get('id')

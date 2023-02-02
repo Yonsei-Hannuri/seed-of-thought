@@ -3,5 +3,5 @@ from lib import googleDriveAPI
 import requests
 import json
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
-with open('./config/googleDrive/folderId.json') as json_file:
-    googleFolderId = json.load(json_file)
+
+googleFolderId = os.environ.get('GOOGLE_DRIVE_ROOT_FOLDER')

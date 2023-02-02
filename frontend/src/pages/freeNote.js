@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import Page from '../components/freeNote/page';
-import address from '../config/address.json';
 import errorReport from '../modules/errorReport';
 import postRequest from '../api/postRequest';
-import { Link } from "react-router-dom";
+import { Link } from 'react-router-dom';
 
 class FreeNote extends Component {
   static defaultProps = {
@@ -20,7 +19,7 @@ class FreeNote extends Component {
   componentDidMount() {
     axios({
       method: 'GET',
-      url: address.back + 'freeNote/',
+      url: process.env.REACT_APP_API_DOMAIN + 'freeNote/',
       params: { recentNotePage: true },
       withCredentials: true,
     })
@@ -38,7 +37,7 @@ class FreeNote extends Component {
   getInfoAndPageFlip = (flip) => {
     axios({
       method: 'GET',
-      url: address.back + 'freeNote/',
+      url: process.env.REACT_APP_API_DOMAIN + 'freeNote/',
       params: { notePage: this.state.page + flip },
       withCredentials: true,
     })
@@ -100,7 +99,11 @@ class FreeNote extends Component {
           ''
         )}
         <Link to="/metaspace" className=" float-end mx-3">
-            <span style={{color: "tomato", fontSize: "x-large", fontWeight:"bold"}}>X</span>
+          <span
+            style={{ color: 'tomato', fontSize: 'x-large', fontWeight: 'bold' }}
+          >
+            X
+          </span>
         </Link>
         <Page
           info={this.state.notes}

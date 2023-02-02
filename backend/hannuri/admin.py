@@ -4,8 +4,8 @@ from lib import googleDriveAPI, utils
 import json
 from collections import defaultdict
 import os
-with open('./config/googleDrive/folderId.json') as json_file:
-    googleFolderId = json.load(json_file)
+
+googleFolderId = os.environ.get('GOOGLE_DRIVE_ROOT_FOLDER')
 
 class SeasonAdmin(admin.ModelAdmin):
     fields = ('is_current','year', 'semester', 'title', 'leader', 'sessioner', 'socializer')
@@ -87,19 +87,19 @@ class UserAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         if obj.is_active == True and not(obj.permissionId):
-            permissionId = googleDriveAPI.registerReader(obj.email, googleFolderId['root'])
+            permissionId = googleDriveAPI.registerReader(obj.email, googleFolderId)
             obj.permissionId = permissionId
         elif obj.is_active == False and obj.permissionId:
-            googleDriveAPI.deleteMember(obj.permissionId, googleFolderId['root'])
+            googleDriveAPI.deleteMember(obj.permissionId, googleFolderId)
             obj.permissionId = ''
 
         if obj.is_staff == True and not(obj.writerPermissioned):  
-            googleDriveAPI.registerWriter(obj.email, googleFolderId['root'])
+            googleDriveAPI.registerWriter(obj.email, googleFolderId)
             obj.writerPermissioned = True
 
         elif obj.is_staff == False and obj.writerPermissioned:
-            googleDriveAPI.deleteMember(obj.permissionId, googleFolderId['root'])
-            permissionId = googleDriveAPI.registerReader(obj.email, googleFolderId['root'])
+            googleDriveAPI.deleteMember(obj.permissionId, googleFolderId)
+            permissionId = googleDriveAPI.registerReader(obj.email, googleFolderId)
             obj.permissionId = permissionId
             obj.writerPermissioned = False
 

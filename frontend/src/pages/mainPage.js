@@ -3,7 +3,6 @@ import SessionBanner from '../components/main/sessionBanner';
 import NotificationBox from '../components/main/notificationBox';
 import FolderUI from '../components/main/folderUI/folderUI';
 import errorReport from '../modules/errorReport';
-import address from '../config/address.json';
 import axios from 'axios';
 
 class MainPage extends Component {
@@ -19,23 +18,31 @@ class MainPage extends Component {
   };
 
   componentDidMount() {
-    (async () => { 
+    (async () => {
       try {
         const [notificationData, seasonData] = await Promise.all([
-          axios({ method: 'GET',
-                  url: address.back + 'notification/',
-                  withCredentials: true }),
-          axios({ method: 'GET',
-                  url: address.back + 'season/?current=True',
-                  withCredentials: true })
+          axios({
+            method: 'GET',
+            url: process.env.REACT_APP_API_DOMAIN + 'notification/',
+            withCredentials: true,
+          }),
+          axios({
+            method: 'GET',
+            url: process.env.REACT_APP_API_DOMAIN + 'season/?current=True',
+            withCredentials: true,
+          }),
         ]);
         this.setState({
-          notifications: notificationData.data.length > 0 ? 
-            notificationData.data : this.state.notifications,
-          sessions: seasonData.data[0].session.length > 0 ? 
-            seasonData.data[0].session : this.state.sessions,
-          loaded: true
-        })
+          notifications:
+            notificationData.data.length > 0
+              ? notificationData.data
+              : this.state.notifications,
+          sessions:
+            seasonData.data[0].session.length > 0
+              ? seasonData.data[0].session
+              : this.state.sessions,
+          loaded: true,
+        });
       } catch (e) {
         this.setState({ ajaxError: true });
         errorReport(e, 'mainPage');
@@ -50,19 +57,25 @@ class MainPage extends Component {
     if (this.state.loaded === true) {
       return (
         <div className={this.props.active === true ? '' : 'blank'}>
-          <NotificationBox notifications={this.state.notifications}/>
-          <SessionBanner recentSession={this.state.sessions[this.state.sessions.length-1]}>
+          <NotificationBox notifications={this.state.notifications} />
+          <SessionBanner
+            recentSession={this.state.sessions[this.state.sessions.length - 1]}
+          >
             <button
               type="button"
               className="btn btn-light border btn-lg px-4 gap-3"
               onClick={() => {
-                this.props.history.push({pathname: '/session/?sessionID=' + this.state.sessions[this.state.sessions.length-1].id})
+                this.props.history.push({
+                  pathname:
+                    '/session/?sessionID=' +
+                    this.state.sessions[this.state.sessions.length - 1].id,
+                });
               }}
             >
-            세션 입장하기
+              세션 입장하기
             </button>
           </SessionBanner>
-          <FolderUI seasonSessionInfos={this.state.sessions}/>
+          <FolderUI seasonSessionInfos={this.state.sessions} />
         </div>
       );
     }

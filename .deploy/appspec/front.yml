@@ -1,0 +1,10 @@
+version: 0.0
+os: linux
+files:
+  - source: /build
+    destination: /home/hannuri/static/frontend
+    overwrite: yes
+
+permissions:
+  - object: /
+    pattern: "**"

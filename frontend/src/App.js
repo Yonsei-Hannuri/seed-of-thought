@@ -8,8 +8,6 @@ import LoginPage from './pages/loginPage';
 import HeaderNav from './components/headerNav';
 import Footer from './components/footer';
 import getCookieValue from './modules/getCookieValue';
-import address from './config/address.json';
-
 
 class App extends Component {
   render() {
@@ -22,62 +20,72 @@ class App extends Component {
       );
     }
     return (
-        <div className="container">
+      <div className="container">
         <Router>
           <Switch>
-              <Route path="/session" component={Session}/>
-              <Route>
-                  <HeaderNav
-                    defaultLinkState={'/' + window.location.pathname.split("/")[1]}
-                    links={(link, onNavClick)=>{
-                      return(
-                        <>
-                          <li className="nav-item">
-                            <button
-                              name="main"
-                              className={'nav-link ' + (link === "/" ? 'active' : '')}
-                              onClick={()=>onNavClick("/")}
-                            >
-                              메인
-                            </button>
-                          </li>
-                          <li className="nav-item">
-                            <button
-                              name="metaspace"
-                              className={'nav-link ' + (link === "/metaspace" ? 'active' : '')}
-                              onClick={()=>onNavClick("/metaspace")}
-                            >
-                              메타
-                            </button>
-                          </li>
-                          <li className="nav-item">
-                            <button
-                              name="mypage"
-                              className={'nav-link ' + (link === "/mypage" ? 'active' : '')}
-                              onClick={()=>onNavClick("/mypage")}
-                            >
-                              마이페이지
-                            </button>
-                          </li>
-                          <li className="nav-item">
-                            <a href={address.back + 'logout/'} className="nav-link">
-                              로그아웃
-                            </a>
-                          </li>
+            <Route path="/session" component={Session} />
+            <Route>
+              <HeaderNav
+                defaultLinkState={'/' + window.location.pathname.split('/')[1]}
+                links={(link, onNavClick) => {
+                  return (
+                    <>
+                      <li className="nav-item">
+                        <button
+                          name="main"
+                          className={
+                            'nav-link ' + (link === '/' ? 'active' : '')
+                          }
+                          onClick={() => onNavClick('/')}
+                        >
+                          메인
+                        </button>
+                      </li>
+                      <li className="nav-item">
+                        <button
+                          name="metaspace"
+                          className={
+                            'nav-link ' +
+                            (link === '/metaspace' ? 'active' : '')
+                          }
+                          onClick={() => onNavClick('/metaspace')}
+                        >
+                          메타
+                        </button>
+                      </li>
+                      <li className="nav-item">
+                        <button
+                          name="mypage"
+                          className={
+                            'nav-link ' + (link === '/mypage' ? 'active' : '')
+                          }
+                          onClick={() => onNavClick('/mypage')}
+                        >
+                          마이페이지
+                        </button>
+                      </li>
+                      <li className="nav-item">
+                        <a
+                          href={process.env.REACT_APP_API_DOMAIN + 'logout/'}
+                          className="nav-link"
+                        >
+                          로그아웃
+                        </a>
+                      </li>
                     </>
-                      )
-                    }}
-                  />
-                  <Switch>
-                    <Route exact path="/" component={MainPage}/>
-                    <Route exact path="/metaspace" component={MetaSpace}/>
-                    <Route exact path="/mypage" component={Mypage}/>
-                  </Switch>
-              </Route>
-            </Switch>
-          </Router>
-          <Footer />
-        </div>
+                  );
+                }}
+              />
+              <Switch>
+                <Route exact path="/" component={MainPage} />
+                <Route exact path="/metaspace" component={MetaSpace} />
+                <Route exact path="/mypage" component={Mypage} />
+              </Switch>
+            </Route>
+          </Switch>
+        </Router>
+        <Footer />
+      </div>
     );
   }
 }

@@ -1,6 +1,6 @@
-version: '3'
+version: "3"
 
-services: 
+services:
   nginx:
     build:
       context: .
@@ -8,16 +8,19 @@ services:
     platform: linux/amd64
     container_name: nginx
     volumes:
-      - .:/hannuri     
-      - ./nginx:/etc/nginx/
+      - ${host_path_to_static}:/static
       - ${host_path_to_ssl}:/etc/letsencrypt
+      - ./nginx:/etc/nginx/
+    environment:
+      - FRONT_DOMAIN: ${FRONT_DOMAIN}
+      - BACK_DOMAIN: ${BACK_DOMAIN}
     command: ["nginx", "-g", "daemon off;"]
     ports:
       - 80:80
       - 443:443
     links:
       - backend:backend
-  
+
   backend:
     build:
       context: .
@@ -26,6 +29,6 @@ services:
     container_name: backend
     volumes:
       - ./backend:/backend
-    command : bash -c "cd /backend && gunicorn -w 3 --bind 0:2102 backend.wsgi"
+    command: bash -c "cd /backend && gunicorn -w 3 --bind 0:2102 backend.wsgi"
     ports:
       - 2102:2102

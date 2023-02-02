@@ -1,20 +1,19 @@
 import axios from 'axios';
-import address from '../config/address.json';
-import getCookieValue from './getCookieValue'
+import getCookieValue from './getCookieValue';
 
 function errorReport(e, from) {
-  const csrfToken = getCookieValue(document.cookie, 'csrftoken')
+  const csrfToken = getCookieValue(document.cookie, 'csrftoken');
   axios({
     method: 'POST',
-    url: address.back + 'frontError/',
+    url: process.env.REACT_APP_API_DOMAIN + 'frontError/',
     withCredentials: true,
     data: {
       errorMessage: e,
       from: from,
     },
-    headers: { 
+    headers: {
       'Content-Type': 'Application/json',
-      'X-CSRFToken': csrfToken 
+      'X-CSRFToken': csrfToken,
     },
   });
 }
