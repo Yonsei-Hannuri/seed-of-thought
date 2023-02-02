@@ -13,7 +13,7 @@ services:
       - ./nginx:/etc/nginx/
     environment:
       - FRONT_DOMAIN: ${FRONT_DOMAIN}
-      - BACK_DOMAIN: ${BACK_DOMAIN}
+      - API_DOMAIN: ${API_DOMAIN}
     command: ["nginx", "-g", "daemon off;"]
     ports:
       - 80:80

@@ -29,6 +29,8 @@ jobs:
         with:
           envkey_host_path_to_ssl: ${{ secrets.HOST_PATH_TO_SSL }}
           envkey_host_path_to_static: ${{ secrets.STATIC_FILE_ROOT }}
+          envkey_FRONT_DOMAIN: ${{ secrets.FRONT_DOMAIN }}
+          envkey_API_DOMAIN: ${{ secrets.API_DOMAIN }}
           directory: ./
           file_name: .env
           fail_on_empty: true
