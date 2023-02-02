@@ -1,6 +1,9 @@
 name: CI-CD-Server
 
 on:
+  workflow_dispatch:
+    branches:
+      - master
   push:
     paths:
       - "nginx/**"

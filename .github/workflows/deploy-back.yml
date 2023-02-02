@@ -1,6 +1,9 @@
 name: CI-CD-Backend
 
 on:
+  workflow_dispatch:
+    branches:
+      - master
   push:
     paths:
       - "backend/**"

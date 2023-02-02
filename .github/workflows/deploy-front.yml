@@ -1,6 +1,9 @@
 name: CI-CD-Frontend
 
 on:
+  workflow_dispatch:
+    branches:
+      - master
   push:
     paths:
       - "frontend/**"
