@@ -3,7 +3,8 @@ os: linux
 files:
   - source: /backend
     destination: /home/hannuri/backend
-    overwrite: yes
+
+file_exists_behavior: RETAIN
 
 permissions:
   - object: /

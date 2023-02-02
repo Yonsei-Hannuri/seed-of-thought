@@ -21,11 +21,11 @@ os: linux
 files:
   - source: /nginx
     destination: /home/hannuri/nginx
-    overwrite: yes
 
   - source: docker-compose.yml
     destination: /home/hannuri
-    overwrite: yes
+
+file_exists_behavior: RETAIN
 
 permissions:
   - object: /
