@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: ./nginx/Dockerfile
     platform: linux/amd64
-    container_name: nginx
+    container_name: hannuri-nginx
     volumes:
       - ${STATIC_FILE_ROOT}:/static
       - ${HOST_PATH_TO_SSL}:/etc/letsencrypt
@@ -26,8 +26,11 @@ services:
       context: .
       dockerfile: ./backend/Dockerfile
     platform: linux/amd64
-    container_name: backend
+    container_name: hannuri-backend
     volumes:
+      - ${STATIC_FILE_ROOT}/db.sqlite3:/backend/db.sqlite3
+      - ${STATIC_FILE_ROOT}/uploads:/backend/uploads
+      _ ${SECRET_FILE_ROOT}:/backend/secret
       - ./backend:/backend
     command: bash -c "cd /backend && gunicorn -w 3 --bind 0:2102 backend.wsgi"
     ports:

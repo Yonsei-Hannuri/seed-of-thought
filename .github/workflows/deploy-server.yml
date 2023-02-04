@@ -29,6 +29,7 @@ jobs:
         with:
           envkey_HOST_PATH_TO_SSL: ${{ secrets.HOST_PATH_TO_SSL }}
           envkey_STATIC_FILE_ROOT: ${{ secrets.STATIC_FILE_ROOT }}
+          envkey_SECRET_FILE_ROOT: ${{ secrets.SECRET_FILE_ROOT }}
           envkey_FRONT_DOMAIN: ${{ secrets.FRONT_DOMAIN }}
           envkey_API_DOMAIN: ${{ secrets.API_DOMAIN }}
           directory: ./
@@ -38,6 +39,7 @@ jobs:
       - name: Make zip soure code
         run: |
           cp ./.deploy/appspec/server.yml ./appspec.yml
+          cp ./.deploy/docker-compose.yml ./docker-compose.yml
           cp ./.deploy/script/application-restart.sh ./script.sh
           zip -r ./deploy-server.zip ./nginx docker-compose.yml appspec.yml .env script.sh
         shell: bash
