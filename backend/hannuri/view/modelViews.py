@@ -1,4 +1,4 @@
-from hannuri.views.viewDependencies import *
+from ._dependencies import *
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.order_by('-id')

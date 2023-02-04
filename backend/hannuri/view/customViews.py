@@ -1,36 +1,35 @@
-from hannuri.views.viewDependencies import *
+from ._dependencies import *
 
 def Login(request):
     #google 에서 code 받고 그 code로 token을 받아서 그 token에 해당하는 email 받기
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        './config/googleDrive/client_secret.json',
+        './secret/client_secret.json',
         scopes = 'openid https://www.googleapis.com/auth/userinfo.email'
         )
-    flow.redirect_uri = address['back'] + '/login'
+    flow.redirect_uri = settings.ENV('API_DOMAIN') + '/login'
     flow.fetch_token(code=request.GET.get('code'))
     credentials = flow.credentials
     token = credentials.token
     response = requests.get('https://www.googleapis.com/oauth2/v1/userinfo?access_token={}'.format(token))
     email = response.json()['email']
-
     #받은 이메일을 통해서 로그인 시켜주기
     try: 
         user = User.objects.get(email=email)
         login(request, user)
-        response = redirect(address['front'])
-        response.set_cookie('isLogin', 'true', domain=address['common'], max_age=60*60*4)
+        response = redirect(settings.ENV('FRONT_DOMAIN'))
+        response.set_cookie('isLogin', 'true', domain=settings.ENV('DOMAIN'), max_age=60*60*4)
         return response
     except:
-        return redirect(address['front']+'?login=error')
-    return redirect(address['front']+'?login=error')
+        return redirect(settings.ENV('FRONT_DOMAIN')+'?login=error')
+    return redirect(settings.ENV('FRONT_DOMAIN')+'?login=error')
 
 def Signin(request):
     #google 에서 code 받고 그 code로 token을 받아서 그 token에 해당하는 email 받기
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        './config/googleDrive/client_secret.json',
+        './secret/client_secret.json',
         scopes = 'openid https://www.googleapis.com/auth/userinfo.email'
         )
-    flow.redirect_uri = address['back'] + '/signin'
+    flow.redirect_uri = settings.ENV('API_DOMAIN') + '/signin'
     flow.fetch_token(code=request.GET.get('code'))
     credentials = flow.credentials
     token = credentials.token
@@ -49,15 +48,15 @@ def Signin(request):
         user.generation = generation
         user.save()
 
-        return redirect(address['front']+'?type=signinSuccess')
+        return redirect(settings.ENV('FRONT_DOMAIN')+'?type=signinSuccess')
         
     except:
-        return redirect(address['front']+'?type=signinError')
+        return redirect(settings.ENV('FRONT_DOMAIN')+'?type=signinError')
 
 def Logout(request):
     logout(request)
-    response = redirect(address['front'])
-    response.set_cookie('isLogin', 'false', domain=address['common'])
+    response = redirect(settings.ENV('FRONT_DOMAIN'))
+    response.set_cookie('isLogin', 'false', domain=settings.ENV('DOMAIN'))
     return response
 
 def ProfileColor(request):

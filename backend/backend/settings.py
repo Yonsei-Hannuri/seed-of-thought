@@ -1,5 +1,20 @@
-DEBUG = False
-STATIC_DIR = os.environ.get('STATIC_FILE_ROOT')
+from pathlib import Path
+import os
+import environ
+
+ENV = environ.Env(
+    DEBUG=(bool, False)
+)
+BASE_DIR = Path(__file__).resolve().parent.parent
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+
+SECRET_KEY = ENV('DJANGO_SECRET_KEY')
+# SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = ENV('DEBUG')
+if(DEBUG==True):
+    ALLOWED_HOSTS = ["*"]
+    ##SSL disregards in development environment
+    os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
 # Application definition
 INSTALLED_APPS = [
@@ -11,8 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'hannuri.apps.HannuriConfig',
-    'corsheaders', #CORS 관련
-    #'sslserver', #임시 https
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
@@ -54,7 +68,7 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': STATIC_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
@@ -96,10 +110,11 @@ USE_TZ = False
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
-
-MEDIA_ROOT = os.path.join(STATIC_DIR, "uploads")
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 STATIC_URL = "/static/"
+
+MEDIA_ROOT = os.path.join(BASE_DIR, "uploads")
 
 MEDIA_URL = "/uploads/"
 
@@ -112,11 +127,22 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
 		'rest_framework.renderers.JSONRenderer',
     )
-
 }
+
 
 SESSION_COOKIE_AGE = 60 * 60 * 4
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOWED_ORIGINS = [
+    ENV("FRONT_DOMAIN"),
+]
+
+CSRF_COOKIE_DOMAIN = ENV("DOMAIN")
+
+CSRF_TRUSTED_ORIGINS = [
+    ENV("FRONT_DOMAIN"),
+    ENV("API_DOMAIN"),
+]

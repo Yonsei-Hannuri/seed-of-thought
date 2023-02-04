@@ -4,8 +4,7 @@ from lib import googleDriveAPI, utils
 import json
 from collections import defaultdict
 import os
-
-googleFolderId = os.environ.get('GOOGLE_DRIVE_ROOT_FOLDER')
+from django.conf import settings
 
 class SeasonAdmin(admin.ModelAdmin):
     fields = ('is_current','year', 'semester', 'title', 'leader', 'sessioner', 'socializer')
@@ -54,8 +53,6 @@ class SessionAdmin(admin.ModelAdmin):
 
             obj.season = Season.objects.get(is_current=True)
 
-        #googleDriveAPI.registerWriter(request.user.email, obj.googleFolderId)
-
         super().save_model(request, obj, form, change)   
 
     def save_formset(self, request, form, formset, change):
@@ -86,6 +83,7 @@ class UserAdmin(admin.ModelAdmin):
     fields = ('name', 'generation', 'email', 'is_active','is_staff', 'groups')
 
     def save_model(self, request, obj, form, change):
+        googleFolderId = settings.ENV('GOOGLE_DRIVE_ROOT_FOLDER')
         if obj.is_active == True and not(obj.permissionId):
             permissionId = googleDriveAPI.registerReader(obj.email, googleFolderId)
             obj.permissionId = permissionId

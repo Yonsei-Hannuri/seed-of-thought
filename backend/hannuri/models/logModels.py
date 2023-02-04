@@ -1,5 +1,5 @@
-from hannuri.model.dependencies import *
-from hannuri.model.appModels import *
+from ._dependencies import *
+from .appModels import *
 
 class DetgoriReadTime(models.Model):
     reader = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="읽은 사람")

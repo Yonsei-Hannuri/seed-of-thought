@@ -1,4 +1,4 @@
-from hannuri.model.dependencies import *
+from ._dependencies import *
 
 class UserManager(BaseUserManager):
     def create_user(self, email, name, password=None):
@@ -47,7 +47,7 @@ class Season(models.Model):
             file_metadata = {
                 'name': '한누리 {}-{}'.format(self.year, self.semester),
                 'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [googleFolderId]
+                'parents': [settings.ENV('GOOGLE_DRIVE_ROOT_FOLDER')]
             }
             folder_ = drive_service.files().create(body=file_metadata, fields='id').execute()
             self.googleFolderId=folder_.get('id')
