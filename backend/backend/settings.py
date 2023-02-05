@@ -8,6 +8,7 @@ ENV = environ.Env(
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
+ALLOWED_HOSTS = [ENV('FRONT_DOMAIN'), ENV('API_DOMAIN')]
 SECRET_KEY = ENV('DJANGO_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENV('DEBUG')
