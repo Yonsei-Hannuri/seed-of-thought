@@ -28,10 +28,10 @@ services:
     platform: linux/amd64
     container_name: hannuri-backend
     volumes:
-      - ${STATIC_FILE_ROOT}/db.sqlite3:/backend/db.sqlite3
+      - ${DB_ROOT}/db.sqlite3:/backend/db.sqlite3
       - ${STATIC_FILE_ROOT}/uploads:/backend/uploads
-      _ ${SECRET_FILE_ROOT}:/backend/secret
+      - ${SECRET_FILE_ROOT}:/backend/secret
       - ./backend:/backend
-    command: bash -c "cd /backend && gunicorn -w 3 --bind 0:2102 backend.wsgi"
+    command: bash -c "cd /backend && python3 manage.py migrate && gunicorn -w 3 --bind 0:2102 backend.wsgi"
     ports:
       - 2102:2102

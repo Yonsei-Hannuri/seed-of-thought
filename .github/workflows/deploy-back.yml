@@ -29,8 +29,8 @@ jobs:
         with:
           envkey_DEBUG: False
           envkey_GOOGLE_DRIVE_ROOT_FOLDER: ${{ secrets.GOOGLE_DRIVE_ROOT_FOLDER }}
-          envkey_FRONT_DOMAIN: ${{ secrets.FRONT_DOMAIN }}
-          envkey_API_DOMAIN: ${{ secrets.API_DOMAIN }}
+          envkey_FRONT_DOMAIN: https://${{ secrets.FRONT_DOMAIN }}
+          envkey_API_DOMAIN: https://${{ secrets.API_DOMAIN }}
           envkey_DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           envkey_DOMAIN: ${{ secrets.DOMAIN }}
           directory: ./backend
