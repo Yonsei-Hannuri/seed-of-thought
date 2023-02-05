@@ -33,7 +33,7 @@ jobs:
           envkey_FRONT_DOMAIN: ${{ secrets.FRONT_DOMAIN }}
           envkey_API_DOMAIN: ${{ secrets.API_DOMAIN }}
           envkey_DB_ROOT: ${{ secrets.DB_ROOT }}
-          envkey_DB_ROOT: ${{ secrets.DOMAIN }}
+          envkey_DOMAIN: ${{ secrets.DOMAIN }}
           directory: ./
           file_name: .env
           fail_on_empty: true
