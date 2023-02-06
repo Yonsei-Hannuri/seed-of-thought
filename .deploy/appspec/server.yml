@@ -3,24 +3,6 @@ os: linux
 files:
   - source: /nginx
     destination: /home/hannuri/nginx
-    overwrite: yes
-
-  - source: docker-compose.yml
-    destination: /home/hannuri
-    overwrite: yes
-
-permissions:
-  - object: /
-    pattern: "**"
-
-hooks:
-  ApplicationStart:
-    - location: script.sh
-version: 0.0
-os: linux
-files:
-  - source: /nginx
-    destination: /home/hannuri/nginx
 
   - source: docker-compose.yml
     destination: /home/hannuri
