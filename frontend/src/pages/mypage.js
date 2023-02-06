@@ -32,18 +32,18 @@ class Mypage extends Component {
       const [myPageData, seasonData, userWords] = await Promise.all([
         axios({
           method: 'GET',
-          url: process.env.REACT_APP_API_DOMAIN + 'mypageInfo',
+          url: process.env.REACT_APP_API_URL + 'mypageInfo',
           withCredentials: true,
         }),
         axios({
           method: 'GET',
-          url: process.env.REACT_APP_API_DOMAIN + 'season/',
+          url: process.env.REACT_APP_API_URL + 'season/',
           params: { current: true },
           withCredentials: true,
         }),
         axios({
           method: 'GET',
-          url: `${process.env.REACT_APP_API_DOMAIN}wordList/mypage/0`,
+          url: `${process.env.REACT_APP_API_URL}wordList/mypage/0`,
           withCredentials: true,
         }),
       ]);
@@ -67,7 +67,7 @@ class Mypage extends Component {
   getSeasonDetgori = (e) => {
     axios({
       method: 'GET',
-      url: process.env.REACT_APP_API_DOMAIN + 'mypageInfo',
+      url: process.env.REACT_APP_API_URL + 'mypageInfo',
       withCredentials: true,
       params: {
         seasonId: e.target.value,
@@ -91,7 +91,7 @@ class Mypage extends Component {
       axios({
         method: 'DELETE',
         url:
-          process.env.REACT_APP_API_DOMAIN +
+          process.env.REACT_APP_API_URL +
           'detgori/' +
           e.currentTarget.getAttribute('val') +
           '/',
@@ -138,7 +138,7 @@ class Mypage extends Component {
                 &nbsp;&nbsp;&nbsp;&nbsp; {this.state.userInfo.generation}기
               </h5>
               {this.state.userInfo.is_staff ? (
-                <a href={`${process.env.REACT_APP_API_DOMAIN}admin`}>
+                <a href={`${process.env.REACT_APP_API_URL}admin`}>
                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 임원진 페이지
                 </a>
               ) : (
@@ -187,7 +187,7 @@ class Mypage extends Component {
               }}
             />
             {this.state.showWordCloud && (
-              <WordCloud src={`${process.env.REACT_APP_API_DOMAIN}wordList/mypage/0`} />
+              <WordCloud src={`${process.env.REACT_APP_API_URL}wordList/mypage/0`} />
             )} */}
           </div>
         </div>

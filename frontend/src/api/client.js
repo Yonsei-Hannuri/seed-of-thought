@@ -2,7 +2,7 @@ import axios from 'axios';
 import getCookieValue from '../modules/getCookieValue';
 
 const client = axios.create({
-  baseURL: process.env.REACT_APP_API_DOMAIN,
+  baseURL: process.env.REACT_APP_API_URL,
   withCredentials: true,
 });
 

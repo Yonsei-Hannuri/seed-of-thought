@@ -5,7 +5,7 @@ function errorReport(e, from) {
   const csrfToken = getCookieValue(document.cookie, 'csrftoken');
   axios({
     method: 'POST',
-    url: process.env.REACT_APP_API_DOMAIN + 'frontError/',
+    url: process.env.REACT_APP_API_URL + 'frontError/',
     withCredentials: true,
     data: {
       errorMessage: e,

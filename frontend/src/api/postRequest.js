@@ -6,7 +6,7 @@ export default function postRequest(e, destination, callback) {
     e.preventDefault();
     let formElement = e.target;
     let data = new FormData(formElement);
-    let request_url = process.env.REACT_APP_API_DOMAIN + destination;
+    let request_url = process.env.REACT_APP_API_URL + destination;
     const xhr = new XMLHttpRequest();
     xhr.open('POST', request_url);
     xhr.withCredentials = true;

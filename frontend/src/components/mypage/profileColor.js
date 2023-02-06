@@ -20,7 +20,7 @@ class ProfileColor extends Component {
     e.preventDefault();
     let formElement = e.target;
     let data = new FormData(formElement);
-    let request_url = process.env.REACT_APP_API_DOMAIN + 'profileColor/';
+    let request_url = process.env.REACT_APP_API_URL + 'profileColor/';
     const xhr = new XMLHttpRequest();
     xhr.open('POST', request_url);
     xhr.withCredentials = true;

@@ -43,7 +43,7 @@ function Session() {
           panel={(detgoriId) => (
             <PDFViewer
               key={detgoriId}
-              src={`${process.env.REACT_APP_API_DOMAIN}uploads/detgori/${detgoriId}.pdf`}
+              src={`${process.env.REACT_APP_API_URL}uploads/detgori/${detgoriId}.pdf`}
             />
           )}
           options={(setDetgori) =>
@@ -65,7 +65,7 @@ function Session() {
       )}
       {session && (
         <WordCloud
-          src={`${process.env.REACT_APP_API_DOMAIN}wordList/session/${session.id}`}
+          src={`${process.env.REACT_APP_API_URL}wordList/session/${session.id}`}
         />
       )}
     </div>

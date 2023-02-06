@@ -23,12 +23,12 @@ class MainPage extends Component {
         const [notificationData, seasonData] = await Promise.all([
           axios({
             method: 'GET',
-            url: process.env.REACT_APP_API_DOMAIN + 'notification/',
+            url: process.env.REACT_APP_API_URL + 'notification/',
             withCredentials: true,
           }),
           axios({
             method: 'GET',
-            url: process.env.REACT_APP_API_DOMAIN + 'season/?current=True',
+            url: process.env.REACT_APP_API_URL + 'season/?current=True',
             withCredentials: true,
           }),
         ]);

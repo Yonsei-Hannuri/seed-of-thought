@@ -19,7 +19,7 @@ class FreeNote extends Component {
   componentDidMount() {
     axios({
       method: 'GET',
-      url: process.env.REACT_APP_API_DOMAIN + 'freeNote/',
+      url: process.env.REACT_APP_API_URL + 'freeNote/',
       params: { recentNotePage: true },
       withCredentials: true,
     })
@@ -37,7 +37,7 @@ class FreeNote extends Component {
   getInfoAndPageFlip = (flip) => {
     axios({
       method: 'GET',
-      url: process.env.REACT_APP_API_DOMAIN + 'freeNote/',
+      url: process.env.REACT_APP_API_URL + 'freeNote/',
       params: { notePage: this.state.page + flip },
       withCredentials: true,
     })
