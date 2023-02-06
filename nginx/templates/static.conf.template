@@ -38,7 +38,7 @@ server {
   } 
   location /uploads/ {
        add_header Access-Control-Allow-Origin https://${FRONT_DOMAIN}; 
-       root /static/uploads;
+       root /static;
        autoindex off;
   }
 
