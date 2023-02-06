@@ -10,10 +10,16 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 ALLOWED_HOSTS = [ENV('FRONT_DOMAIN'), ENV('API_DOMAIN')]
 SECRET_KEY = ENV('DJANGO_SECRET_KEY')
+
+FRONT_URL = 'https://' + ENV('FRONT_DOMAIN');
+API_URL = 'https://' + ENV('API_DOMAIN');
+
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENV('DEBUG')
 if(DEBUG==True):
     ALLOWED_HOSTS = ["*"]
+    FRONT_URL = 'http://' + ENV('FRONT_DOMAIN');
+    API_URL = 'http://' + ENV('API_DOMAIN');
     ##SSL disregards in development environment
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
@@ -138,12 +144,12 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOWED_ORIGINS = [
-    ENV("FRONT_DOMAIN"),
+    FRONT_URL
 ]
 
 CSRF_COOKIE_DOMAIN = ENV("DOMAIN")
 
 CSRF_TRUSTED_ORIGINS = [
-    ENV("FRONT_DOMAIN"),
-    ENV("API_DOMAIN"),
+    FRONT_URL,
+    API_URL
 ]

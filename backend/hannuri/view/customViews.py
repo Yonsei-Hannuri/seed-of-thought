@@ -6,7 +6,7 @@ def Login(request):
         './secret/client_secret.json',
         scopes = 'openid https://www.googleapis.com/auth/userinfo.email'
         )
-    flow.redirect_uri = settings.ENV('API_DOMAIN') + '/login'
+    flow.redirect_uri = settings.API_URL + '/login'
     flow.fetch_token(code=request.GET.get('code'))
     credentials = flow.credentials
     token = credentials.token
@@ -16,12 +16,12 @@ def Login(request):
     try: 
         user = User.objects.get(email=email)
         login(request, user)
-        response = redirect(settings.ENV('FRONT_DOMAIN'))
+        response = redirect(settings.FRONT_URL)
         response.set_cookie('isLogin', 'true', domain=settings.ENV('DOMAIN'), max_age=60*60*4)
         return response
     except:
-        return redirect(settings.ENV('FRONT_DOMAIN')+'?login=error')
-    return redirect(settings.ENV('FRONT_DOMAIN')+'?login=error')
+        return redirect(settings.FRONT_URL+'?login=error')
+    return redirect(settings.FRONT_URL+'?login=error')
 
 def Signin(request):
     #google 에서 code 받고 그 code로 token을 받아서 그 token에 해당하는 email 받기
@@ -29,7 +29,7 @@ def Signin(request):
         './secret/client_secret.json',
         scopes = 'openid https://www.googleapis.com/auth/userinfo.email'
         )
-    flow.redirect_uri = settings.ENV('API_DOMAIN') + '/signin'
+    flow.redirect_uri = settings.API_URL + '/signin'
     flow.fetch_token(code=request.GET.get('code'))
     credentials = flow.credentials
     token = credentials.token
@@ -48,14 +48,14 @@ def Signin(request):
         user.generation = generation
         user.save()
 
-        return redirect(settings.ENV('FRONT_DOMAIN')+'?type=signinSuccess')
+        return redirect(settings.FRONT_URL+'?type=signinSuccess')
         
     except:
-        return redirect(settings.ENV('FRONT_DOMAIN')+'?type=signinError')
+        return redirect(settings.FRONT_URL+'?type=signinError')
 
 def Logout(request):
     logout(request)
-    response = redirect(settings.ENV('FRONT_DOMAIN'))
+    response = redirect(settings.FRONT_URL)
     response.set_cookie('isLogin', 'false', domain=settings.ENV('DOMAIN'))
     return response
 
