@@ -104,22 +104,18 @@ def MypageInfo(request):
     if not(request.user):
         return HttpResponse('Unauthorized', status=401)
 
-
-    try:
-        season_id =  request.GET['seasonId'] 
-    except:
-        season_id = None
-    if season_id:
-        requested_season = Season.objects.get(id=season_id)
-        season_detgori_infos = my_detgori_infos(request.user.id, requested_season)
-        response_data = dict()
-        response_data['seasonDetgoris'] = season_detgori_infos
-        return HttpResponse(json.dumps(response_data)) 
-    
     user_seasons = [season for season in request.user.act_seasons.order_by('-id')]
-    current_infos = []
-    if len(user_seasons) != 0 :
-        current_infos = my_detgori_infos(request.user.id,  user_seasons[0])
+    season_id = None
+    try:
+        season_id = request.GET['seasonId']
+    except:
+        pass
+    season_detgoris = []
+    if len(user_seasons) != 0 and season_id == None:
+        season_detgoris = my_detgori_infos(request.user.id,  user_seasons[0])
+    elif season_id != None:
+        requested_season = Season.objects.get(id=season_id)
+        season_detgoris = my_detgori_infos(request.user.id, requested_season)
 
     seasons = list()
     for season in user_seasons:
@@ -130,7 +126,7 @@ def MypageInfo(request):
         }
         seasons.append(season_info)
     response_data = dict()
-    response_data['seasonDetgoris'] = current_infos
+    response_data['seasonDetgoris'] = season_detgoris
     response_data['seasons'] = seasons
     response_data['name'] = request.user.name
     response_data['color'] = request.user.color
