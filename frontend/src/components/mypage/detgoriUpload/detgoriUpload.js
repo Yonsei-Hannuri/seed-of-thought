@@ -6,7 +6,7 @@ import Loading from '../../common/loading';
 
 class DetgoriUpload extends Component {
   static defaultProps = {
-    seasonInfo: { session: [] },
+    session: [],
   };
   state = {
     opened: false,
@@ -54,7 +54,7 @@ class DetgoriUpload extends Component {
     }
 
     if (this.state.opened === true) {
-      const sessionOptions = this.props.seasonInfo.session
+      const sessionOptions = this.props.session
         .slice()
         .reverse()
         .map((sessionInfo, idx) => (
