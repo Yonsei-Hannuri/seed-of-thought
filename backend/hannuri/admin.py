@@ -14,8 +14,8 @@ class SeasonAdmin(admin.ModelAdmin):
         if obj.is_current==True:
 
             pre_current_season = Season.objects.all().filter(is_current=True)
-
-            for season in pre_current_season:
+            if pre_current_season and len(pre_current_season) == 1 and pre_current_season[0].pk != obj.pk:
+                season = pre_current_season[0]
                 season_sessions = season.session.all()
                 season_detgoris = Detgori.objects.all().filter(parentSession__in=season_sessions)
 
@@ -28,10 +28,9 @@ class SeasonAdmin(admin.ModelAdmin):
                 season_total_count_filtered = \
                     utils.filter_dict(season_total_count, lambda x: x[1] > 30)
                 season.words = json.dumps(season_total_count_filtered)
-
                 season.is_current = False
-
                 season.save()
+    
         super().save_model(request, obj, form, change)   
 
 
@@ -52,28 +51,26 @@ class SessionAdmin(admin.ModelAdmin):
                 session.is_current = False
                 session.save()
 
-            obj.season = Season.objects.get(is_current=True)
+        obj.season = Season.objects.get(is_current=True)
 
         super().save_model(request, obj, form, change)   
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         files = list(request.FILES.values())
-        i=0
         for obj in formset.deleted_objects:
             if os.path.exists('uploads/session/'+obj.googleId+'.pdf'):
                 os.remove('uploads/session/'+obj.googleId+'.pdf')
             obj.delete()
-
-        for instance in instances:
-            parentFolderId = instance.parentSession.googleFolderId
+    
+        for i, instance in enumerate(instances):
             PDF = files[i]
             fileName = '읽기자료' + str(instance.parentSession.week) + '주차_' + os.path.splitext(PDF.name)[0] + '.pdf'
             googleId = str(uuid.uuid4())
             instance.googleId = googleId 
             instance.pdf.name = googleId+'.pdf'
             instance.save()
-            i += 1        
+
         formset.save_m2m()
 
 
