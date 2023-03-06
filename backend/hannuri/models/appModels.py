@@ -39,20 +39,6 @@ class Season(models.Model):
     googleFolderId = models.CharField(max_length=200, blank=True, verbose_name="구글드라이브 폴더ID")
     words = models.TextField(default='', verbose_name="단어 언급 횟수")
 
-    def save(self, *args, **kargs):
-        if self.googleFolderId == '':
-            from googleapiclient.discovery import build
-            creds = googleDriveAPI.getCreds()
-            drive_service = build('drive', 'v3', credentials=creds)
-            file_metadata = {
-                'name': '한누리 {}-{}'.format(self.year, self.semester),
-                'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [settings.ENV('GOOGLE_DRIVE_ROOT_FOLDER')]
-            }
-            folder_ = drive_service.files().create(body=file_metadata, fields='id').execute()
-            self.googleFolderId=folder_.get('id')
-        super(Season, self).save(*args, **kargs)
-
     def __str__(self):
         return f'{self.year}-{self.semester}'
     
@@ -121,20 +107,6 @@ class Session(models.Model):
     week = models.IntegerField(default=1, verbose_name="주차")
     title = models.CharField(max_length=200, verbose_name="제목")
     googleFolderId = models.CharField(max_length=200, blank=True, verbose_name="구글드라이브 폴더ID")
-
-    def save(self, *args, **kargs):
-        if self.googleFolderId == '':
-            from googleapiclient.discovery import build
-            creds = googleDriveAPI.getCreds()
-            drive_service = build('drive', 'v3', credentials=creds)
-            file_metadata = {
-                'name': '세션 {}주차'.format(self.week),
-                'mimeType': 'application/vnd.google-apps.folder',
-                'parents': [self.season.googleFolderId]
-            }
-            folder_ = drive_service.files().create(body=file_metadata, fields='id').execute()
-            self.googleFolderId=folder_.get('id')
-        super(Session, self).save(*args, **kargs)
         
     def __str__(self):
         return f'{self.season}, {self.week}주'

@@ -1,4 +1,5 @@
 from ._dependencies import *
+import uuid
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.order_by('-id')
@@ -92,9 +93,8 @@ class DetgoriViewSet(viewsets.ModelViewSet):
 
         #parse nouns of a detgori and upload on the google drive
         parentSession = Session.objects.get(pk=self.request.POST['parentSession'])
-        parentFolderId = parentSession.googleFolderId
         fileName = '댓거리' + str(parentSession.week) + '주차_'+ self.request.user.name + '.pdf'
-
+        
         text = ''
         words = '{ }'
         try: # if deep copy not working (this happens when pdf file is too big)
@@ -103,11 +103,10 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             words = wordcount.tokenizer(text)  
         except:
             pass
-        
-        googleId = googleDriveAPI.savePDF(fileName, parentFolderId, self.request.FILES['pdf'])
+
+        googleId = str(uuid.uuid4())
         self.request.FILES['pdf'].name = googleId+'.pdf'
         serializer.save(googleId=googleId, pureText=text, author=self.request.user, words=words, pdf=self.request.FILES['pdf'])
-
         #check users acting season, if first detgori add current season as his acting season.
         act_seasons = [season.id for season in self.request.user.act_seasons.all()]
         current_season = Season.objects.get(is_current=True).pk
@@ -116,10 +115,6 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         self.request.user.save()
 
     def perform_destroy(self, instance):
-        try:
-            googleDriveAPI.deletePDF(instance.googleId)
-        except:
-            pass
         #check whether was a detgori was the only detgori of the season
         #if so erase this acting season.
         user_detgoris = Detgori.objects.filter(author=self.request.user)

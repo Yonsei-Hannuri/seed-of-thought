@@ -1,5 +1,4 @@
 from django.db import models
-from lib import googleDriveAPI
 import requests
 import json
 import os

@@ -12,7 +12,7 @@ import datetime
 import os
 from django.conf import settings
 from collections import defaultdict
-from lib import googleDriveAPI, wordcount, validate
+from lib import wordcount, validate
 from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
 from rest_framework.permissions import IsAuthenticated
 from django.contrib.auth import login, logout

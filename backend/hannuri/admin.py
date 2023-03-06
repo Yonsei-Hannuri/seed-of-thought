@@ -1,10 +1,11 @@
 from django.contrib import admin
 from hannuri.models import *
-from lib import googleDriveAPI, utils
+from lib import utils
 import json
 from collections import defaultdict
 import os
 from django.conf import settings
+import uuid
 
 class SeasonAdmin(admin.ModelAdmin):
     fields = ('is_current','year', 'semester', 'title', 'leader', 'sessioner', 'socializer')
@@ -60,7 +61,6 @@ class SessionAdmin(admin.ModelAdmin):
         files = list(request.FILES.values())
         i=0
         for obj in formset.deleted_objects:
-            googleDriveAPI.deletePDF(obj.googleId)
             if os.path.exists('uploads/session/'+obj.googleId+'.pdf'):
                 os.remove('uploads/session/'+obj.googleId+'.pdf')
             obj.delete()
@@ -69,8 +69,7 @@ class SessionAdmin(admin.ModelAdmin):
             parentFolderId = instance.parentSession.googleFolderId
             PDF = files[i]
             fileName = '읽기자료' + str(instance.parentSession.week) + '주차_' + os.path.splitext(PDF.name)[0] + '.pdf'
-            if instance.googleId != '': googleDriveAPI.deletePDF(instance.googleId)
-            googleId = googleDriveAPI.savePDF(fileName, parentFolderId, PDF)
+            googleId = str(uuid.uuid4())
             instance.googleId = googleId 
             instance.pdf.name = googleId+'.pdf'
             instance.save()
@@ -83,21 +82,15 @@ class UserAdmin(admin.ModelAdmin):
     fields = ('name', 'generation', 'email', 'is_active','is_staff', 'groups')
 
     def save_model(self, request, obj, form, change):
-        googleFolderId = settings.ENV('GOOGLE_DRIVE_ROOT_FOLDER')
         if obj.is_active == True and not(obj.permissionId):
-            permissionId = googleDriveAPI.registerReader(obj.email, googleFolderId)
             obj.permissionId = permissionId
         elif obj.is_active == False and obj.permissionId:
-            googleDriveAPI.deleteMember(obj.permissionId, googleFolderId)
             obj.permissionId = ''
 
         if obj.is_staff == True and not(obj.writerPermissioned):  
-            googleDriveAPI.registerWriter(obj.email, googleFolderId)
             obj.writerPermissioned = True
 
         elif obj.is_staff == False and obj.writerPermissioned:
-            googleDriveAPI.deleteMember(obj.permissionId, googleFolderId)
-            permissionId = googleDriveAPI.registerReader(obj.email, googleFolderId)
             obj.permissionId = permissionId
             obj.writerPermissioned = False
 
