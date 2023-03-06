@@ -20,7 +20,6 @@ function MetaSpace(props) {
                 title="Notebook free icon"
               />
             </Link>
-            <EasterEgg />
           </Route>
         </Switch>
       </Router>
