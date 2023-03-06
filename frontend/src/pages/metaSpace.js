@@ -1,5 +1,4 @@
 import { BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
-import EasterEgg from '../components/easterEgg';
 import FreeNote from './freeNote';
 
 function MetaSpace(props) {
