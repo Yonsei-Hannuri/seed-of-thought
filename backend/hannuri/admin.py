@@ -78,21 +78,6 @@ class SessionAdmin(admin.ModelAdmin):
 class UserAdmin(admin.ModelAdmin):
     fields = ('name', 'generation', 'email', 'is_active','is_staff', 'groups')
 
-    def save_model(self, request, obj, form, change):
-        if obj.is_active == True and not(obj.permissionId):
-            obj.permissionId = permissionId
-        elif obj.is_active == False and obj.permissionId:
-            obj.permissionId = ''
-
-        if obj.is_staff == True and not(obj.writerPermissioned):  
-            obj.writerPermissioned = True
-
-        elif obj.is_staff == False and obj.writerPermissioned:
-            obj.permissionId = permissionId
-            obj.writerPermissioned = False
-
-        super().save_model(request, obj, form, change)
-
 
 class FreeNoteAdmin(admin.ModelAdmin):
     fields = ('text', )

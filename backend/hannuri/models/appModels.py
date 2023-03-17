@@ -52,8 +52,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     name = models.CharField(default='', max_length=100, null=False, blank=False, verbose_name='이름')
     generation = models.IntegerField(default=20, blank=True, verbose_name='기수')
     color = models.CharField(default='#000080', max_length=200, null=True, blank=True)
-    permissionId = models.CharField(blank=True, max_length=100)
-    writerPermissioned = models.BooleanField(default=False)
     act_seasons = models.ManyToManyField(Season)
 
     # User 모델의 필수 field
