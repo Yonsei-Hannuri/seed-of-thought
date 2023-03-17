@@ -20,11 +20,6 @@ class SeasonSerializer(serializers.ModelSerializer):
         model = Season
         fields = ['id', 'year', 'semester', 'title', 'leader', 'sessioner', 'socializer', 'session', 'googleFolderId']
 
-class NotificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Notification
-        fields = '__all__'
-
 class DetgoriSerializerForSession(serializers.ModelSerializer):
     authorName = serializers.ReadOnlyField(source='author.name')
     authorColor = serializers.ReadOnlyField(source='author.color')
@@ -56,23 +51,9 @@ class DetgoriSerializer(serializers.ModelSerializer):
     class Meta:
         model = Detgori
         fields = ['id', 'parentSession', 'title', 'authorId', 'authorColor','authorName', 'date', 'googleId',]
-
-
-class FreeNoteSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = FreeNote
-        fields = ['id', 'text', 'page', 'position']
         
 
 class DetgoriReadTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetgoriReadTime
         fields = '__all__'
-
-        
-#class SocialActivityImgSerializer(serializers.ModelSerializer):
-#    googleId = serializers.ReadOnlyField()
-#    class Meta:
-#        model = SocialActivityImg
-#        fields = ['id', 'googleId']
-#

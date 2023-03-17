@@ -6,11 +6,9 @@ from hannuri import view
 router = DefaultRouter()
 router.register(r'user', view.UserViewSet)
 router.register(r'season', view.SeasonViewSet)
-router.register(r'notification', view.NotificationViewSet)
 router.register(r'session', view.SessionViewSet)
 router.register(r'sessionReadfile', view.SessionReadfileViewSet)
 router.register(r'detgori', view.DetgoriViewSet)
-router.register(r'freeNote', view.FreeNoteViewSet)
 router.register(r'detgoriReadTime', view.DetgoriReadTimeViewSet)
 
 
@@ -22,6 +20,5 @@ urlpatterns = [
     path('profileColor/', view.ProfileColor),
     path('wordList/<str:type>/<int:sessionId>', view.WordList),
     path('mypageInfo', view.MypageInfo),
-    path('archive/', view.ArchiveView),
     path('frontError/', view.FrontError)
 ]

@@ -79,12 +79,7 @@ class UserAdmin(admin.ModelAdmin):
     fields = ('name', 'generation', 'email', 'is_active','is_staff', 'groups')
 
 
-class FreeNoteAdmin(admin.ModelAdmin):
-    fields = ('text', )
-
 
 admin.site.register(Season, SeasonAdmin)
-admin.site.register(Notification)
 admin.site.register(User, UserAdmin)
 admin.site.register(Session, SessionAdmin)
-admin.site.register(FreeNote, FreeNoteAdmin)

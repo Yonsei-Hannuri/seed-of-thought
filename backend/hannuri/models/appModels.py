@@ -73,29 +73,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     class Meta:
         verbose_name        = '학회원'
-        verbose_name_plural = '0. 학회원'
-
-
-class Notification(models.Model):
-    #SCOPE_CHOICES = (
-    #    ('ALL', '전체 공개'),
-    #    ('1MEMBER', '한누리 공개'),
-    #    ('2MEMBER', '두누리 공개'),
-    #    ('ALLMEMBER', '전체 학회원 공개'),
-    #    ('CLOSED', '비공개')
-    #)
-    #scope = models.CharField(max_length=10, choices=SCOPE_CHOICES, verbose_name='공개범위')
-    title = models.CharField(max_length=200, verbose_name="제목")
-    description = models.TextField(verbose_name="내용")
-    date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
-    
-
-    def __str__(self):
-        return f"{self.date.strftime('%Y-%m-%d')} 공지: {self.title}"
-
-    class Meta:
-        verbose_name        = '공지사항'
-        verbose_name_plural = '1. 공지사항'
+        verbose_name_plural = '1. 학회원'
 
 
 class Session(models.Model):
@@ -134,15 +112,3 @@ class Detgori(models.Model):
 
     def __str__(self):
         return f'{self.parentSession}, {self.author} 댓거리'
-
-class FreeNote(models.Model):
-    text = models.TextField(verbose_name="내용")
-    page = models.IntegerField(default=1)
-    position = models.IntegerField(default=1)
-
-    def __str__(self):
-      return f'{self.page}쪽, {self.position+1}칸'
-
-    class Meta:
-        verbose_name = '공책'
-        verbose_name_plural = '4. 메타동방-공책'

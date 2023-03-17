@@ -35,11 +35,6 @@ class SeasonViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(is_current=False)
         return queryset
 
-class NotificationViewSet(viewsets.ModelViewSet):
-    queryset = Notification.objects.order_by('-id')
-    serializer_class = NotificationSerializer
-    permission_classes = [IsAuthenticated, AlwaysReadOnly]
-
 class SessionViewSet(viewsets.ModelViewSet):
     queryset = Session.objects.order_by('-id')
     serializer_class = SessionSerializer
@@ -138,24 +133,6 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(author=int(author), season=int(season))
         return queryset
 
-class FreeNoteViewSet(viewsets.ModelViewSet):
-    queryset = FreeNote.objects.order_by('-id')
-    serializer_class = FreeNoteSerializer
-    permission_classes = [IsAuthenticated, AppendOnly]
-
-    def get_queryset(self):
-        queryset = self.queryset
-
-        notePage = self.request.query_params.get('notePage', None)
-        recentNotePage = self.request.query_params.get("recentNotePage", None)
-        if notePage:
-            queryset = queryset.filter(page=notePage)
-        elif recentNotePage:
-            if len(queryset) != 0:
-                recentNote = queryset[0]
-                queryset = queryset.filter(page=recentNote.page)
-
-        return queryset
 
 class DetgoriReadTimeViewSet(viewsets.ModelViewSet):
     queryset = DetgoriReadTime.objects.order_by('-id')
