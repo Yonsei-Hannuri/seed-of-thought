@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 import MainPage from './pages/mainPage';
 import Mypage from './pages/mypage';
-import MetaSpace from './pages/metaSpace';
 import Session from './pages/session';
 import LoginPage from './pages/loginPage';
 import HeaderNav from './components/headerNav';
@@ -43,18 +42,6 @@ class App extends Component {
                       </li>
                       <li className="nav-item">
                         <button
-                          name="metaspace"
-                          className={
-                            'nav-link ' +
-                            (link === '/metaspace' ? 'active' : '')
-                          }
-                          onClick={() => onNavClick('/metaspace')}
-                        >
-                          메타
-                        </button>
-                      </li>
-                      <li className="nav-item">
-                        <button
                           name="mypage"
                           className={
                             'nav-link ' + (link === '/mypage' ? 'active' : '')
@@ -78,7 +65,6 @@ class App extends Component {
               />
               <Switch>
                 <Route exact path="/" component={MainPage} />
-                <Route exact path="/metaspace" component={MetaSpace} />
                 <Route exact path="/mypage" component={Mypage} />
               </Switch>
             </Route>
