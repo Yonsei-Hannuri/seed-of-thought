@@ -1,8 +1,9 @@
 import SessionReadfile from '../containers/sessionReadfile';
 import PDFViewer from '../components/session/PDFViewer';
-import WordCloud from '../containers/WordCloud';
+import WordCloud from '../components/wordCloud/WordCloud';
 import useSession from '../hooks/session/useSession';
 import useOnMount from '../hooks/common/useOnMount';
+import useSessionWords from '../hooks/session/useSessionWords';
 import DurationLogger from '../modules/DurationLogger';
 import { POST_DETGORI_READ_LOG } from '../api/log';
 import ShowSelection from '../components/highorder/ShowSelection';
@@ -18,6 +19,7 @@ const durationLogger = new DurationLogger((id, duration) => {
 function Session() {
   const sessionId = getQueryParams().sessionID;
   const [session, detgoris] = useSession(sessionId);
+  const { sessionWordList } = useSessionWords(sessionId);
   const readRecord = new LocalstorageObject(`session-${sessionId}-read-record`);
   useOnMount(() => {
     const unloadhandler = () => durationLogger.close();
@@ -63,11 +65,7 @@ function Session() {
           }
         />
       )}
-      {session && (
-        <WordCloud
-          src={`${process.env.REACT_APP_API_URL}wordList/session/${session.id}`}
-        />
-      )}
+      <WordCloud wordList={sessionWordList} />
     </div>
   );
 }
