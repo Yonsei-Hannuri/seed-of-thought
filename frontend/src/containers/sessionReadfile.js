@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import httpsfy from '../../modules/httpsfy';
-import PDFViewer from './PDFViewer';
+import httpsfy from '../modules/httpsfy';
+import PDFViewer from '../components/session/PDFViewer';
 
 class SessionReadfile extends Component {
   static defaultProps = {

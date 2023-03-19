@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import getCookieValue from '../../modules/getCookieValue';
+import getCookieValue from '../modules/getCookieValue';
 
 class ProfileColor extends Component {
   static defaultProps = {

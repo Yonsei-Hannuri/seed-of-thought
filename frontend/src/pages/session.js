@@ -1,11 +1,11 @@
-import SessionReadfile from '../components/session/sessionReadfile';
+import SessionReadfile from '../containers/sessionReadfile';
 import PDFViewer from '../components/session/PDFViewer';
-import WordCloud from '../components/wordCloud/WordCloud';
+import WordCloud from '../containers/WordCloud';
 import useSession from '../hooks/session/useSession';
 import useOnMount from '../hooks/common/useOnMount';
 import DurationLogger from '../modules/DurationLogger';
 import { POST_DETGORI_READ_LOG } from '../api/log';
-import ShowSelection from '../components/ShowSelection';
+import ShowSelection from '../components/highorder/ShowSelection';
 import ColorButton from '../components/session/ColorButton';
 import getQueryParams from '../modules/getQueryParams';
 import LocalstorageObject from '../modules/LocalstorageObject';

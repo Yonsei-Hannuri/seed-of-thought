@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import ReactWordcloud from 'react-wordcloud';
-import errorReport from '../../modules/errorReport';
-import wordCloudDataMaker from './lib/wordCloudDataMaker';
+import errorReport from '../modules/errorReport';
+import wordCloudDataMaker from '../components/wordCloud/lib/wordCloudDataMaker';
 
 const WordCloud = ({ src }) => {
   const [wordCloudWords, setWordCloudWords] = useState([]);

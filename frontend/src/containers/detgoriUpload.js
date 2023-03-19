@@ -1,8 +1,8 @@
 import React, { Component } from 'react';
-import SessionOption from './sessionOption';
-import errorReport from '../../../modules/errorReport';
-import getCookieValue from '../../../modules/getCookieValue';
-import Loading from '../../common/loading';
+import SessionOption from '../components/mypage/detgoriUpload/sessionOption';
+import errorReport from '../modules/errorReport';
+import getCookieValue from '../modules/getCookieValue';
+import Loading from '../components/common/loading';
 
 class DetgoriUpload extends Component {
   static defaultProps = {

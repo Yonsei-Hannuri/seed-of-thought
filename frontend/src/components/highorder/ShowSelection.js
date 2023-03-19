@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import getGlobalRect from '../modules/getGlobalRect';
+import getGlobalRect from '../../modules/getGlobalRect';
 
 const ShowSelection = ({ title, panel, options }) => {
   const [selected, setSelected] = useState(null);

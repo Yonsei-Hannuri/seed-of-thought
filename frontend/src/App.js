@@ -4,7 +4,7 @@ import MainPage from './pages/mainPage';
 import Mypage from './pages/mypage';
 import Session from './pages/session';
 import LoginPage from './pages/loginPage';
-import HeaderNav from './components/headerNav';
+import HeaderNav from './components/highorder/headerNav';
 import Footer from './components/footer';
 import getCookieValue from './modules/getCookieValue';
 
