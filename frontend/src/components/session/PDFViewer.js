@@ -3,7 +3,7 @@ import { Page, Document } from 'react-pdf';
 import { pdfjs } from 'react-pdf';
 pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-function PDFViewer(props) {
+function PDFViewer({ src }) {
   const [numPages, setNumpages] = useState(1);
   const [curPage, setCurPage] = useState(1);
   const [loading, setLoading] = useState(true);
@@ -15,6 +15,12 @@ function PDFViewer(props) {
   const calculateHeight = () => {
     if (height === null) {
       setHeight(document.querySelector('#pdfDocument').offsetHeight);
+    }
+  };
+
+  const openUpWithNewWindowWhenDoubleClick = (e) => {
+    if (e.detail === 2) {
+      window.open(src);
     }
   };
 
@@ -31,10 +37,11 @@ function PDFViewer(props) {
         id="pdfDocument"
         style={{ height: height }}
         className={loading ? 'blank carousel slide' : 'carousel slide'}
+        onClick={openUpWithNewWindowWhenDoubleClick}
       >
         <div className="carousel-inner">
           <Document
-            file={props.src}
+            file={src}
             onLoadSuccess={onDocumentLoadSuccess}
             options={{
               cMapUrl: `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/cmaps/`,
