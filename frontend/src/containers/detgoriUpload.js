@@ -1,5 +1,5 @@
 import SessionOption from '../components/mypage/detgoriUpload/sessionOption';
-import Loading from '../components/common/loading';
+import Loading from '../components/design/Loading';
 import useOpenOrClose from '../hooks/mypage/useOpenOrClose';
 import useUploadDetgori from '../hooks/mypage/useUploadDetgori';
 

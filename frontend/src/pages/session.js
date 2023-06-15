@@ -7,7 +7,7 @@ import useSessionWords from '../hooks/session/useSessionWords';
 import DurationLogger from '../modules/DurationLogger';
 import { POST_DETGORI_READ_LOG } from '../api/log';
 import ShowSelection from '../components/highorder/ShowSelection';
-import ColorButton from '../components/session/ColorButton';
+import ColorButton from '../components/design/ColorButton';
 import getQueryParams from '../modules/getQueryParams';
 import LocalstorageObject from '../modules/LocalstorageObject';
 
