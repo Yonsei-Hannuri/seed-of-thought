@@ -1,13 +1,14 @@
 import SessionBanner from '../components/main/sessionBanner';
 import FolderUI from '../components/main/folderUI/folderUI';
 import { useHistory } from 'react-router';
-import useCurrentSeasonSessions from '../hooks/session/useCurrentSeasonSessions';
+import useCurrentSeason from '../hooks/season/useCurrentSeason';
 
 function MainPage() {
-  const sessions = useCurrentSeasonSessions();
+  const { seasonTitle, seasonSessions: sessions } = useCurrentSeason();
   const history = useHistory();
   return (
     <div>
+      <div>{seasonTitle}</div>
       <SessionBanner recentSession={sessions[sessions.length - 1]}>
         <button
           type="button"
