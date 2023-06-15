@@ -11,15 +11,15 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 ALLOWED_HOSTS = [ENV('FRONT_DOMAIN'), ENV('API_DOMAIN')]
 SECRET_KEY = ENV('DJANGO_SECRET_KEY')
 
-FRONT_URL = 'https://' + ENV('FRONT_DOMAIN');
-API_URL = 'https://' + ENV('API_DOMAIN');
+FRONT_URL = 'https://' + ENV('FRONT_DOMAIN')
+API_URL = 'https://' + ENV('API_DOMAIN')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENV('DEBUG')
-if(DEBUG==True):
+if DEBUG:
     ALLOWED_HOSTS = ["*"]
-    FRONT_URL = 'http://' + ENV('FRONT_DOMAIN');
-    API_URL = 'http://' + ENV('API_DOMAIN');
+    FRONT_URL = 'http://' + ENV('FRONT_DOMAIN')
+    API_URL = 'http://' + ENV('API_DOMAIN')
     ##SSL disregards in development environment
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
 
