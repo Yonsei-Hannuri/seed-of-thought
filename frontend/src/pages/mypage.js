@@ -4,12 +4,12 @@ import ProfileColor from '../containers/profileColor';
 import Detgori from '../components/mypage/detgori';
 import WordChart from '../components/wordChart/WordChart';
 import useUserInfo from '../hooks/mypage/useUserInfo';
-import useSeasonSessions from '../hooks/mypage/useSeasonSessions';
+import useCurrentSeasonSessions from '../hooks/session/useCurrentSeasonSessions';
 import useUserWords from '../hooks/mypage/useUserWords';
 
 function Mypage() {
   const { userInfo, requestUserInfo, deleteRequest } = useUserInfo();
-  const { seasonSessions } = useSeasonSessions();
+  const currentSeasonSessions = useCurrentSeasonSessions();
   const { userWords } = useUserWords();
   const seasonOptions =
     userInfo &&
@@ -29,7 +29,7 @@ function Mypage() {
           deleteRequest={deleteRequest}
         />
       ));
-  if (!(userInfo && seasonSessions && userWords)) return '';
+  if (!(userInfo && currentSeasonSessions && userWords)) return '';
   return (
     <div>
       <div className="d-flex m-3" id="profile_box">
@@ -72,7 +72,10 @@ function Mypage() {
       </ul>
       <div>{userInfo.detgori}</div>
       <div className="mt-3">
-        <DetgoriUpload session={seasonSessions} onUpload={requestUserInfo} />
+        <DetgoriUpload
+          session={currentSeasonSessions}
+          onUpload={requestUserInfo}
+        />
       </div>
       <div className="row m-0">
         {userWords !== null && <WordChart data={userWords} />}

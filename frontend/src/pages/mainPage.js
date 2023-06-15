@@ -1,7 +1,7 @@
 import SessionBanner from '../components/main/sessionBanner';
 import FolderUI from '../components/main/folderUI/folderUI';
 import { useHistory } from 'react-router';
-import useCurrentSeasonSessions from '../hooks/main/useCurrentSeasonSessions';
+import useCurrentSeasonSessions from '../hooks/session/useCurrentSeasonSessions';
 
 function MainPage() {
   const sessions = useCurrentSeasonSessions();
