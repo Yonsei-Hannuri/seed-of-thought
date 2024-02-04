@@ -1,26 +1,6 @@
 version: "3"
 
 services:
-  nginx:
-    build:
-      context: .
-      dockerfile: ./nginx/Dockerfile
-    platform: linux/amd64
-    container_name: hannuri-nginx
-    volumes:
-      - ${STATIC_FILE_ROOT}:/static
-      - ${HOST_PATH_TO_SSL}:/etc/letsencrypt
-      - ./nginx:/etc/nginx/
-    environment:
-      - FRONT_DOMAIN=${FRONT_DOMAIN}
-      - API_DOMAIN=${API_DOMAIN}
-    command: ["nginx", "-g", "daemon off;"]
-    ports:
-      - 80:80
-      - 443:443
-    links:
-      - backend:backend
-
   backend:
     build:
       context: .
