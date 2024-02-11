@@ -1,3 +1,4 @@
+from .KoreanWordAnalyzer import KoreanWordAnalyzer
 from konlpy.tag import Mecab
 
 class MecabKoreanWordAnalyzer(KoreanWordAnalyzer):

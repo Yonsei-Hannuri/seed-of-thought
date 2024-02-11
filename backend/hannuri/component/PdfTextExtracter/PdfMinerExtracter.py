@@ -1,3 +1,4 @@
+from .PdfTextExtracter import PdfTextExtracter
 from io import StringIO
 from pdfminer.converter import TextConverter
 from pdfminer.layout import LAParams
