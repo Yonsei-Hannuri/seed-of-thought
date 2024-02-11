@@ -7,21 +7,10 @@ import os
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.shortcuts import redirect
-import requests
-import google_auth_oauthlib.flow
+from hannuri.component import googleOauth
 
 def Login(request):
-    #google 에서 code 받고 그 code로 token을 받아서 그 token에 해당하는 email 받기
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        './secret/client_secret.json',
-        scopes = 'openid https://www.googleapis.com/auth/userinfo.email'
-        )
-    flow.redirect_uri = settings.API_URL + '/login'
-    flow.fetch_token(code=request.GET.get('code'))
-    credentials = flow.credentials
-    token = credentials.token
-    response = requests.get('https://www.googleapis.com/oauth2/v1/userinfo?access_token={}'.format(token))
-    email = response.json()['email']
+    email = googleOauth.get_user_email(request.GET.get('code'), settings.API_URL + '/login')
     #받은 이메일을 통해서 로그인 시켜주기
     try: 
         user = User.objects.get(email=email)
@@ -31,21 +20,9 @@ def Login(request):
         return response
     except:
         return redirect(settings.FRONT_URL+'?login=error')
-    return redirect(settings.FRONT_URL+'?login=error')
 
 def Signin(request):
-    #google 에서 code 받고 그 code로 token을 받아서 그 token에 해당하는 email 받기
-    flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-        './secret/client_secret.json',
-        scopes = 'openid https://www.googleapis.com/auth/userinfo.email'
-        )
-    flow.redirect_uri = settings.API_URL + '/signin'
-    flow.fetch_token(code=request.GET.get('code'))
-    credentials = flow.credentials
-    token = credentials.token
-    response = requests.get('https://www.googleapis.com/oauth2/v1/userinfo?access_token={}'.format(token))
-    email = response.json()['email']
-    
+    email = googleOauth.get_user_email(request.GET.get('code'), settings.API_URL + '/signin')
     #받은 이메일을 저장하기
     try: 
         user = User.objects.create(email=email)
@@ -53,13 +30,10 @@ def Signin(request):
         state = json.loads(state_)
         name = state['name']
         generation = state['generation']
-
         user.name = name
         user.generation = generation
         user.save()
-
-        return redirect(settings.FRONT_URL+'?type=signinSuccess')
-        
+        return redirect(settings.FRONT_URL+'?type=signinSuccess') 
     except:
         return redirect(settings.FRONT_URL+'?type=signinError')
 
