@@ -1,4 +1,4 @@
 class PdfTextExtracter:
     
-    def extract_text(self, file) -> str:
+    def extract_text(self, file):
         pass

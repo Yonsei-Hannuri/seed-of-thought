@@ -8,7 +8,7 @@ from pdfminer.pdfparser import PDFParser
 
 class PdfMinerExtracter(PdfTextExtracter):
 
-    def extract_text(self, file) -> str:
+    def extract_text(self, file):
         output_string = StringIO()
         parser = PDFParser(file)
         doc = PDFDocument(parser)

@@ -1,4 +1,4 @@
 class KoreanWordAnalyzer:
     
-    def extract_nouns(self, text: str) -> str[]:
+    def extract_nouns(self, text):
         pass

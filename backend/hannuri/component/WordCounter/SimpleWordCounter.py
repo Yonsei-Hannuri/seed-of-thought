@@ -1,5 +1,5 @@
 class SimpleWordCounter(WordCounter):
-    def count(self, words: str[]) -> dict[str, int]:
+    def count(self, words):
         meaningless_words = ('한누리', '아무것', '누구', '거기', '그것', '이것', '거리',)
         counts = dict()
         for word in words:

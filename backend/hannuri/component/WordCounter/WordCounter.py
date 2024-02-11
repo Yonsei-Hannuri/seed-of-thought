@@ -1,3 +1,3 @@
 class WordCounter:
-    def count(self, words: str[]) -> dict[str, int]:
+    def count(self, words):
         pass
