@@ -32,11 +32,11 @@ RUN cd /tmp && \
 
 RUN apt-get install libffi-dev -y
 
+RUN pip3 install gunicorn
+
 COPY ./requirements.txt /backend/requirements.txt
 
 RUN pip3 install -r /backend/requirements.txt
-
-RUN pip3 install gunicorn
 
 COPY ./ /backend/
 
