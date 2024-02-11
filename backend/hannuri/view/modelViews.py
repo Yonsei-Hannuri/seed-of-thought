@@ -1,4 +1,5 @@
 from ._dependencies import *
+from hannuri.component import pdfTextExtracter, koreanWordAnalyzer, wordCounter 
 import uuid
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -94,14 +95,15 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         words = '{ }'
         try: # if deep copy not working (this happens when pdf file is too big)
             PDF = copy.deepcopy(self.request.FILES['pdf'])
-            text = wordcount.read_pdf(PDF.file)
-            words = wordcount.tokenizer(text)  
+            text = pdfTextExtracter.extract_text(PDF.file)
+            nouns = koreanWordAnalyzer.extract_nouns(text)  
+            word_count = wordCounter.count(nouns)
         except:
             pass
 
         googleId = str(uuid.uuid4())
         self.request.FILES['pdf'].name = googleId+'.pdf'
-        serializer.save(googleId=googleId, pureText=text, author=self.request.user, words=words, pdf=self.request.FILES['pdf'])
+        serializer.save(googleId=googleId, pureText=text, author=self.request.user, words=json.dumps(word_count), pdf=self.request.FILES['pdf'])
         #check users acting season, if first detgori add current season as his acting season.
         act_seasons = [season.id for season in self.request.user.act_seasons.all()]
         current_season = Season.objects.get(is_current=True).pk
