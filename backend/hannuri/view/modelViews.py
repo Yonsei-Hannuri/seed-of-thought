@@ -8,6 +8,7 @@ from rest_framework.response import Response
 from rest_framework import status
 import copy
 import os
+from lib import validate
 from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
 from rest_framework.permissions import IsAuthenticated
 from hannuri.component import pdfTextExtracter, koreanWordAnalyzer, wordCounter 
