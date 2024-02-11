@@ -4,7 +4,6 @@ from lib import utils
 import json
 from collections import defaultdict
 import os
-from django.conf import settings
 import uuid
 
 class SeasonAdmin(admin.ModelAdmin):
