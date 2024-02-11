@@ -32,9 +32,8 @@ jobs:
           fail_on_empty: true
 
       - name: Build docker image
-        working-directory: ./backend
         run: |
-          docker build -t hannuri-api ./
+          docker build -t hannuri-api ./backend
           docker save -o hannuri-api.tar hannuri-api
 
       - name: Make zip soure code
