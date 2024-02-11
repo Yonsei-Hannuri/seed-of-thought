@@ -11,3 +11,5 @@ develop.sh
 
 elastic*/
 *.sqlite3
+
+dev/
