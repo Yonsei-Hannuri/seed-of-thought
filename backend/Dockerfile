@@ -1,8 +1,8 @@
 #cotainer 실행시 옵션 추가: --platform linux/amd64 
 
-FROM ubuntu:latest
+FROM --platform=linux/amd64 ubuntu:latest
 
-COPY ./backend/requirements.txt /backend/requirements.txt 
+COPY ./ /backend/
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -34,6 +34,10 @@ RUN cd /tmp && \
 
 RUN apt-get install libffi-dev -y
 
-RUN pip3 install -r  ./backend/requirements.txt
+RUN pip3 install -r  /backend/requirements.txt
 
 RUN pip3 install gunicorn
+
+WORKDIR /backend
+
+CMD ["bash", "-c", "cd /backend && python3 manage.py migrate && gunicorn -w 3 --bind 0:2102 backend.wsgi"]

@@ -1,8 +1,8 @@
 version: 0.0
 os: linux
 files:
-  - source: /backend
-    destination: /home/hannuri/backend
+  - source: hannuri-api.tar
+    destination: /deploy
 
 file_exists_behavior: OVERWRITE
 

@@ -11,11 +11,6 @@ on:
     branches:
       - master
 
-env:
-  S3_BUCKET_NAME: hannuri
-  CODE_DEPLOY_APPLICATION_NAME: deploy-hannuri-back
-  CODE_DEPLOY_DEPLOYMENT_GROUP_NAME: hannuri-server
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -28,20 +23,25 @@ jobs:
         uses: SpicyPizza/create-envfile@v1.3
         with:
           envkey_DEBUG: False
-          envkey_GOOGLE_DRIVE_ROOT_FOLDER: ${{ secrets.GOOGLE_DRIVE_ROOT_FOLDER }}
-          envkey_FRONT_DOMAIN: ${{ secrets.FRONT_DOMAIN }}
-          envkey_API_DOMAIN: ${{ secrets.API_DOMAIN }}
+          envkey_FRONT_DOMAIN: ${{ vars.FRONT_DOMAIN }}
+          envkey_API_DOMAIN: ${{ vars.API_DOMAIN }}
           envkey_DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
-          envkey_DOMAIN: ${{ secrets.DOMAIN }}
+          envkey_DOMAIN: ${{ vars.DOMAIN }}
           directory: ./backend
           file_name: .env
           fail_on_empty: true
+
+      - name: Build docker image
+        working-directory: ./backend
+        run: |
+          docker build -t hannuri-api ./
+          docker save -o hannuri-api.tar hannuri-api
 
       - name: Make zip soure code
         run: |
           cp ./.deploy/appspec/back.yml ./appspec.yml
           cp ./.deploy/script/application-restart.sh ./script.sh
-          zip -r ./deploy-backend.zip ./backend appspec.yml script.sh
+          zip -r ./deploy-backend.zip hannuri-api.tar appspec.yml script.sh
         shell: bash
 
       - name: Configure AWS credentials
@@ -49,16 +49,16 @@ jobs:
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
+          aws-region: ${{ vars.AWS_REGION }}
 
       - name: Upload to S3
         run: |
-          aws s3 cp --region ${{ secrets.AWS_REGION }} ./deploy-backend.zip s3://$S3_BUCKET_NAME/deploy-backend.zip
+          aws s3 cp --region ${{ vars.AWS_REGION }} ./deploy-backend.zip s3://${{ vars.S3_BUCKET_NAME }}/deploy-backend.zip
 
       - name: Code Deploy
         run: |
           aws deploy create-deployment \
           --deployment-config-name CodeDeployDefault.AllAtOnce \
-          --application-name ${{ env.CODE_DEPLOY_APPLICATION_NAME }} \
-          --deployment-group-name ${{ env.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
-          --s3-location bucket=$S3_BUCKET_NAME,bundleType=zip,key=deploy-backend.zip
+          --application-name ${{ vars.CODE_DEPLOY_APPLICATION_NAME }} \
+          --deployment-group-name ${{ vars.CODE_DEPLOY_DEPLOYMENT_GROUP_NAME }} \
+          --s3-location bucket=${{ vars.S3_BUCKET_NAME }},bundleType=zip,key=deploy-backend.zip
