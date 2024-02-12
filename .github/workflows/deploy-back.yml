@@ -39,7 +39,7 @@ jobs:
       - name: Make config for AWS S3
         uses: jsdaniell/create-json@1.1.2
         with:
-          name: "config.json"
+          name: "configs.json"
           json: ${{ secrets.AWS_S3_CONFIG }}
           dir: "./backend/hannuri/component/ObjectStorage/secret"
 
