@@ -7,11 +7,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
 import copy
-import os
 from lib import validate
-from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
-from rest_framework.permissions import IsAuthenticated
-from hannuri.component import pdfTextExtracter, koreanWordAnalyzer, wordCounter 
+from hannuri.component import pdfTextExtracter, koreanWordAnalyzer, wordCounter, objectStorage
 import uuid
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -95,16 +92,11 @@ class DetgoriViewSet(viewsets.ModelViewSet):
 
 
     def perform_create(self, serializer): # Detgori 관련 create가 발생했을 때 호출되는 메쏘드의 일부분 custom
-
         if not validate.is_PDF(self.request.FILES['pdf'].name): 
             raise Exception('pdf 파일이 아닙니다.')
-
-        #parse nouns of a detgori and upload on the google drive
-        parentSession = Session.objects.get(pk=self.request.POST['parentSession'])
-        fileName = '댓거리' + str(parentSession.week) + '주차_'+ self.request.user.name + '.pdf'
         
         text = ''
-        words = '{ }'
+        word_count = '{ }'
         try: # if deep copy not working (this happens when pdf file is too big)
             PDF = copy.deepcopy(self.request.FILES['pdf'])
             text = pdfTextExtracter.extract_text(PDF.file)
@@ -112,16 +104,19 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             word_count = wordCounter.count(nouns)
         except:
             pass
-
-        googleId = str(uuid.uuid4())
-        self.request.FILES['pdf'].name = googleId+'.pdf'
-        serializer.save(googleId=googleId, pureText=text, author=self.request.user, words=json.dumps(word_count), pdf=self.request.FILES['pdf'])
+        short_uuid = str(uuid.uuid4()).split("-")[0]
+        session = Session.objects.get(pk=self.request.POST['parentSession'])
+        season = session.season
+        fileName = f'{season.year}/{season.semester}학기/{session.week}주차/댓거리/{self.request.user.name}-{short_uuid}.pdf'
+        objectStorage.save(self.request.FILES['pdf'], fileName, 'application/pdf')
+        serializer.save(googleId=fileName, pureText=text, author=self.request.user, words=json.dumps(word_count))
         #check users acting season, if first detgori add current season as his acting season.
         act_seasons = [season.id for season in self.request.user.act_seasons.all()]
         current_season = Season.objects.get(is_current=True).pk
         if not current_season in act_seasons:
             self.request.user.act_seasons.add(current_season)
         self.request.user.save()
+
 
     def perform_destroy(self, instance):
         #check whether was a detgori was the only detgori of the season
@@ -132,9 +127,6 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         if user_detgori_seasons.count(removing_detgori_season) == 1:
             self.request.user.act_seasons.remove(removing_detgori_season)
             self.request.user.save()
-
-        if os.path.exists('uploads/detgori/'+instance.googleId+'.pdf'):
-            os.remove('uploads/detgori/'+instance.googleId+'.pdf')
         
         instance.delete()
 

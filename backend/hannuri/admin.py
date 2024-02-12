@@ -5,6 +5,7 @@ import json
 from collections import defaultdict
 import os
 import uuid
+from hannuri.component import objectStorage
 
 class SeasonAdmin(admin.ModelAdmin):
     fields = ('is_current','year', 'semester', 'title', 'leader', 'sessioner', 'socializer')
@@ -34,10 +35,13 @@ class SeasonAdmin(admin.ModelAdmin):
 
 
 class ReadfileInline(admin.TabularInline):
-    fields = ('pdf', )
+    fields = ('googleId', 'pdf')
+    readonly_fields = ('googleId',)
     model = SessionReadfile
     extra = 2
-    
+
+    def has_change_permission(self, request, object):
+      return False
 
 class SessionAdmin(admin.ModelAdmin):
     inlines = [ReadfileInline]
@@ -57,17 +61,19 @@ class SessionAdmin(admin.ModelAdmin):
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
         files = list(request.FILES.values())
+
         for obj in formset.deleted_objects:
-            if os.path.exists('uploads/session/'+obj.googleId+'.pdf'):
-                os.remove('uploads/session/'+obj.googleId+'.pdf')
             obj.delete()
-    
+        
         for i, instance in enumerate(instances):
             PDF = files[i]
-            fileName = '읽기자료' + str(instance.parentSession.week) + '주차_' + os.path.splitext(PDF.name)[0] + '.pdf'
-            googleId = str(uuid.uuid4())
-            instance.googleId = googleId 
-            instance.pdf.name = googleId+'.pdf'
+            session = instance.parentSession
+            season = session.season
+            short_uuid = str(uuid.uuid4()).split("-")[0]
+            fileName = f'{season.year}/{season.semester}학기/{session.week}주차/세션/{os.path.splitext(PDF.name)[0]}-{short_uuid}.pdf'
+            objectStorage.save(PDF, fileName, 'application/pdf')
+            instance.googleId = fileName
+            instance.pdf = None
             instance.save()
 
         formset.save_m2m()
