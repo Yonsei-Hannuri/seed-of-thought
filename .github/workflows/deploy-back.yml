@@ -31,6 +31,20 @@ jobs:
           file_name: .env
           fail_on_empty: true
 
+      - name: Make config for AWS S3
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "config.json"
+          json: ${{ secrets.AWS_S3_CONFIG }}
+          dir: "./backend/hannuri/component/ObjectStorage/secret"
+
+      - name: Make client secret file for Google Oauth
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "client_secret.json"
+          json: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          dir: "./backend/hannuri/component/GoogleOauth/secret"
+
       - name: Build docker image
         run: |
           docker build -t hannuri-api ./backend
