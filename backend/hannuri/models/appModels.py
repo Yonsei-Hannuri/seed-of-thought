@@ -95,7 +95,7 @@ class Session(models.Model):
 class SessionReadfile(models.Model):
     parentSession = models.ForeignKey(Session, related_name='readfile', on_delete=models.CASCADE)
     pdf = models.FileField(upload_to='session/', blank=True)
-    googleId = models.CharField(max_length=200, blank=True, verbose_name="구글id")
+    googleId = models.CharField(max_length=200, blank=True, verbose_name="파일id")
 
     def __str__(self):
         return f'{self.parentSession}, 읽기자료'
@@ -106,10 +106,9 @@ class Detgori(models.Model):
     author = models.ForeignKey(User, on_delete=models.PROTECT, related_name='detgori', verbose_name="댓거리 작성자")
     title = models.CharField(max_length=200, verbose_name="제목")
     date = models.DateTimeField(auto_now_add=True, verbose_name="날짜")
-    pdf = models.FileField(upload_to='detgori/', blank=True)
     words = models.TextField(blank=True)
     pureText = models.TextField(blank=True)
-    googleId = models.CharField(max_length=200, blank=True, verbose_name="구글id")
+    googleId = models.CharField(max_length=200, blank=True, verbose_name="파일id")
 
     def __str__(self):
         return f'{self.parentSession}, {self.author} 댓거리'
