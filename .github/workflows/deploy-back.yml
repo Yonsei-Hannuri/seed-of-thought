@@ -31,6 +31,11 @@ jobs:
           file_name: .env
           fail_on_empty: true
 
+      - name: Make directory for component config files
+        run: |
+          mkdir ./backend/hannuri/component/ObjectStorage/secret
+          mkdir ./backend/hannuri/component/GoogleOauth/secret
+
       - name: Make config for AWS S3
         uses: jsdaniell/create-json@1.1.2
         with:
