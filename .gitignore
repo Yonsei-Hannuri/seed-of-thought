@@ -13,3 +13,4 @@ elastic*/
 *.sqlite3
 
 dev/
+prd/
