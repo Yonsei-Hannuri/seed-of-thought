@@ -1,0 +1,9 @@
+{% extends "admin/base.html" %}
+
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{{ title }} | {{ site_title|default:_('한누리 임원진 페이지') }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a style="color:white;" href="{% url 'admin:index' %}">한누리 임원진 페이지</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
