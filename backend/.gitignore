@@ -10,5 +10,4 @@ secret/
 _dev/
 .env
 
-/templates
 /static
