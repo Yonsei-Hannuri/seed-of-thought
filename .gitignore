@@ -8,8 +8,6 @@ dc-develop.yml
 develop.sh
 .env
 
-
-elastic*/
 *.sqlite3
 
 dev/
