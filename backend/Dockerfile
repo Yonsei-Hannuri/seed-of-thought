@@ -1,41 +1,29 @@
 #cotainer 실행시 옵션 추가: --platform linux/amd64 
 
-FROM --platform=linux/amd64 ubuntu:latest
+# debian bullseye 버전, python이 설치된 base 이미지
+FROM --platform=linux/amd64 python:3.8-slim-bullseye
 
+# 빌드시 사용자 입력을 요구하는 것을 방지하는 설정
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && \
- dpkg --purge --force-depends ca-certificates-java && \
- apt-get install ca-certificates-java -y && \
- apt-get install software-properties-common -y && \
- add-apt-repository ppa:deadsnakes/ppa -y && \
- apt-get -y install tzdata && \
- apt-get install python3.8 -y && \
- apt-get install python3-pip -y && \
- apt-get install openjdk-8-jdk -y && \
- apt-get install curl gcc -y && \
- apt-get install wget -y && \
- apt-get install git -y && \
- apt-get install automake -y && \
- apt-get install autoconf -y && \
- apt-get install autotools-dev -y
+# installations for python django
+RUN apt-get update -y
+# RUN apt-get -y install tzdata
+# RUN apt-get install curl gcc -y
+# RUN apt-get install wget -y
+# RUN apt-get install automake -y
+# RUN apt-get install autoconf -y
+# RUN apt-get install autotools-dev -y 
+# RUN apt-get install libffi-dev -y
 
-RUN curl -L https://raw.githubusercontent.com/konlpy/konlpy/master/scripts/mecab.sh | bash
+# installation for pdftotext 
+RUN apt-get install build-essential -y
+RUN apt-get install libpoppler-cpp-dev -y
+RUN apt-get install pkg-config -y
+RUN apt-get install python3-dev -y 
 
-RUN cd /tmp && \
-  wget https://bitbucket.org/eunjeon/mecab-ko/downloads/mecab-0.996-ko-0.9.2.tar.gz && \
-  tar xvf mecab-0.996-ko-0.9.2.tar.gz && \
-  cd /tmp/mecab-0.996-ko-0.9.2 && \
-  ./configure && \
-  make check && \
-  make install
-
-RUN apt-get install libffi-dev -y
-
-RUN pip3 install gunicorn
-
+# install python packages
 COPY ./requirements.txt /backend/requirements.txt
-
 RUN pip3 install -r /backend/requirements.txt
 
 COPY ./ /backend/
