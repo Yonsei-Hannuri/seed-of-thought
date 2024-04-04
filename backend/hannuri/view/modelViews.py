@@ -6,10 +6,12 @@ from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.files.storage import FileSystemStorage
 import copy
 from lib import validate
-from hannuri.component import pdfTextExtracter, koreanWordAnalyzer, wordCounter, objectStorage
+from hannuri.component import detgoriPdfTextExtracter, textAnalyzer, objectStorage, elasticSearchClient
 import uuid
+import threading
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.order_by('-id')
@@ -90,32 +92,50 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         headers = self.get_success_headers(serializer.data) 
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
 
-
-    def perform_create(self, serializer): # Detgori 관련 create가 발생했을 때 호출되는 메쏘드의 일부분 custom
+    # Detgori 관련 create가 발생했을 때 호출되는 메쏘드의 일부분 
+    def perform_create(self, serializer):
         if not validate.is_PDF(self.request.FILES['pdf'].name): 
             raise Exception('pdf 파일이 아닙니다.')
         
-        text = ''
-        word_count = '{ }'
-        try: # if deep copy not working (this happens when pdf file is too big)
-            PDF = copy.deepcopy(self.request.FILES['pdf'])
-            text = pdfTextExtracter.extract_text(PDF.file)
-            nouns = koreanWordAnalyzer.extract_nouns(text)  
-            word_count = wordCounter.count(nouns)
-        except:
-            pass
-        short_uuid = str(uuid.uuid4()).split("-")[0]
+        # OLTP
+        ## generate file id
         session = Session.objects.get(pk=self.request.POST['parentSession'])
         season = session.season
+        short_uuid = str(uuid.uuid4()).split("-")[0]
         fileName = f'{season.year}/{season.semester}학기/{session.week}주차/댓거리/{self.request.user.name}-{short_uuid}.pdf'
-        objectStorage.save(self.request.FILES['pdf'], fileName, 'application/pdf')
-        serializer.save(googleId=fileName, pureText=text, author=self.request.user, words=json.dumps(word_count))
-        #check users acting season, if first detgori add current season as his acting season.
+
+        pdf_bytes = copy.deepcopy(self.request.FILES['pdf'])
+        objectStorage.save(pdf_bytes, fileName, 'application/pdf')
+        detgori = serializer.save(googleId=fileName, author=self.request.user)
+
+        ## check users acting season, if first detgori add current season as his acting season.
         act_seasons = [season.id for season in self.request.user.act_seasons.all()]
         current_season = Season.objects.get(is_current=True).pk
         if not current_season in act_seasons:
             self.request.user.act_seasons.add(current_season)
         self.request.user.save()
+
+        # generate derived data
+        pdf_bytes = copy.deepcopy(self.request.FILES['pdf'])
+        t = threading.Thread(target=DetgoriViewSet._create_derived,args=[pdf_bytes, detgori.pk],daemon=True)
+        t.start()
+
+    def _create_derived(pdf_bytes, detgori_id):
+        pdf_bytes = copy.deepcopy(pdf_bytes)
+        FileSystemStorage(location="/tmp").save(f'{detgori_id}', pdf_bytes)
+        text = detgoriPdfTextExtracter.extract_text(f'/tmp/{detgori_id}')
+
+        # count word and save
+        word_count = textAnalyzer.count_words(text)
+        detgori = Detgori.objects.get(pk=detgori_id)
+        detgori.words = json.dumps(word_count)
+        detgori.pureText = text
+        detgori.save(update_fields=['words', 'pureText'])
+
+        # parse to sentences and save to elastic search
+        sentences = textAnalyzer.split_into_sentences(text)
+        elasticSearchClient.save_detgori_sentences(sentences, detgori_id)
+
 
 
     def perform_destroy(self, instance):

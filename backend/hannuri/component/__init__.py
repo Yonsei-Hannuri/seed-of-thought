@@ -1,11 +1,11 @@
-from .PdfTextExtracter.PdfMinerExtracter import PdfMinerExtracter
-from .KoreanWordAnalyzer.MecabKoreanWordAnalyzer import MecabKoreanWordAnalyzer
-from .WordCounter.SimpleWordCounter import SimpleWordCounter
+from .DetgoriPdfTextExtracter.DetgoriPdfTextExtracter import DetgoriPdfTextExtracter
+from .TextAnalyzer.TextAnalyzer import TextAnalyzer
 from .GoogleOauth.GoogleOauth import GoogleOauth
 from .ObjectStorage.S3 import S3
+from .ElasticSearchClient.ElasticSearchClient import ElasticSearchClient
 
-pdfTextExtracter = PdfMinerExtracter()
-koreanWordAnalyzer = MecabKoreanWordAnalyzer()
-wordCounter = SimpleWordCounter() 
+detgoriPdfTextExtracter = DetgoriPdfTextExtracter()
+textAnalyzer = TextAnalyzer()
 googleOauth = GoogleOauth()
 objectStorage = S3()
+elasticSearchClient = ElasticSearchClient()
