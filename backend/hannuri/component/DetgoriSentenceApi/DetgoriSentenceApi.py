@@ -73,7 +73,10 @@ class DetgoriSentenceApi:
             }
         }
         res = requests.get(f'{self.es_url}/{self.detgori_index_name}/_search', headers={"Content-Type" : "application/json"}, data=json.dumps(query))
-        return res.json()
+        body = res.json()
+        sources = [hit['_source'] for hit in body['hits']['hits']]
+        total_count = body['hits']['total']['value']
+        return {'result' : sources, 'total_count': total_count}
     
     def search_detgori_sentences(self, token, page, page_size=5):
         return self.search_detgori_sentences_among_detgoris(token, page=page, page_size=page_size)
