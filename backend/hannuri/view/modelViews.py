@@ -148,7 +148,9 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             self.request.user.act_seasons.remove(removing_detgori_season)
             self.request.user.save()
         
+        detgori_id = instance.pk
         instance.delete()
+        detgoriSentenceApi.delete_sentences_of_detgori(detgori_id)
 
     def get_queryset(self):
         queryset = self.queryset
