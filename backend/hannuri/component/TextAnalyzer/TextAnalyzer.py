@@ -1,6 +1,5 @@
 #https://bab2min.github.io/kiwipiepy/v0.17.0/kr/
 from kiwipiepy import Kiwi
-from kiwipiepy.utils import Stopwords
 
 class TextAnalyzer:
 
