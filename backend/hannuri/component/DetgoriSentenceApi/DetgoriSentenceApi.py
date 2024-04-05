@@ -5,7 +5,7 @@ import json
 import os
 from pathlib import Path
 
-class ElasticSearchClient:
+class DetgoriSentenceApi:
     
     def __init__(self):
         configs_file_path = os.path.join(Path(__file__).parent.absolute(), 'secret', 'configs.json')

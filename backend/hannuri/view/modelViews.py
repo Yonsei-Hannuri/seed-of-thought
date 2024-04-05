@@ -9,7 +9,7 @@ from rest_framework import status
 from django.core.files.storage import FileSystemStorage
 import copy
 from lib import validate
-from hannuri.component import detgoriPdfTextExtracter, textAnalyzer, objectStorage, elasticSearchClient
+from hannuri.component import detgoriPdfTextExtracter, textAnalyzer, objectStorage, detgoriSentenceApi
 import uuid
 import threading
 
@@ -134,7 +134,7 @@ class DetgoriViewSet(viewsets.ModelViewSet):
 
         # parse to sentences and save to elastic search
         sentences = textAnalyzer.split_into_sentences(text)
-        elasticSearchClient.save_detgori_sentences(sentences, detgori_id)
+        detgoriSentenceApi.save_detgori_sentences(sentences, detgori_id)
 
 
 
