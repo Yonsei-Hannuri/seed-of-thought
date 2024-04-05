@@ -7,12 +7,13 @@ from pathlib import Path
 
 class DetgoriSentenceApi:
     
-    def __init__(self):
+    def __init__(self, logger=None):
         configs_file_path = os.path.join(Path(__file__).parent.absolute(), 'secret', 'configs.json')
         with open(configs_file_path) as f:
             configs = json.load(f)
         self.es_url = configs['esUrl']
         self.detgori_index_name = configs['detgoriIndexName']
+        self.logger = logger
 
     def save_detgori_sentences(self, sentences, detgori_id):
         if len(sentences) == 0:
@@ -38,7 +39,16 @@ class DetgoriSentenceApi:
                 time.sleep(5)
 
         if res is None or res.json()["errors"] :
-            print(f'error on elasticsearch index creating: {res.json()}')
+            error_message = json.dumps(
+                    {
+                        "description": "댓거리 문장 저장 중 오류 발생", 
+                        "detgoriId": detgori_id, 
+                        "errorBody": res.json()
+                    }
+                )
+            if self.logger:
+                self.logger.error(error_message)
+            print(error_message)
         
     def search_detgori_sentences_among_detgoris(self, token, detgori_ids=None, page = 0, page_size=5):
         page = page
@@ -76,8 +86,28 @@ class DetgoriSentenceApi:
                 }
             }
         }
-        requests.post(f'{self.es_url}/{self.detgori_index_name}/_delete_by_query', headers={"Content-Type" : "application/json"}, data=json.dumps(query))
 
+        MAX_RETRY_COUNT = 3
+        t = 0
+        res = None
+        while t < MAX_RETRY_COUNT:
+            t += 1
+            try:
+                res = requests.post(f'{self.es_url}/{self.detgori_index_name}/_delete_by_query', headers={"Content-Type" : "application/json"}, data=json.dumps(query))
+                break
+            except:
+                time.sleep(0.5)
 
+        if res is None or len(res.json()["failures"]) != 0:
+            error_message = json.dumps(
+                    {
+                        "description": "댓거리 문장 삭제 중 오류 발생", 
+                        "detgoriId": detgori_id, 
+                        "errorBody": res.json()
+                    }
+                )
+            if self.logger:
+                self.logger.error(error_message)
+            print(error_message)
         
 
