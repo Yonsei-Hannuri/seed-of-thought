@@ -12,30 +12,40 @@ class ElasticSearchClient:
         with open(configs_file_path) as f:
             configs = json.load(f)
         self.es_url = configs['esUrl']
+        self.detgori_index_name = configs['detgoriIndexName']
 
     def save_detgori_sentences(self, sentences, detgori_id):
-        MAX_RETRY_COUNT = 3
+        if len(sentences) == 0:
+            return
+        payload = []
         for i in range(len(sentences)):
-            d = {
+            payload.append('{"index": { }}')
+            payload.append(json.dumps({
                 'detgoriId': detgori_id,
                 'sentence': sentences[i],
                 'sentenceIndex': i+1
-            }
-            t = 0
-            while t < MAX_RETRY_COUNT:
-                t += 1
-                try:
-                    res = requests.post(f'{self.es_url}/detgori/_doc', headers={"Content-Type" : "application/json"}, data=json.dumps(d))
-                    if res.status_code != 201 :
-                        raise IOError(f'**Error** status code is {res.status_code}: {res.json()}')
-                    break
-                except:
-                    time.sleep(5)
+            }))
+        payload.append('\n')
+        MAX_RETRY_COUNT = 3
+        t = 0
+        res = None
+        while t < MAX_RETRY_COUNT:
+            t += 1
+            try:
+                res = requests.post(f'{self.es_url}/{self.detgori_index_name}/_bulk', headers={"Content-Type" : "application/json"}, data='\n'.join(payload))  
+                break
+            except:
+                time.sleep(5)
+
+        if res is None or res.json()["errors"] :
+            print(f'error on elasticsearch index creating: {res.json()}')
         
-    def search_detgori_sentences(self, token, page):
-        page_size = 5
+    def search_detgori_sentences_among_detgoris(self, token, detgori_ids=None, page = 0, page_size=5):
         page = page
         week_num = datetime.datetime.now().isocalendar()[1]
+        must_conditions = [{"match": {"sentence": {"query": token, "operator": "and"}}}]
+        if isinstance(detgori_ids, list):
+            must_conditions.append({ "terms" : { "detgoriId" : detgori_ids }})
         query = {
             "from": page_size * page,
             "size": page_size,
@@ -43,9 +53,7 @@ class ElasticSearchClient:
                 "function_score": {
                     "query": { 
                         "bool": { 
-                                "must": [
-                                    {"match": {"sentence": {"query": token, "operator": "and"}}}
-                                ]
+                                "must": must_conditions
                             }
                         },
                     "random_score": {"seed": week_num, "field": "_seq_no"}, 
@@ -54,5 +62,22 @@ class ElasticSearchClient:
                 }
             }
         }
-        res = requests.get(f'{self.es_url}/detgori/_search', headers={"Content-Type" : "application/json"}, data=json.dumps(query))
+        res = requests.get(f'{self.es_url}/{self.detgori_index_name}/_search', headers={"Content-Type" : "application/json"}, data=json.dumps(query))
         return res.json()
+    
+    def search_detgori_sentences(self, token, page, page_size=5):
+        return self.search_detgori_sentences_among_detgoris(token, page=page, page_size=page_size)
+    
+    def delete_sentences_of_detgori(self, detgori_id):
+        query = {
+            "query": {
+                "term": {
+                    "detgoriId": detgori_id
+                }
+            }
+        }
+        requests.post(f'{self.es_url}/{self.detgori_index_name}/_delete_by_query', headers={"Content-Type" : "application/json"}, data=json.dumps(query))
+
+
+        
+
