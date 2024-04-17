@@ -7,13 +7,12 @@ from pathlib import Path
 
 class DetgoriSentenceApi:
     
-    def __init__(self, logger=None):
+    def __init__(self):
         configs_file_path = os.path.join(Path(__file__).parent.absolute(), 'secret', 'configs.json')
         with open(configs_file_path) as f:
             configs = json.load(f)
         self.es_url = configs['esUrl']
         self.detgori_index_name = configs['detgoriIndexName']
-        self.logger = logger
 
     def save_detgori_sentences(self, sentences, detgori_id):
         if len(sentences) == 0:
@@ -43,12 +42,10 @@ class DetgoriSentenceApi:
                     {
                         "description": "댓거리 문장 저장 중 오류 발생", 
                         "detgoriId": detgori_id, 
-                        "errorBody": res.json()
+                        "dbError": res.json()
                     }
                 )
-            if self.logger:
-                self.logger.error(error_message)
-            print(error_message)
+            raise DetgoriSentenceApi.ApiException(error_message)
         
     def search_detgori_sentences_among_detgoris(self, token, detgori_ids=None, page = 0, page_size=5):
         page = page
@@ -106,11 +103,13 @@ class DetgoriSentenceApi:
                     {
                         "description": "댓거리 문장 삭제 중 오류 발생", 
                         "detgoriId": detgori_id, 
-                        "errorBody": res.json()
+                        "dbError": res.json()
                     }
                 )
-            if self.logger:
-                self.logger.error(error_message)
-            print(error_message)
+            raise DetgoriSentenceApi.ApiException(error_message)
+
+    
+    class ApiException(Exception):
+        pass
         
 
