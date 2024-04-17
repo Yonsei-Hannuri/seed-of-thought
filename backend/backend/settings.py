@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 import environ
+import logging
 
 ENV = environ.Env(
     DEBUG=(bool, False)
@@ -67,6 +68,25 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'backend.wsgi.application'
+
+# Logging
+LOGGING = {
+    'version': 1,  # the dictConfig format version
+    'disable_existing_loggers': False, 
+    'handlers': {
+        'file': {
+            'level': 'WARNING',
+            'filters': ['require_debug_false'],
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'log/warning.log',
+        },
+    },
+    'loggers': {
+        'common': {
+            'handlers': ['console', 'file']
+        }
+    }
+}
 
 
 # Database
