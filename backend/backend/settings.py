@@ -73,12 +73,25 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 LOGGING = {
     'version': 1,  # the dictConfig format version
     'disable_existing_loggers': False, 
+    'filters': {
+        'require_debug_false': {
+            '()': 'django.utils.log.RequireDebugFalse',
+        },
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
     'handlers': {
         'file': {
             'level': 'WARNING',
             'filters': ['require_debug_false'],
             'class': 'logging.FileHandler',
             'filename': BASE_DIR / 'log/warning.log',
+        },
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
