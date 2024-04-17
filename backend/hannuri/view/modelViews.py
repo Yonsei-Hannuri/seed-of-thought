@@ -12,6 +12,8 @@ from lib import validate
 from hannuri.component import detgoriPdfTextExtracter, textAnalyzer, objectStorage, detgoriSentenceApi
 import uuid
 import threading
+import logging
+logger = logging.getLogger('common')
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.order_by('-id')
@@ -121,20 +123,30 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         t.start()
 
     def _create_derived(pdf_bytes, detgori_id):
-        pdf_bytes = copy.deepcopy(pdf_bytes)
-        FileSystemStorage(location="/tmp").save(f'{detgori_id}', pdf_bytes)
-        text = detgoriPdfTextExtracter.extract_text(f'/tmp/{detgori_id}')
+        try:
+            pdf_bytes = copy.deepcopy(pdf_bytes)
+            FileSystemStorage(location="/tmp").save(f'{detgori_id}', pdf_bytes)
+            text = detgoriPdfTextExtracter.extract_text(f'/tmp/{detgori_id}')
+        except Exception as e:
+            logger.error(e)
+            return
 
         # count word and save
-        word_count = textAnalyzer.count_words(text)
-        detgori = Detgori.objects.get(pk=detgori_id)
-        detgori.words = json.dumps(word_count)
-        detgori.pureText = text
-        detgori.save(update_fields=['words', 'pureText'])
+        try:
+            word_count = textAnalyzer.count_words(text)
+            detgori = Detgori.objects.get(pk=detgori_id)
+            detgori.words = json.dumps(word_count)
+            detgori.pureText = text
+            detgori.save(update_fields=['words', 'pureText'])
+        except Exception as e:
+            logger.error(e)
 
         # parse to sentences and save to elastic search
         sentences = textAnalyzer.split_into_sentences(text)
-        detgoriSentenceApi.save_detgori_sentences(sentences, detgori_id)
+        try:
+            detgoriSentenceApi.save_detgori_sentences(sentences, detgori_id)
+        except Exception as e:
+            logger.error(e)
 
 
 
@@ -150,7 +162,10 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         
         detgori_id = instance.pk
         instance.delete()
-        detgoriSentenceApi.delete_sentences_of_detgori(detgori_id)
+        try:
+            detgoriSentenceApi.delete_sentences_of_detgori(detgori_id)
+        except Exception as e:
+            logger.error(e)
 
     def get_queryset(self):
         queryset = self.queryset
