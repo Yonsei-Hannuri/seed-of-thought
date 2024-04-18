@@ -43,6 +43,13 @@ jobs:
           json: ${{ secrets.AWS_S3_CONFIG }}
           dir: "./backend/hannuri/component/ObjectStorage/secret"
 
+      - name: Make config file for detgori sentence api component
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "configs.json"
+          json: ${{ secrets.DETGORI_SENTENCE_API_CONFIG }}
+          dir: "./backend/hannuri/component/DetgoriSentenceApi/secret"
+
       - name: Make client secret file for Google Oauth
         uses: jsdaniell/create-json@1.1.2
         with:
