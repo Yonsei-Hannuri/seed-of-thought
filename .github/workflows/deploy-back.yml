@@ -35,6 +35,7 @@ jobs:
         run: |
           mkdir ./backend/hannuri/component/ObjectStorage/secret
           mkdir ./backend/hannuri/component/GoogleOauth/secret
+          mkdir ./backend/hannuri/component/DetgoriSentenceApi/secret
 
       - name: Make config for AWS S3
         uses: jsdaniell/create-json@1.1.2
