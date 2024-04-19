@@ -119,18 +119,23 @@ class DetgoriViewSet(viewsets.ModelViewSet):
 
         # generate derived data
         pdf_bytes = copy.deepcopy(self.request.FILES['pdf'])
-        t = threading.Thread(target=DetgoriViewSet._create_derived,args=[pdf_bytes, detgori.pk],daemon=True)
-        t.start()
-
-    def _create_derived(pdf_bytes, detgori_id):
         try:
-            pdf_bytes = copy.deepcopy(pdf_bytes)
-            FileSystemStorage(location="/tmp").save(f'{detgori_id}', pdf_bytes)
-            text = detgoriPdfTextExtracter.extract_text(f'/tmp/{detgori_id}')
+            FileSystemStorage(location="/tmp").save(f'{detgori.pk}', pdf_bytes)
+            text = detgoriPdfTextExtracter.extract_text(f'/tmp/{detgori.pk}')
         except Exception as e:
-            logger.error(e)
+            logger.error(f'{detgori.pk}번 댓거리의 PDF에서 텍스트를 추출하는데 실패했습니다.' + e)
             return
 
+        ts = [
+            threading.Thread(target=DetgoriViewSet._generate_wordcount,args=[text, detgori.pk]),
+            threading.Thread(target=DetgoriViewSet._generate_sentences,args=[text, detgori.pk]),
+        ]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join()
+        
+    def _generate_wordcount(text, detgori_id):
         # count word and save
         try:
             word_count = textAnalyzer.count_words(text)
@@ -139,14 +144,15 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             detgori.pureText = text
             detgori.save(update_fields=['words', 'pureText'])
         except Exception as e:
-            logger.error(e)
+            logger.error(f'{detgori_id}번 댓거리의 텍스트에서 단어개수 데이터 생성 작업을 실패했습니다.' + e)
 
+    def _generate_sentences(text, detgori_id):
         # parse to sentences and save to elastic search
         sentences = textAnalyzer.split_into_sentences(text)
         try:
             detgoriSentenceApi.save_detgori_sentences(sentences, detgori_id)
         except Exception as e:
-            logger.error(e)
+            logger.error(f'{detgori_id}번 댓거리의 텍스트에서 문장을 데이터를 생성하는 작업에 실패했습니다.' + e)
 
 
 
