@@ -6,17 +6,8 @@ FROM --platform=linux/amd64 python:3.8-slim-bullseye
 # 빌드시 사용자 입력을 요구하는 것을 방지하는 설정
 ENV DEBIAN_FRONTEND=noninteractive
 
-# installations for python django
 RUN apt-get update -y
-# RUN apt-get -y install tzdata
-# RUN apt-get install curl gcc -y
-# RUN apt-get install wget -y
-# RUN apt-get install automake -y
-# RUN apt-get install autoconf -y
-# RUN apt-get install autotools-dev -y 
-# RUN apt-get install libffi-dev -y
 
-# installation for pdftotext 
 RUN apt-get install build-essential -y
 RUN apt-get install libpoppler-cpp-dev -y
 RUN apt-get install pkg-config -y
