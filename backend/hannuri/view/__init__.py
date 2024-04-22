@@ -1,2 +1,2 @@
-from .customViews import *
-from .modelViews import *
+from .custom import *
+from .model import *
