@@ -20,5 +20,6 @@ urlpatterns = [
     path('profileColor/', view.ProfileColor),
     path('wordList/<str:type>/<int:sessionId>', view.WordList),
     path('mypageInfo', view.MypageInfo),
-    path('frontError/', view.FrontError)
+    path('frontError/', view.FrontError),
+    path('sentenceSearch/', view.SentenceSearch)
 ]
