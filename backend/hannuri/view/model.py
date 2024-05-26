@@ -11,7 +11,6 @@ import copy
 from lib import validate
 from hannuri.component import detgoriPdfTextExtracter, textAnalyzer, objectStorage, detgoriSentenceApi
 import uuid
-import threading
 import logging
 logger = logging.getLogger('common')
 
@@ -125,15 +124,9 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         except Exception as e:
             logger.error(f'{detgori.pk}번 댓거리의 PDF에서 텍스트를 추출하는데 실패했습니다.' + e)
             return
-
-        ts = [
-            threading.Thread(target=DetgoriViewSet._generate_wordcount,args=[text, detgori.pk]),
-            threading.Thread(target=DetgoriViewSet._generate_sentences,args=[text, detgori.pk]),
-        ]
-        for t in ts:
-            t.start()
-        for t in ts:
-            t.join()
+        
+        DetgoriViewSet._generate_wordcount(text, detgori.pk)
+        DetgoriViewSet._generate_sentences(text, detgori.pk)
         
     def _generate_wordcount(text, detgori_id):
         # count word and save
