@@ -1,16 +1,16 @@
-import json
 from rest_framework import viewsets
-from hannuri.serializer import *
-from hannuri.models import *
-from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
-from django.core.files.storage import FileSystemStorage
+from hannuri.serializer import *
+from hannuri.models import *
+from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
+from hannuri.component import objectStorage
+from hannuri.agent import detgoriDerivedDataAgent
 import copy
 from lib import validate
-from hannuri.component import detgoriPdfTextExtracter, textAnalyzer, objectStorage, detgoriSentenceApi
 import uuid
+
 import logging
 logger = logging.getLogger('common')
 
@@ -96,8 +96,7 @@ class DetgoriViewSet(viewsets.ModelViewSet):
     # Detgori 관련 create가 발생했을 때 호출되는 메쏘드의 일부분 
     def perform_create(self, serializer):
         if not validate.is_PDF(self.request.FILES['pdf'].name): 
-            raise Exception('pdf 파일이 아닙니다.')
-        
+            raise Exception('pdf 파일이 아닙니다.')        
         # OLTP
         ## generate file id
         session = Session.objects.get(pk=self.request.POST['parentSession'])
@@ -116,37 +115,7 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             self.request.user.act_seasons.add(current_season)
         self.request.user.save()
 
-        # generate derived data
-        pdf_bytes = copy.deepcopy(self.request.FILES['pdf'])
-        try:
-            FileSystemStorage(location="/tmp").save(f'{detgori.pk}', pdf_bytes)
-            text = detgoriPdfTextExtracter.extract_text(f'/tmp/{detgori.pk}')
-        except Exception as e:
-            logger.error(f'{detgori.pk}번 댓거리의 PDF에서 텍스트를 추출하는데 실패했습니다.' + e)
-            return
-        
-        DetgoriViewSet._generate_wordcount(text, detgori.pk)
-        DetgoriViewSet._generate_sentences(text, detgori.pk)
-        
-    def _generate_wordcount(text, detgori_id):
-        # count word and save
-        try:
-            word_count = textAnalyzer.count_words(text)
-            detgori = Detgori.objects.get(pk=detgori_id)
-            detgori.words = json.dumps(word_count)
-            detgori.pureText = text
-            detgori.save(update_fields=['words', 'pureText'])
-        except Exception as e:
-            logger.error(f'{detgori_id}번 댓거리의 텍스트에서 단어개수 데이터 생성 작업을 실패했습니다.' + e)
-
-    def _generate_sentences(text, detgori_id):
-        # parse to sentences and save to elastic search
-        sentences = textAnalyzer.split_into_sentences(text)
-        try:
-            detgoriSentenceApi.save_detgori_sentences(sentences, detgori_id)
-        except Exception as e:
-            logger.error(f'{detgori_id}번 댓거리의 텍스트에서 문장을 데이터를 생성하는 작업에 실패했습니다.' + e)
-
+        detgoriDerivedDataAgent.create_derived(copy.deepcopy(self.request.FILES['pdf']), detgori.pk)
 
 
     def perform_destroy(self, instance):
@@ -161,10 +130,8 @@ class DetgoriViewSet(viewsets.ModelViewSet):
         
         detgori_id = instance.pk
         instance.delete()
-        try:
-            detgoriSentenceApi.delete_sentences_of_detgori(detgori_id)
-        except Exception as e:
-            logger.error(e)
+        detgoriDerivedDataAgent.remove_derived(detgori_id)
+
 
     def get_queryset(self):
         queryset = self.queryset

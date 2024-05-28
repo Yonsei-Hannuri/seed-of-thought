@@ -1,0 +1,3 @@
+from .DetgoriDerivedDataAgent import DetgoriDerivedDataAgent
+
+detgoriDerivedDataAgent = DetgoriDerivedDataAgent()
