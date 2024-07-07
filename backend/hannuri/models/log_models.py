@@ -1,5 +1,5 @@
 from django.db import models
-from .appModels import *
+from .app_models import *
 
 class DetgoriReadTime(models.Model):
     reader = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="읽은 사람")

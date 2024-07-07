@@ -1,3 +1,3 @@
-from .appModels import *
-from .logModels import *
-from .controlModels import *
+from .app_models import *
+from .log_models import *
+from .control_models import *
