@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'hannuri.apps.HannuriConfig',
+    'cowriter.apps.CowriterConfig',
     'corsheaders',
 ]
 

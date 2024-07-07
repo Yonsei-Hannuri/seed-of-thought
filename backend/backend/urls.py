@@ -18,6 +18,7 @@ from django.urls import path, include
 from django.conf import settings
 
 urlpatterns = [
+    path('cowriter/', include('cowriter.urls')),
     path('', include('hannuri.urls')),
     path('admin/', admin.site.urls),
 ]
