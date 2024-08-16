@@ -2,13 +2,15 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from cowriter import view
 
-
 router = DefaultRouter()
 router.register(r'subject', view.SubjectViewSet)
-router.register(r'keyword', view.KeywordViewSet)
 router.register(r'essay', view.EssayViewSet)
-router.register(r'mindmap', view.EssayMindmapViewSet)
-router.register(r'phase', view.PhaseViewSet)
 
+essay_router = DefaultRouter()
+essay_router.register(r'mindmap', view.EssayMindmapViewSet)
+essay_router.register(r'paragraph', view.ParagraphViewSet)
 
-urlpatterns = [path('', include(router.urls)),]
+urlpatterns = [
+    path('', include(router.urls)),
+    path('essay/<int:essay_id>/', include(essay_router.urls)),
+]

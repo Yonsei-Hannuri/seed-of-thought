@@ -4,7 +4,7 @@ from cowriter.models import *
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
         model = Subject
-        fields = ['source', 'purpose','content']
+        fields = '__all__'
 
 class KeywordSerializer(serializers.ModelSerializer):
     class Meta:
@@ -32,16 +32,18 @@ class EssaySerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class EssayMindmapSerializer(serializers.ModelSerializer):
+    keyword_1nm = serializers.ReadOnlyField(source='keyword1.keyword_nm')
+    keyword_2nm = serializers.ReadOnlyField(source='keyword2.keyword_nm')
     class Meta:
         model = EssayMindmap
+        fields = ['essay_id', 'keyword1', 'keyword2', 'keyword_1nm', 'keyword_2nm']
+
+class ParagraphSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Paragraph
         fields = '__all__'
 
-class PhaseSerializer(serializers.ModelSerializer):
+class ParagraphHistSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Phase
-        fields = '__all__'
-
-class PhaseHistSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PhaseHist
+        model = ParagraphHist
         fields = '__all__'
