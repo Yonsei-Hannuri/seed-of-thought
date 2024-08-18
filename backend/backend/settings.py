@@ -176,7 +176,8 @@ SESSION_COOKIE_AGE = 60 * 60 * 4
 if DEBUG == True:
     CORS_ALLOW_CREDENTIALS = True
     CORS_ALLOWED_ORIGINS = [
-        FRONT_URL
+        FRONT_URL,
+        "http://localhost:6006" # storybook
     ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
