@@ -2,16 +2,22 @@ from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import viewsets
+from rest_framework.parsers import JSONParser
 from django.db import transaction
 from cowriter.serializer import *
 from cowriter.models import *
 from rest_framework.permissions import IsAuthenticated
 from cowriter.message import *
+from cowriter.renderer import CamelCaseJSONRenderer
+from cowriter.parser import CamelCaseJSONParser
+
 
 class SubjectViewSet(viewsets.ModelViewSet):
     queryset = Subject.objects.filter(del_yn=False).order_by('-subject_id')
     serializer_class = SubjectSerializer
     permission_classes = [IsAuthenticated]
+    renderer_classes = [CamelCaseJSONRenderer]
+    parser_classes = [CamelCaseJSONParser, JSONParser] 
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -23,10 +29,19 @@ class EssayViewSet(viewsets.ModelViewSet):
     queryset = Essay.objects.filter(del_yn=False).order_by('-created_dt')
     serializer_class = EssaySerializer
     permission_classes = [IsAuthenticated]
+    renderer_classes = [CamelCaseJSONRenderer]
+    parser_classes = [CamelCaseJSONParser, JSONParser] 
 
     def get_queryset(self):
         user = self.request.user
         return Essay.objects.filter(owner=user.email, del_yn=False).order_by('-created_dt')
+
+    def retrieve(self, request, *args, **kwargs):
+        action = request.query_params.get('action', None)
+        if action == "title-recommend":
+            return Response(["제목추천1", "제목추천2", "제목추천3"])
+        else:
+            return super().retrieve(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs): 
         request.data['owner'] = request.user.email
@@ -37,6 +52,13 @@ class EssayViewSet(viewsets.ModelViewSet):
         if not action:
             return Response(NO_ACTION_DEFINED, status=status.HTTP_400_BAD_REQUEST)
         
+        if action.lower() == "title":
+            if not request.data["title"]:
+                return Response('title 프로퍼티가 필요합니다.', status=status.HTTP_400_BAD_REQUEST)
+            serializer = self.get_serializer(self.get_object(), partial=True, data={"essay_title": request.data["title"]})
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
         if action.lower() == "complete":
             if not request.data["complete"]:
                 return Response('complete(true/false) 프로퍼티가 필요합니다.', status=status.HTTP_400_BAD_REQUEST)
@@ -59,6 +81,8 @@ class EssayMindmapViewSet(viewsets.ModelViewSet):
     queryset = EssayMindmap.objects.order_by('-created_dt')
     serializer_class = EssayMindmapSerializer
     permission_classes = [IsAuthenticated]
+    renderer_classes = [CamelCaseJSONRenderer]
+    parser_classes = [CamelCaseJSONParser, JSONParser] 
 
     def get_queryset(self):
         essay_id = self.kwargs['essay_id']
@@ -73,7 +97,6 @@ class EssayMindmapViewSet(viewsets.ModelViewSet):
         for edge in mindmap:
             keywords = [edge["keyword1"] if edge["keyword1"] < edge["keyword2"] else edge["keyword2"],
                         edge["keyword2"] if edge["keyword1"] < edge["keyword2"] else edge["keyword1"]]
-            if keywords[0] == keywords[1] : continue
 
             keyword_records = [None, None]
             for index in range(2):
@@ -102,6 +125,9 @@ class ParagraphViewSet(viewsets.ModelViewSet):
     queryset = Paragraph.objects.filter(del_yn=False).order_by('-created_dt')
     serializer_class = ParagraphSerializer  
     permission_classes = [IsAuthenticated]
+    renderer_classes = [CamelCaseJSONRenderer]
+    parser_classes = [CamelCaseJSONParser, JSONParser] 
+
     DUMMY_ORDER = 10000
 
     def get_queryset(self):
