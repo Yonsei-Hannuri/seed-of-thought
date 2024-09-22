@@ -53,8 +53,9 @@ class SessionAdmin(admin.ModelAdmin):
             for session in pre_current_session:
                 session.is_current = False
                 session.save()
-
-        obj.season = Season.objects.get(is_current=True)
+    
+        if not obj.season:
+            obj.season = Season.objects.get(is_current=True)
 
         super().save_model(request, obj, form, change)   
 
