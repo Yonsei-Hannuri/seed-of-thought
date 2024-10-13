@@ -24,6 +24,7 @@ jobs:
         with:
           envkey_DEBUG: False
           envkey_FRONT_DOMAIN: ${{ vars.FRONT_DOMAIN }}
+          envkey_COWRITER_DOMAIN: ${{ vars.COWRITER_DOMAIN }}
           envkey_API_DOMAIN: ${{ vars.API_DOMAIN }}
           envkey_DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           envkey_DOMAIN: ${{ vars.DOMAIN }}

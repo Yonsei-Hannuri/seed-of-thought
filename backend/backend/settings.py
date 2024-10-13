@@ -9,17 +9,19 @@ ENV = environ.Env(
 BASE_DIR = Path(__file__).resolve().parent.parent
 environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
-ALLOWED_HOSTS = [ENV('FRONT_DOMAIN'), ENV('API_DOMAIN')]
+ALLOWED_HOSTS = [ENV('FRONT_DOMAIN'), ENV('API_DOMAIN'), ENV('COWRITER_DOMAIN')]
 SECRET_KEY = ENV('DJANGO_SECRET_KEY')
 
-FRONT_URL = 'https://' + ENV('FRONT_DOMAIN')
+HANNURI_URL = 'https://' + ENV('FRONT_DOMAIN')
+COWRITER_URL = 'https://' + ENV('COWRITER_DOMAIN')
 API_URL = 'https://' + ENV('API_DOMAIN')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = ENV('DEBUG')
 if DEBUG:
     ALLOWED_HOSTS = ["*"]
-    FRONT_URL = 'http://' + ENV('FRONT_DOMAIN')
+    HANNURI_URL = 'http://' + ENV('FRONT_DOMAIN')
+    COWRITER_URL = 'http://' + ENV('COWRITER_DOMAIN')
     API_URL = 'http://' + ENV('API_DOMAIN')
     ##SSL disregards in development environment
     os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -176,8 +178,9 @@ SESSION_COOKIE_AGE = 60 * 60 * 4
 if DEBUG == True:
     CORS_ALLOW_CREDENTIALS = True
     CORS_ALLOWED_ORIGINS = [
-        FRONT_URL,
-        "http://localhost:6006" # storybook
+        HANNURI_URL,
+        COWRITER_URL,
+        "http://localhost:6006", # storybook
     ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
@@ -185,6 +188,7 @@ X_FRAME_OPTIONS = 'SAMEORIGIN'
 CSRF_COOKIE_DOMAIN = ENV("DOMAIN")
 
 CSRF_TRUSTED_ORIGINS = [
-    FRONT_URL,
+    HANNURI_URL,
+    COWRITER_URL,
     API_URL
 ]
