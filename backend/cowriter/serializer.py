@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from cowriter.models import *
+from cowriter.utils import is_valid_sentence
 
 class SubjectSerializer(serializers.ModelSerializer):
     class Meta:
@@ -11,20 +12,11 @@ class KeywordSerializer(serializers.ModelSerializer):
         model = Keyword
         fields = '__all__'
 
-    def is_valid(self, raise_exception=False):
-        # 기존의 유효성 검사를 먼저 수행합니다.
-        valid = super().is_valid(raise_exception=raise_exception)
+    def validate_keyword_nm(self, name):        
+        if name.strip() == '':
+            raise serializers.ValidationError('키워드는 빈 문자열일 수 없습니다.')
 
-        if not valid:
-            return False
-        
-        keyword_name = self.validated_data.get('name')
-        
-        if keyword_name == '':
-            self.add_error('name', '키워드는 빈 문자열일 수 없습니다.')
-            valid = False
-
-        return True
+        return name
 
 class EssaySerializer(serializers.ModelSerializer):
     class Meta:
@@ -42,6 +34,11 @@ class ParagraphSerializer(serializers.ModelSerializer):
     class Meta:
         model = Paragraph
         fields = '__all__'
+
+    def validate_paragraph_content(self, content):
+        if not is_valid_sentence(content):
+            raise serializers.ValidationError("하나의 완성된 문장을 입력해주세요.")
+        return content
 
 class ParagraphHistSerializer(serializers.ModelSerializer):
     class Meta:
