@@ -15,11 +15,11 @@ def Login(request):
     try: 
         user = User.objects.get(email=email)
         login(request, user)
-        response = redirect(settings.FRONT_URL)
+        response = redirect(settings.HANNURI_URL)
         response.set_cookie('isLogin', 'true', domain=settings.ENV('DOMAIN'), max_age=60*60*4)
         return response
     except:
-        return redirect(settings.FRONT_URL+'?login=error')
+        return redirect(settings.HANNURI_URL+'?login=error')
 
 def Signin(request):
     email = googleOauth.get_user_email(request.GET.get('code'), settings.API_URL + '/signin')
@@ -33,13 +33,13 @@ def Signin(request):
         user.name = name
         user.generation = generation
         user.save()
-        return redirect(settings.FRONT_URL+'?type=signinSuccess') 
+        return redirect(settings.HANNURI_URL+'?type=signinSuccess') 
     except:
-        return redirect(settings.FRONT_URL+'?type=signinError')
+        return redirect(settings.HANNURI_URL+'?type=signinError')
 
 def Logout(request):
     logout(request)
-    response = redirect(settings.FRONT_URL)
+    response = redirect(settings.HANNURI_URL)
     response.set_cookie('isLogin', 'false', domain=settings.ENV('DOMAIN'))
     return response
 
@@ -141,3 +141,22 @@ def FrontError(request):
     except: pass
     return HttpResponse('FronError logged', status=200)
 
+def CowriterSubject(request):
+    sessionId = request.GET.get('sessionId')
+    session = Session.objects.filter(pk=sessionId).first()
+    if not session:
+        return HttpResponse('Not Found', status=404)
+    
+    subjectInfo = {
+        "subjectTitle": session.title,
+        "subjectPurpose": "생각의 공유",
+        "subjectContent": json.dumps(
+            {
+                "attatchments": {
+                    "pdf": [rf.googleId for rf in session.readfile.all()]
+                }
+            }
+        )
+    }
+    
+    return HttpResponse(json.dumps(subjectInfo), status=200) 

@@ -21,5 +21,6 @@ urlpatterns = [
     path('wordList/<str:type>/<int:sessionId>', view.WordList),
     path('mypageInfo', view.MypageInfo),
     path('frontError/', view.FrontError),
-    path('sentenceSearch/', view.SentenceSearch)
+    path('sentenceSearch/', view.SentenceSearch),
+    path('cowriter-subject/', view.CowriterSubject)
 ]
