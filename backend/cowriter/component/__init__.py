@@ -1,3 +1,3 @@
-from .LLM import LLM
+from .LLM.GeminiLLM import GeminiLLM
 
-llm = LLM()
+llm = GeminiLLM()
