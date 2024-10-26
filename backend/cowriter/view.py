@@ -1,15 +1,22 @@
+import hannuri.integration.cowriter
 from rest_framework import status
-from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework.parsers import JSONParser
+from rest_framework.exceptions import ValidationError
 from django.db import transaction
+from rest_framework.permissions import IsAuthenticated
+
+import hannuri.integration
+
 from cowriter.serializer import *
 from cowriter.models import *
-from rest_framework.permissions import IsAuthenticated
 from cowriter.message import *
 from cowriter.renderer import CamelCaseJSONRenderer
 from cowriter.parser import CamelCaseJSONParser
+from cowriter.component import llm
+from cowriter.agent import promptAgent
+from cowriter.utils import is_valid_sentence
 
 
 class SubjectViewSet(viewsets.ModelViewSet):
@@ -18,6 +25,43 @@ class SubjectViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     renderer_classes = [CamelCaseJSONRenderer]
     parser_classes = [CamelCaseJSONParser, JSONParser] 
+
+    def retrieve(self, request, *args, **kwargs):
+        subject_id = kwargs.get('pk')
+        subject_url = request.query_params.get('subjectUrl', None)
+        subject = Subject.objects.filter(pk=subject_id).first()
+
+        if not subject:
+            res = None
+            # if subject_url:
+            #     response = requests.get(subject_url)
+            #     if response.status_code == 200:
+            #         res = response.json()
+            # print(response)
+            from urllib.parse import urlparse, parse_qs
+            parsed_url = urlparse(subject_url)
+            query_params = parse_qs(parsed_url.query)
+            session_ids = query_params.get('sessionId')
+            if not session_ids:
+                return Response('존재하지 않는 자원', status=status.HTTP_404_NOT_FOUND)
+            session_id = session_ids[0]
+            res = hannuri.integration.cowriter.get_subject(session_id)
+            if res is None: 
+                subject = Subject(pk=subject_id, subject_url=subject_url)
+                subject.save()
+            else:
+                subject = Subject(
+                    pk=subject_id, 
+                    subject_url=subject_url,
+                    subject_title = res.get('subjectTitle'),
+                    subject_content = res.get('subjectContent'),
+                    subject_purpose = res.get('subjectPurpose'),
+                )
+                subject.save()
+        
+        serializer = self.get_serializer(subject)
+        return Response(serializer.data)
+
 
     def destroy(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -34,12 +78,23 @@ class EssayViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         user = self.request.user
-        return Essay.objects.filter(owner=user.email, del_yn=False).order_by('-created_dt')
+        action = self.request.query_params.get('action', None)
+        if action == 'recent-subject-essay':
+          subject_id = self.request.query_params.get('subject-id', None)
+          return Essay.objects.filter(owner=user.email, del_yn=False, subject_id=subject_id).order_by('-created_dt')
+        else:
+            return Essay.objects.filter(owner=user.email, del_yn=False).order_by('-created_dt')
 
     def retrieve(self, request, *args, **kwargs):
         action = request.query_params.get('action', None)
         if action == "title-recommend":
-            return Response(["제목추천1", "제목추천2", "제목추천3"])
+            essay_id = kwargs.get('pk')
+            essay = Essay.objects.filter(pk=essay_id).first()
+            paras = essay.paragraph.filter(del_yn=False)
+            if len(paras) == 0 :
+                raise ValidationError("단락이 없어 제목을 생성할 수 없습니다.")
+            essay_contents = '\n'.join([para.paragraph_content for para in paras])
+            return Response({"titleRecommend" : promptAgent.recommend_title(essay_contents)})
         else:
             return super().retrieve(request, *args, **kwargs)
 
@@ -132,7 +187,7 @@ class ParagraphViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         essay_id = self.kwargs['essay_id']
-        return Paragraph.objects.filter(essay_id=essay_id, del_yn=False)
+        return Paragraph.objects.filter(essay_id=essay_id, del_yn=False).order_by("order")
 
     def create(self, request, *args, **kwargs): 
         request.data['essay_id'] = kwargs['essay_id']
@@ -157,7 +212,13 @@ class ParagraphViewSet(viewsets.ModelViewSet):
         if action == 'regenerate':
             instance = self.get_object()
             command = request.data["command"]
-            revised_content = instance.paragraph_content +'\n**regenerated**\n'+ command + '**regenerated**\n' # 여기에 LLM 모듈을 꽂으면 됨.
+            if command == 'INITIAL':
+                revised_content = promptAgent.initial_gen_paragraph(instance.paragraph_content)
+            else:
+                if not is_valid_sentence(command):
+                    raise ValidationError("더욱 자세한 요청을 입력해주세요.")
+                revised_content = promptAgent.modify_paragaph_command(instance.paragraph_content, command)
+
             serializer = self.get_serializer(instance, partial=True, data={"paragraph_content": revised_content})
             serializer.is_valid(raise_exception=True)
             with transaction.atomic():
@@ -189,6 +250,8 @@ class ParagraphViewSet(viewsets.ModelViewSet):
             return Response(self.get_serializer(instance).data)
     
         return Response(NOT_DEFINED_ACTION, status=status.HTTP_400_BAD_REQUEST)
+    
+
     
     def _update_paragraph_order(self, paragraph, place_before):
         cur_order = paragraph.order
