@@ -3,9 +3,10 @@ from common.models.BaseModelMixin import BaseModelMixin
 
 class Subject(BaseModelMixin):
     subject_id = models.CharField(max_length=100, verbose_name="주제ID", primary_key=True, db_column="SUBJECT_ID")
-    subject_purpose = models.CharField(max_length=50, verbose_name="목적", db_column="SUBJECT_PURPOSE")
+    subject_url = models.TextField(blank=True, verbose_name="주제URL", db_column="SUBJECT_URL")
+    subject_purpose = models.CharField(blank=True, max_length=50, verbose_name="목적", db_column="SUBJECT_PURPOSE")
     subject_content = models.TextField(blank=True, verbose_name="내용", db_column="SUBJECT_CONTENT")
-    subject_title = models.CharField(max_length=200, verbose_name="제목", db_column="SUBJECT_TITLE")
+    subject_title = models.CharField(blank=True, max_length=200, verbose_name="제목", db_column="SUBJECT_TITLE")
     del_yn = models.BooleanField(default=False, verbose_name="삭제여부", db_column="DEL_YN")
 
     class Meta:
