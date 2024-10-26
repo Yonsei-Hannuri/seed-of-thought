@@ -37,6 +37,7 @@ jobs:
           mkdir ./backend/hannuri/component/ObjectStorage/secret
           mkdir ./backend/hannuri/component/GoogleOauth/secret
           mkdir ./backend/hannuri/component/DetgoriSentenceApi/secret
+          mkdir ./backend/cowriter/component/LLM/secret
 
       - name: Make config for AWS S3
         uses: jsdaniell/create-json@1.1.2
@@ -58,6 +59,13 @@ jobs:
           name: "client_secret.json"
           json: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           dir: "./backend/hannuri/component/GoogleOauth/secret"
+
+      - name: Make secret file for Gemini key
+        uses: jsdaniell/create-json@1.1.2
+        with:
+          name: "secret.json"
+          json: ${{ secrets.GEMINI_URL_KEY }}
+          dir: "./backend/cowriter/component/LLM/secret"
 
       - name: Build docker image
         run: |
