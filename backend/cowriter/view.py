@@ -150,9 +150,10 @@ class EssayMindmapViewSet(viewsets.ModelViewSet):
             return Response({"error": "Expected a list of items on 'mindmap' property"}, status=status.HTTP_400_BAD_REQUEST)
         edges = []
         for edge in mindmap:
+            edge["keyword1"] = edge["keyword1"].strip()
+            edge["keyword2"] = edge["keyword2"].strip()
             keywords = [edge["keyword1"] if edge["keyword1"] < edge["keyword2"] else edge["keyword2"],
                         edge["keyword2"] if edge["keyword1"] < edge["keyword2"] else edge["keyword1"]]
-
             keyword_records = [None, None]
             for index in range(2):
                 keyword_record = Keyword.objects.filter(keyword_nm=keywords[index]).first()
