@@ -6,7 +6,7 @@ from hannuri.serializer import *
 from hannuri.models import *
 from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
 from hannuri.component import objectStorage
-from hannuri.agent import detgoriDerivedDataAgent
+from hannuri.job import detgoriDerivedDataJob
 import copy
 from lib import validate
 import uuid
@@ -115,7 +115,7 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             self.request.user.act_seasons.add(current_season)
         self.request.user.save()
 
-        detgoriDerivedDataAgent.create_derived(copy.deepcopy(self.request.FILES['pdf']), detgori.pk)
+        detgoriDerivedDataJob.create_derived_async(copy.deepcopy(self.request.FILES['pdf']), detgori.pk)
 
 
     def perform_destroy(self, instance):
@@ -129,7 +129,7 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             self.request.user.save()
         
         detgori_id = instance.pk
-        detgoriDerivedDataAgent.remove_derived(detgori_id)
+        detgoriDerivedDataJob.remove_derived(detgori_id)
         instance.delete()
 
 

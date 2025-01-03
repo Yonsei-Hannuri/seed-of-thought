@@ -11,12 +11,12 @@ from multiprocessing import Process
 
 logger = logging.getLogger('common')
 
-class DetgoriDerivedDataAgent:
+class DetgoriDerivedDataJob:
     
-    def create_derived(self, pdf_bytes, detgori_id):
+    def create_derived_async(self, pdf_bytes, detgori_id):
         detgori_on_processing = DetgoriOnProcessingDerived(detgori_id=detgori_id)
         detgori_on_processing.save()
-        t = Process(target=DetgoriDerivedDataAgent._create_derived, args=(pdf_bytes, detgori_id))
+        t = Process(target=DetgoriDerivedDataJob._create_derived, args=(pdf_bytes, detgori_id))
         t.start()
 
     def _create_derived(pdf_bytes, detgori_id):
@@ -27,8 +27,8 @@ class DetgoriDerivedDataAgent:
             logger.error(f'{detgori_id}번 댓거리의 PDF에서 텍스트를 추출하는데 실패했습니다. {e}')
             return
         
-        DetgoriDerivedDataAgent._generate_wordcount(text, detgori_id)
-        DetgoriDerivedDataAgent._generate_sentences(text, detgori_id)
+        DetgoriDerivedDataJob._generate_wordcount(text, detgori_id)
+        DetgoriDerivedDataJob._generate_sentences(text, detgori_id)
 
         detgori_on_proceesing = DetgoriOnProcessingDerived.objects.get(detgori_id=detgori_id)
         detgori_on_proceesing.delete()
