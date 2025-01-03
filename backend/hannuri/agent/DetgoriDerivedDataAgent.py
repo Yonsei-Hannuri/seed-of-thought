@@ -1,7 +1,7 @@
 from django.core.files.storage import FileSystemStorage
 
-from hannuri.component import detgoriSentenceApi, detgoriPdfTextExtracter, textAnalyzer
-from hannuri.models import Detgori, DetgoriOnProcessingDerived
+from hannuri.component import detgoriPdfTextExtracter, textAnalyzer
+from hannuri.models import Detgori, DetgoriOnProcessingDerived, Sentence, Word, SentenceWord
 from django.core.exceptions import ObjectDoesNotExist
 
 import logging
@@ -33,8 +33,6 @@ class DetgoriDerivedDataAgent:
         detgori_on_proceesing = DetgoriOnProcessingDerived.objects.get(detgori_id=detgori_id)
         detgori_on_proceesing.delete()
 
-
-
     def _generate_wordcount(text, detgori_id):
         # count word and save
         try:
@@ -50,18 +48,18 @@ class DetgoriDerivedDataAgent:
             logger.error(f'{detgori_id} 댓거리의 텍스트에서 단어개수 데이터 생성 작업을 실패했습니다. {e}')
 
     def _generate_sentences(text, detgori_id):
-        # parse to sentences and save to elastic search
         sentences = textAnalyzer.split_into_sentences(text)
         try:
-            detgoriSentenceApi.save_detgori_sentences(sentences, detgori_id)
+            for i, sentence in enumerate(sentences):
+                sentence_obj = Sentence.objects.create(detgori_id=detgori_id, content=sentence, seq_no=i+1)
+                word_count = textAnalyzer.count_words(sentence)
+                for word, count in word_count.items():
+                    word_obj, _ = Word.objects.get_or_create(word=word)
+                    SentenceWord.objects.create(sentence=sentence_obj, word=word_obj, count=count)
         except Exception as e:
-            logger.error(f'{detgori_id} 댓거리의 텍스트에서 문장을 데이터를 생성하는 작업에 실패했습니다. {e}')
+            logger.error(f'{detgori_id} 댓거리의 텍스트에서 문장을 데이터로 저장하는 작업에 실패했습니다. {e}')
     
     def remove_derived(self, detgori_id):
-        t = Process(target=DetgoriDerivedDataAgent._remove_derived, args=(detgori_id,))
-        t.start()
-
-    def _remove_derived(detgori_id):
         max_try = 10
         sleep_time = 10
         for _ in range(max_try):
@@ -70,9 +68,11 @@ class DetgoriDerivedDataAgent:
                 time.sleep(sleep_time)
                 continue
             try:
-                detgoriSentenceApi.delete_sentences_of_detgori(detgori_id)
+                SentenceWord.objects.filter(sentence__detgori_id=detgori_id).delete()
+                Sentence.objects.filter(detgori_id=detgori_id).delete()
             except Exception as e:
                 logger.error(f'{detgori_id} 댓거리의 문장 파생데이터를 삭제하는 실패했습니다. {e}')
+                raise e
             finally:
                 return
             

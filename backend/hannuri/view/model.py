@@ -129,8 +129,8 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             self.request.user.save()
         
         detgori_id = instance.pk
-        instance.delete()
         detgoriDerivedDataAgent.remove_derived(detgori_id)
+        instance.delete()
 
 
     def get_queryset(self):
