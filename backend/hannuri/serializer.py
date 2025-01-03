@@ -57,3 +57,15 @@ class DetgoriReadTimeSerializer(serializers.ModelSerializer):
     class Meta:
         model = DetgoriReadTime
         fields = '__all__'
+
+class SentenceSerializer(serializers.ModelSerializer):
+    detgori_title = serializers.ReadOnlyField(source='detgori.title')
+    year = serializers.ReadOnlyField(source='detgori.parentSession.season.year')
+    semester = serializers.ReadOnlyField(source='detgori.parentSession.season.semester')
+    title = serializers.ReadOnlyField(source='detgori.title')
+    author = serializers.ReadOnlyField(source='detgori.author.name')
+    link = serializers.ReadOnlyField(source='detgori.googleId')
+
+    class Meta:
+        model = Sentence
+        fields = ['id', 'detgori_title', 'content', 'year', 'semester', 'title', 'author', 'link'] 

@@ -2,6 +2,9 @@ from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.pagination import PageNumberPagination
+from django.db.models import Count
+
 from hannuri.serializer import *
 from hannuri.models import *
 from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
@@ -10,6 +13,7 @@ from hannuri.job import detgoriDerivedDataJob
 import copy
 from lib import validate
 import uuid
+from datetime import datetime
 
 import logging
 logger = logging.getLogger('common')
@@ -142,6 +146,44 @@ class DetgoriViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(author=int(author), season=int(season))
         return queryset
 
+class SentencePagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'page_size'
+    max_page_size = 100
+
+class SentenceViewSet(viewsets.ModelViewSet):
+    queryset = Sentence.objects.order_by('-id')
+    serializer_class = SentenceSerializer
+    permission_classes = [IsAuthenticated, AlwaysReadOnly]
+    pagination_class = SentencePagination
+
+    def get_queryset(self):
+        queryset = self.queryset
+
+        tokens = self.request.query_params.get('tokens', None) 
+        if tokens is None:
+            return queryset
+
+        # 토큰에 해당하는 단어를 가진 문장을 반환한다. (여러 토큰이 있는 경우 모든 토큰을 포함하는 문장만 선택)
+        tokens = [token.strip() for token in tokens.split(',')]
+        words = Word.objects.filter(word__in=tokens)
+
+        targets = SentenceWord.objects\
+            .filter(word__in=words)\
+            .values('sentence')\
+            .annotate(wc=Count('word'))\
+            .filter(wc=len(words))
+        
+        # 다양한 검색 결과를 위해 매일 조회 순서가 바뀌도록 한다.
+        today = int(datetime.now().strftime("%Y%m%d"))
+        queryset = queryset\
+            .filter(id__in=targets.values('sentence'))\
+            .extra(
+                select={'ordering': f'ABS(id * {today} %% 100000)'},
+                order_by=['ordering']
+            )
+
+        return queryset
 
 class DetgoriReadTimeViewSet(viewsets.ModelViewSet):
     queryset = DetgoriReadTime.objects.order_by('-id')
