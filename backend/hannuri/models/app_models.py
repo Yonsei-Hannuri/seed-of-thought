@@ -112,3 +112,27 @@ class Detgori(models.Model):
 
     def __str__(self):
         return f'{self.parentSession}, {self.author} 댓거리'
+    
+
+class Sentence(models.Model):
+    detgori = models.ForeignKey(Detgori, on_delete=models.PROTECT, related_name='sentence', verbose_name="댓거리")
+    seq_no = models.IntegerField(blank=True,verbose_name="순서")
+    content = models.TextField(blank=True)
+
+    def __str__(self):
+        return f'{self.detgori} 댓거리, {self.content}'
+
+class Word(models.Model):
+    word = models.CharField(max_length=20, verbose_name="단어")
+    description = models.CharField(max_length=200, blank=True, verbose_name="설명")
+
+    def __str__(self):
+        return f'{self.word}: {self.description}'
+
+class SentenceWord(models.Model):
+    sentence = models.ForeignKey(Sentence, on_delete=models.PROTECT, related_name='word', verbose_name="문장")
+    word = models.ForeignKey(Word, on_delete=models.PROTECT, related_name='sentence', verbose_name="단어")
+    count = models.IntegerField(default=0, verbose_name="단어 언급 횟수")
+
+    def __str__(self):
+        return f'{self.sentence} 문장, {self.word}'
