@@ -19,4 +19,4 @@ RUN pip3 install -r /backend/requirements.txt
 
 COPY ./ /backend/
 
-CMD ["bash", "-c", "cd /backend && python3 manage.py migrate && gunicorn --timeout 120 -w 1 --bind 0:2102 backend.wsgi"]
+CMD ["bash", "-c", "cd /backend && python3 manage.py migrate && gunicorn --timeout 120 -w 3 --bind 0:2102 backend.wsgi"]
