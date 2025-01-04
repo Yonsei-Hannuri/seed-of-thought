@@ -1,6 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import status
 from rest_framework.pagination import PageNumberPagination
 from django.db.models import Count
@@ -9,7 +10,7 @@ from hannuri.serializer import *
 from hannuri.models import *
 from hannuri.permissions import IsOwnerOrReadOnly, AlwaysReadOnly, AppendOnly
 from hannuri.component import objectStorage
-from hannuri.job import detgoriDerivedDataJob
+from hannuri.job import detgoriDerivedDataJob, wordCountAggregateJob
 import copy
 from lib import validate
 import uuid
@@ -72,8 +73,27 @@ class SessionViewSet(viewsets.ModelViewSet):
             except:
                 pass
         return queryset
-
-
+    
+    @action(detail=True, methods=['get'], url_path='word')
+    def get_session_words(self, request, pk=None):
+        try:
+            session = Session.objects.get(pk=pk)
+            detgoris = Detgori.objects.filter(parentSession=session)
+            detgori_ids = [detgori.id for detgori in detgoris]
+            words = wordCountAggregateJob.aggregate_word_count(detgori_ids)
+            words = {word: count for word, count in words.items() if count > 7}
+            return Response(words)
+        except Session.DoesNotExist:
+            return Response(
+                {"error": "세션을 찾을 수 없습니다"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception:
+            return Response(
+                {"error": "세션 단어 집계 오류"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
 class SessionReadfileViewSet(viewsets.ModelViewSet):
     queryset = SessionReadfile.objects.order_by('-id')
     serializer_class = SessionReadfileSerializer
