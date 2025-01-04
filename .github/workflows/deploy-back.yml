@@ -36,7 +36,6 @@ jobs:
         run: |
           mkdir ./backend/hannuri/component/ObjectStorage/secret
           mkdir ./backend/hannuri/component/GoogleOauth/secret
-          mkdir ./backend/hannuri/component/DetgoriSentenceApi/secret
           mkdir ./backend/cowriter/component/LLM/secret
 
       - name: Make config for AWS S3
@@ -45,13 +44,6 @@ jobs:
           name: "configs.json"
           json: ${{ secrets.AWS_S3_CONFIG }}
           dir: "./backend/hannuri/component/ObjectStorage/secret"
-
-      - name: Make config file for detgori sentence api component
-        uses: jsdaniell/create-json@1.1.2
-        with:
-          name: "configs.json"
-          json: ${{ secrets.DETGORI_SENTENCE_API_CONFIG }}
-          dir: "./backend/hannuri/component/DetgoriSentenceApi/secret"
 
       - name: Make client secret file for Google Oauth
         uses: jsdaniell/create-json@1.1.2
