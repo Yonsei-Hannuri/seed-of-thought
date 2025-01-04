@@ -174,12 +174,13 @@ class SentenceViewSet(viewsets.ModelViewSet):
             .annotate(wc=Count('word'))\
             .filter(wc=len(words))
         
-        # 다양한 검색 결과를 위해 매일 조회 순서가 바뀌도록 한다.
-        today = int(datetime.now().strftime("%Y%m%d"))
-        queryset = queryset\
-            .filter(id__in=targets.values('sentence'))\
+        # 조회 순서를 매주 변경한다.현재 연도와 주차 정보를 조합하여 시드 생성
+        year, week, _ = datetime.now().isocalendar()
+        week_seed = year * 100 + week  # 예: 2024년 10주차 -> 202410
+        
+        queryset = queryset.filter(id__in=targets.values('sentence'))\
             .extra(
-                select={'ordering': f'ABS(id * {today} %% 100000)'},
+                select={'ordering': f'ABS(id * {week_seed} %% 1000000)'},
                 order_by=['ordering']
             )
 
