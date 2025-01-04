@@ -51,25 +51,6 @@ def ProfileColor(request):
     request.user.save()
     return HttpResponse('true')
 
-def WordList(request, type, sessionId):
-    if not(request.user):
-        return HttpResponse('Unauthorized', status=401)
-
-    if type=='mypage':
-        wordList = []
-        for detgori in request.user.detgori.all():
-            wordList.append(detgori.words)
-        return HttpResponse(json.dumps({'wordList':wordList}))
-    elif type=='session':
-        wordList = []
-        session = Session.objects.get(pk=sessionId)
-        session_detgori = session.detgori.all()
-        for detgori in session_detgori:
-            wordList.append(detgori.words)
-        return HttpResponse(json.dumps({'wordList':wordList})) 
-
-    return HttpResponse('Not Found', status=404)
-
 def my_detgori_infos(userId, currentSeason):
         my_detgori_infos = list()
         currentSessions = currentSeason.session.all()

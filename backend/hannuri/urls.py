@@ -19,7 +19,6 @@ urlpatterns = [
     path('signin/', view.Signin),
     path('logout/', view.Logout),
     path('profileColor/', view.ProfileColor),
-    path('wordList/<str:type>/<int:sessionId>', view.WordList),
     path('mypageInfo', view.MypageInfo),
     path('frontError/', view.FrontError),
     path('cowriter-subject/', view.CowriterSubject)
