@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging
 import time
 import json
-from multiprocessing import Process
+from threading import Thread
 
 logger = logging.getLogger('common')
 
@@ -16,7 +16,7 @@ class DetgoriDerivedDataJob:
     def create_derived_async(self, pdf_bytes, detgori_id):
         detgori_on_processing = DetgoriOnProcessingDerived(detgori_id=detgori_id)
         detgori_on_processing.save()
-        t = Process(target=DetgoriDerivedDataJob._create_derived, args=(pdf_bytes, detgori_id))
+        t = Thread(target=DetgoriDerivedDataJob._create_derived, args=(pdf_bytes, detgori_id))
         t.start()
 
     def _create_derived(pdf_bytes, detgori_id):
