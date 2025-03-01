@@ -8,7 +8,7 @@ dc-develop.yml
 develop.sh
 .env
 
-*.sqlite3
+*.sqlite3*
 
 dev/
 prd/
