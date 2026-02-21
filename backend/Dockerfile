@@ -18,7 +18,7 @@ RUN apt-get install cmake -y
 COPY ./requirements.txt /backend/requirements.txt
 RUN pip3 install --upgrade pip setuptools wheel
 RUN pip3 install numpy==1.24.1 Cython==0.29.23
-RUN pip3 install --no-build-isolation kiwipiepy==0.15.2
+RUN pip3 install --no-build-isolation kiwipiepy==0.17.0
 RUN pip3 install -r /backend/requirements.txt
 
 COPY ./ /backend/
