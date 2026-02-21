@@ -197,6 +197,9 @@ def _create_budget_record(request):
     record_type = _normalize_record_type(request.data.get('type'))
     transaction_date = _parse_date(request.data.get('transaction_date', request.data.get('transactionDate')), 'transaction_date')
     amount = _parse_positive_int(request.data.get('amount'), 'amount')
+    memo = request.data.get('memo', '')
+    if memo is None:
+        memo = ''
     segments = _parse_effective_segments(
         _extract_json_field(request.data, 'effective_segments', 'effectiveSegments'),
         transaction_date,
@@ -214,6 +217,7 @@ def _create_budget_record(request):
             type=record_type,
             transaction_date=transaction_date,
             amount=amount,
+            memo=str(memo),
             photo_url=photo_url,
         )
         BudgetEffectiveSegment.objects.bulk_create(
@@ -301,11 +305,20 @@ def budget_record_detail(request, record_id):
 def budget_tags(request):
     rows = (
         BudgetRecordTag.objects
-        .values('name')
+        .values('name', 'record__type')
         .annotate(amount=Sum('amount'))
-        .order_by('-amount', 'name')
+        .order_by('-amount', 'name', 'record__type')
     )
-    return Response(list(rows), status=status.HTTP_200_OK)
+
+    response_rows = [
+        {
+            'name': row['name'],
+            'amount': row['amount'] or 0,
+            'recordType': row['record__type'],
+        }
+        for row in rows
+    ]
+    return Response(response_rows, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])

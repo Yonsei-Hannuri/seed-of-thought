@@ -44,6 +44,7 @@ class PpanzziriApiTests(APITestCase):
             'type': 'expense',
             'transaction_date': '2026-02-20',
             'amount': '30000',
+            'memo': '감자탕',
             'effective_segments': (
                 '[{"effective_from":"2026-02-20","effective_to":"2026-02-21","segment_amount":15000},'
                 '{"effective_from":"2026-02-22","effective_to":"2026-02-22","segment_amount":15000}]'
@@ -57,6 +58,7 @@ class PpanzziriApiTests(APITestCase):
         response = self._create_record()
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['amount'], 30000)
+        self.assertEqual(response.data['memo'], '감자탕')
         self.assertEqual(len(response.data['effective_segments']), 2)
         self.assertEqual(sum(tag['amount'] for tag in response.data['tags']), 30000)
 
@@ -67,6 +69,7 @@ class PpanzziriApiTests(APITestCase):
         self.assertEqual(dashboard_response.data['totalIncome'], 0)
         self.assertEqual(dashboard_response.data['currentBalance'], 29970000)
         self.assertEqual(len(dashboard_response.data['records']), 1)
+        self.assertEqual(dashboard_response.data['records'][0]['memo'], '감자탕')
         self.assertEqual(dashboard_response.data['certifications'], [])
 
     def test_create_record_without_segments_uses_default_segment(self):
@@ -123,15 +126,26 @@ class PpanzziriApiTests(APITestCase):
     def test_budget_tags_aggregates_amounts(self):
         self._create_record(tags='[{"name":"생활비","amount":20000},{"name":"경험소비","amount":10000}]')
         self._create_record(
+            type='income',
             amount='10000',
             effective_segments='[{"effective_from":"2026-02-21","effective_to":"2026-02-21","segment_amount":10000}]',
             tags='["생활비"]',
         )
+        self._create_record(
+            type='income',
+            amount='7000',
+            effective_segments='[{"effective_from":"2026-02-22","effective_to":"2026-02-22","segment_amount":7000}]',
+            tags='["월급"]',
+        )
 
         tags_response = self.client.get('/ppanzziri/budget/tags')
         self.assertEqual(tags_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(tags_response.data[0]['name'], '생활비')
-        self.assertEqual(tags_response.data[0]['amount'], 30000)
+        by_key = {(item['name'], item['recordType']): item for item in tags_response.data}
+
+        self.assertEqual(by_key[('생활비', 'EXPENSE')]['amount'], 20000)
+        self.assertEqual(by_key[('생활비', 'INCOME')]['amount'], 10000)
+        self.assertEqual(by_key[('경험소비', 'EXPENSE')]['amount'], 10000)
+        self.assertEqual(by_key[('월급', 'INCOME')]['amount'], 7000)
 
     def test_create_list_replace_and_delete_certification(self):
         file1 = SimpleUploadedFile('proof1.jpg', b'fake-image-content-1', content_type='image/jpeg')

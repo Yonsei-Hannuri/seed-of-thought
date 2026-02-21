@@ -12,6 +12,7 @@ class BudgetRecord(models.Model):
     type = models.CharField(max_length=10, choices=TYPE_CHOICES)
     transaction_date = models.DateField()
     amount = models.PositiveBigIntegerField()
+    memo = models.TextField(blank=True, default='')
     photo_url = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

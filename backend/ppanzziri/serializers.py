@@ -31,6 +31,7 @@ class BudgetRecordSerializer(serializers.ModelSerializer):
             'type',
             'transaction_date',
             'amount',
+            'memo',
             'photo_url',
             'created_at',
             'effective_segments',
