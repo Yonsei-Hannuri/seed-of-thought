@@ -31,7 +31,6 @@ jobs:
           envkey_PPANZZIRI_ADMIN_PASSWORD: ${{ secrets.PPANZZIRI_ADMIN_PASSWORD }}
           envkey_PPANZZIRI_START_CAPITAL: ${{ vars.PPANZZIRI_START_CAPITAL }}
           envkey_PPANZZIRI_S3_BUCKET: ${{ vars.PPANZZIRI_S3_BUCKET }}
-          envkey_PPANZZIRI_AWS_REGION: ${{ vars.PPANZZIRI_AWS_REGION }}
           envkey_PPANZZIRI_CLOUDFRONT_URL: ${{ vars.PPANZZIRI_CLOUDFRONT_URL }}
           envkey_PPANZZIRI_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           envkey_PPANZZIRI_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
