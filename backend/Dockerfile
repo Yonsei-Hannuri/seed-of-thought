@@ -15,6 +15,8 @@ RUN apt-get install python3-dev -y
 
 # install python packages
 COPY ./requirements.txt /backend/requirements.txt
+RUN pip3 install --upgrade pip setuptools wheel
+RUN pip3 install numpy==1.24.1 Cython==0.29.23
 RUN pip3 install -r /backend/requirements.txt
 
 COPY ./ /backend/
