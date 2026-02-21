@@ -28,21 +28,16 @@ jobs:
           envkey_API_DOMAIN: ${{ vars.API_DOMAIN }}
           envkey_DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
           envkey_DOMAIN: ${{ vars.DOMAIN }}
+          envkey_PPANZZIRI_ADMIN_PASSWORD: ${{ secrets.PPANZZIRI_ADMIN_PASSWORD }}
+          envkey_PPANZZIRI_START_CAPITAL: ${{ vars.PPANZZIRI_START_CAPITAL }}
+          envkey_PPANZZIRI_S3_BUCKET: ${{ vars.PPANZZIRI_S3_BUCKET }}
+          envkey_PPANZZIRI_AWS_REGION: ${{ vars.PPANZZIRI_AWS_REGION }}
+          envkey_PPANZZIRI_CLOUDFRONT_URL: ${{ vars.PPANZZIRI_CLOUDFRONT_URL }}
+          envkey_PPANZZIRI_AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          envkey_PPANZZIRI_AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           directory: ./backend
           file_name: .env
           fail_on_empty: true
-
-      - name: Append ppanzziri envs
-        run: |
-          {
-            echo "PPANZZIRI_ADMIN_PASSWORD=${{ secrets.PPANZZIRI_ADMIN_PASSWORD }}"
-            echo "PPANZZIRI_START_CAPITAL=${{ vars.PPANZZIRI_START_CAPITAL }}"
-            echo "PPANZZIRI_S3_BUCKET=${{ vars.PPANZZIRI_S3_BUCKET }}"
-            echo "PPANZZIRI_AWS_REGION=${{ vars.PPANZZIRI_AWS_REGION }}"
-            echo "PPANZZIRI_CLOUDFRONT_URL=${{ vars.PPANZZIRI_CLOUDFRONT_URL }}"
-            echo "PPANZZIRI_AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
-            echo "PPANZZIRI_AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
-          } >> ./backend/.env
 
       - name: Make directory for component config files
         run: |
