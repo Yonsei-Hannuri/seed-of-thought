@@ -18,6 +18,7 @@ from django.urls import path, include
 from django.conf import settings
 
 urlpatterns = [
+    path('ppanzziri/', include('ppanzziri.urls')),
     path('cowriter/', include('cowriter.urls')),
     path('', include('hannuri.urls')),
     path('admin/', admin.site.urls),
@@ -29,4 +30,3 @@ if settings.ENV('DEBUG'):
     from django.conf.urls.static import static
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL,  document_root=settings.STATIC_ROOT)
-

@@ -1,0 +1,51 @@
+from django.db import models
+
+
+class BudgetRecord(models.Model):
+    TYPE_EXPENSE = 'EXPENSE'
+    TYPE_INCOME = 'INCOME'
+    TYPE_CHOICES = (
+        (TYPE_EXPENSE, 'Expense'),
+        (TYPE_INCOME, 'Income'),
+    )
+
+    type = models.CharField(max_length=10, choices=TYPE_CHOICES)
+    transaction_date = models.DateField()
+    amount = models.PositiveBigIntegerField()
+    photo_url = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'budget_records'
+        ordering = ['-transaction_date', '-id']
+
+
+class BudgetEffectiveSegment(models.Model):
+    record = models.ForeignKey(BudgetRecord, on_delete=models.CASCADE, related_name='effective_segments')
+    effective_from = models.DateField()
+    effective_to = models.DateField()
+    segment_amount = models.PositiveBigIntegerField()
+
+    class Meta:
+        db_table = 'budget_effective_segments'
+        ordering = ['effective_from', 'id']
+
+
+class BudgetRecordTag(models.Model):
+    record = models.ForeignKey(BudgetRecord, on_delete=models.CASCADE, related_name='tags')
+    name = models.CharField(max_length=50)
+    amount = models.PositiveBigIntegerField()
+
+    class Meta:
+        db_table = 'budget_record_tags'
+        ordering = ['-amount', 'name', 'id']
+
+
+class BalanceCertification(models.Model):
+    date = models.DateField(unique=True)
+    photo_url = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'balance_certifications'
+        ordering = ['-date', '-id']

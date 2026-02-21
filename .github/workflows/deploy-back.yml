@@ -32,6 +32,18 @@ jobs:
           file_name: .env
           fail_on_empty: true
 
+      - name: Append ppanzziri envs
+        run: |
+          {
+            echo "PPANZZIRI_ADMIN_PASSWORD=${{ secrets.PPANZZIRI_ADMIN_PASSWORD }}"
+            echo "PPANZZIRI_START_CAPITAL=${{ vars.PPANZZIRI_START_CAPITAL }}"
+            echo "PPANZZIRI_S3_BUCKET=${{ vars.PPANZZIRI_S3_BUCKET }}"
+            echo "PPANZZIRI_AWS_REGION=${{ vars.PPANZZIRI_AWS_REGION }}"
+            echo "PPANZZIRI_CLOUDFRONT_URL=${{ vars.PPANZZIRI_CLOUDFRONT_URL }}"
+            echo "PPANZZIRI_AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}"
+            echo "PPANZZIRI_AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}"
+          } >> ./backend/.env
+
       - name: Make directory for component config files
         run: |
           mkdir ./backend/hannuri/component/ObjectStorage/secret

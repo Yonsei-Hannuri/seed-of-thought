@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import environ
 import logging
+from corsheaders.defaults import default_headers
 
 ENV = environ.Env(
     DEBUG=(bool, False)
@@ -37,6 +38,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'hannuri.apps.HannuriConfig',
     'cowriter.apps.CowriterConfig',
+    'ppanzziri.apps.PpanzziriConfig',
     'corsheaders',
 ]
 
@@ -183,6 +185,14 @@ if DEBUG == True:
         "http://localhost:6006", # storybook
     ]
 
+# Allow ppanzziri.site (and subdomains) across environments.
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^https?://([a-z0-9-]+\.)?ppanzziri\.site$",
+]
+
+# Required for admin requests that send X-Admin-Password from browser.
+CORS_ALLOW_HEADERS = (*default_headers, "x-admin-password")
+
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 CSRF_COOKIE_DOMAIN = ENV("DOMAIN")
@@ -190,5 +200,6 @@ CSRF_COOKIE_DOMAIN = ENV("DOMAIN")
 CSRF_TRUSTED_ORIGINS = [
     HANNURI_URL,
     COWRITER_URL,
-    API_URL
+    API_URL,
+    "https://ppanzziri.site",
 ]
