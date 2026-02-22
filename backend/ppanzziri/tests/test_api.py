@@ -71,6 +71,7 @@ class PpanzziriApiTests(APITestCase):
         self.assertEqual(len(dashboard_response.data['records']), 1)
         self.assertEqual(dashboard_response.data['records'][0]['memo'], '감자탕')
         self.assertEqual(dashboard_response.data['certifications'], [])
+        self.assertIn('social', dashboard_response.data)
 
     def test_create_record_without_segments_uses_default_segment(self):
         response = self._create_record(effective_segments='')
@@ -182,3 +183,66 @@ class PpanzziriApiTests(APITestCase):
     def test_delete_certification_requires_admin_password(self):
         response = self.client.delete('/ppanzziri/budget/certifications/2026-02-21')
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_get_social_default(self):
+        response = self.client.get('/ppanzziri/social')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            response.data,
+            {
+                'youtube_embed_url': '',
+                'instagram_post_url': '',
+                'instagram_profile_url': '',
+                'extra_links': [],
+            },
+        )
+
+    def test_put_social_and_dashboard_snapshot(self):
+        response = self.client.put(
+            '/ppanzziri/social',
+            {
+                'youtube_embed_url': ' https://www.youtube.com/embed/abc123?foo=bar ',
+                'instagram_post_url': 'https://www.instagram.com/p/C9AbCdEf/?utm=1',
+                'instagram_profile_url': ' https://www.instagram.com/ppanzziri ',
+                'extra_links': [
+                    {'label': '  블로그  ', 'href': '  https://example.com/a?b=1  '},
+                    {'label': ' ', 'href': ' '},
+                ],
+            },
+            format='json',
+            **self._auth_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data, {'ok': True})
+
+        social_response = self.client.get('/ppanzziri/social')
+        self.assertEqual(social_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(social_response.data['youtube_embed_url'], 'https://www.youtube.com/embed/abc123')
+        self.assertEqual(social_response.data['instagram_post_url'], 'https://www.instagram.com/p/C9AbCdEf/')
+        self.assertEqual(social_response.data['instagram_profile_url'], 'https://www.instagram.com/ppanzziri/')
+        self.assertEqual(
+            social_response.data['extra_links'],
+            [{'label': '블로그', 'href': 'https://example.com/a?b=1'}],
+        )
+
+        dashboard_response = self.client.get('/ppanzziri/dashboard')
+        self.assertEqual(dashboard_response.status_code, status.HTTP_200_OK)
+        self.assertEqual(dashboard_response.data['social'], social_response.data)
+
+    def test_put_social_requires_admin_password(self):
+        response = self.client.put('/ppanzziri/social', {}, format='json')
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_put_social_rejects_invalid_values(self):
+        response = self.client.put(
+            '/ppanzziri/social',
+            {
+                'youtube_embed_url': 'http://www.youtube.com/embed/abc123',
+                'instagram_post_url': 'https://www.instagram.com/reel/xxxx/',
+                'instagram_profile_url': 'https://www.instagram.com/p/xxxx/',
+                'extra_links': [{'label': '링크', 'href': 'ftp://example.com'}] * 7,
+            },
+            format='json',
+            **self._auth_headers(),
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)

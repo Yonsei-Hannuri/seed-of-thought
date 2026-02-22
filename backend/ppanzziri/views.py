@@ -1,6 +1,7 @@
 import json
 import os
 from datetime import date
+from urllib.parse import urlparse
 
 from django.db import transaction
 from django.db.models import Sum
@@ -16,6 +17,7 @@ from ppanzziri.models import (
     BudgetEffectiveSegment,
     BudgetRecord,
     BudgetRecordTag,
+    Social,
 )
 from ppanzziri.serializers import (
     BalanceCertificationSerializer,
@@ -96,6 +98,125 @@ def _extract_json_field(data, snake_key, camel_key):
         return json.loads(raw_value)
     except (TypeError, ValueError) as exc:
         raise ValidationError({snake_key: 'Must be valid JSON.'}) from exc
+
+
+def _serialize_social(social):
+    return {
+        'youtube_embed_url': social.youtube_embed_url,
+        'instagram_post_url': social.instagram_post_url,
+        'instagram_profile_url': social.instagram_profile_url,
+        'extra_links': social.extra_links,
+    }
+
+
+def _get_or_create_social():
+    social = Social.objects.order_by('id').first()
+    if social:
+        return social
+    return Social.objects.create()
+
+
+def _parse_https_url(value, field_name):
+    if value is None:
+        return ''
+    if not isinstance(value, str):
+        raise ValidationError({field_name: 'Must be a string.'})
+
+    normalized = value.strip()
+    if normalized == '':
+        return ''
+
+    parsed = urlparse(normalized)
+    if parsed.scheme.lower() != 'https' or not parsed.netloc:
+        raise ValidationError({field_name: 'Only valid https URL is allowed.'})
+    return parsed
+
+
+def _normalize_youtube_embed_url(value):
+    parsed = _parse_https_url(value, 'youtube_embed_url')
+    if parsed == '':
+        return ''
+
+    if parsed.netloc.lower() != 'www.youtube.com':
+        raise ValidationError({'youtube_embed_url': 'Only https://www.youtube.com/embed/... is allowed.'})
+
+    paths = [part for part in parsed.path.split('/') if part]
+    if len(paths) != 2 or paths[0] != 'embed':
+        raise ValidationError({'youtube_embed_url': 'Only https://www.youtube.com/embed/... is allowed.'})
+
+    return f'https://www.youtube.com/embed/{paths[1]}'
+
+
+def _normalize_instagram_post_url(value):
+    parsed = _parse_https_url(value, 'instagram_post_url')
+    if parsed == '':
+        return ''
+
+    if parsed.netloc.lower() != 'www.instagram.com':
+        raise ValidationError({'instagram_post_url': 'Only https://www.instagram.com/p/... is allowed.'})
+
+    paths = [part for part in parsed.path.split('/') if part]
+    if len(paths) != 2 or paths[0] != 'p':
+        raise ValidationError({'instagram_post_url': 'Only https://www.instagram.com/p/... is allowed.'})
+
+    return f'https://www.instagram.com/p/{paths[1]}/'
+
+
+def _normalize_instagram_profile_url(value):
+    parsed = _parse_https_url(value, 'instagram_profile_url')
+    if parsed == '':
+        return ''
+
+    if parsed.netloc.lower() != 'www.instagram.com':
+        raise ValidationError({'instagram_profile_url': 'Only https://www.instagram.com/... is allowed.'})
+
+    paths = [part for part in parsed.path.split('/') if part]
+    if len(paths) != 1 or paths[0] == 'p':
+        raise ValidationError({'instagram_profile_url': 'Only profile URL is allowed.'})
+
+    return f'https://www.instagram.com/{paths[0]}/'
+
+
+def _normalize_extra_links(raw_value):
+    if raw_value in (None, ''):
+        return []
+    if not isinstance(raw_value, list):
+        raise ValidationError({'extra_links': 'Must be a list.'})
+
+    normalized = []
+    for idx, item in enumerate(raw_value):
+        if not isinstance(item, dict):
+            raise ValidationError({'extra_links': f'Item {idx} must be an object.'})
+
+        label = item.get('label', '')
+        href = item.get('href', '')
+        label = str(label).strip() if label is not None else ''
+        href = str(href).strip() if href is not None else ''
+
+        # Remove empty items after trim.
+        if label == '' or href == '':
+            continue
+
+        if len(label) > 30:
+            raise ValidationError({'extra_links': f'Item {idx} label must be <= 30 chars.'})
+        if len(href) > 500:
+            raise ValidationError({'extra_links': f'Item {idx} href must be <= 500 chars.'})
+
+        parsed = _parse_https_url(href, f'extra_links[{idx}].href')
+        normalized_href = f'https://{parsed.netloc.lower()}{parsed.path}'
+        if parsed.query:
+            normalized_href = f'{normalized_href}?{parsed.query}'
+
+        normalized.append(
+            {
+                'label': label,
+                'href': normalized_href,
+            }
+        )
+
+    if len(normalized) > 6:
+        raise ValidationError({'extra_links': 'Maximum 6 non-empty items are allowed.'})
+    return normalized
 
 
 def _parse_effective_segments(raw_segments, transaction_date, amount):
@@ -249,6 +370,7 @@ def _create_budget_record(request):
 def dashboard(request):
     records = BudgetRecord.objects.prefetch_related('effective_segments', 'tags').all()
     certifications = BalanceCertification.objects.all()
+    social = _get_or_create_social()
 
     start_capital = int(os.getenv('PPANZZIRI_START_CAPITAL', '30000000'))
     total_income = BudgetRecord.objects.filter(type=BudgetRecord.TYPE_INCOME).aggregate(total=Sum('amount'))['total'] or 0
@@ -262,6 +384,7 @@ def dashboard(request):
             'currentBalance': start_capital + total_income - total_expense,
             'records': BudgetRecordSerializer(records, many=True).data,
             'certifications': BalanceCertificationSerializer(certifications, many=True).data,
+            'social': _serialize_social(social),
         },
         status=status.HTTP_200_OK,
     )
@@ -319,6 +442,41 @@ def budget_tags(request):
         for row in rows
     ]
     return Response(response_rows, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', 'PUT'])
+@parser_classes([JSONParser, FormParser])
+def social(request):
+    if request.method == 'GET':
+        return Response(_serialize_social(_get_or_create_social()), status=status.HTTP_200_OK)
+
+    auth_error = _get_admin_password_error_response(request)
+    if auth_error is not None:
+        return auth_error
+
+    try:
+        youtube_embed_url = _normalize_youtube_embed_url(request.data.get('youtube_embed_url', ''))
+        instagram_post_url = _normalize_instagram_post_url(request.data.get('instagram_post_url', ''))
+        instagram_profile_url = _normalize_instagram_profile_url(request.data.get('instagram_profile_url', ''))
+        extra_links = _normalize_extra_links(_extract_json_field(request.data, 'extra_links', 'extraLinks') or [])
+    except ValidationError as exc:
+        return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+
+    social_obj = _get_or_create_social()
+    social_obj.youtube_embed_url = youtube_embed_url
+    social_obj.instagram_post_url = instagram_post_url
+    social_obj.instagram_profile_url = instagram_profile_url
+    social_obj.extra_links = extra_links
+    social_obj.save(
+        update_fields=[
+            'youtube_embed_url',
+            'instagram_post_url',
+            'instagram_profile_url',
+            'extra_links',
+            'updated_at',
+        ]
+    )
+    return Response({'ok': True}, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'POST'])

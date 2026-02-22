@@ -50,3 +50,15 @@ class BalanceCertification(models.Model):
     class Meta:
         db_table = 'balance_certifications'
         ordering = ['-date', '-id']
+
+
+class Social(models.Model):
+    youtube_embed_url = models.TextField(blank=True, default='')
+    instagram_post_url = models.TextField(blank=True, default='')
+    instagram_profile_url = models.TextField(blank=True, default='')
+    extra_links = models.JSONField(blank=True, default=list)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'social'
