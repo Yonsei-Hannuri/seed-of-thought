@@ -23,6 +23,13 @@ class BudgetRecordTagSerializer(serializers.ModelSerializer):
 class BudgetRecordSerializer(serializers.ModelSerializer):
     effective_segments = BudgetEffectiveSegmentSerializer(many=True, read_only=True)
     tags = BudgetRecordTagSerializer(many=True, read_only=True)
+    created_at = serializers.SerializerMethodField()
+
+    def get_created_at(self, obj):
+        # Keep created_at format stable for frontend parsing.
+        if not obj.created_at:
+            return ''
+        return obj.created_at.strftime('%Y-%m-%dT%H:%M:%S')
 
     class Meta:
         model = BudgetRecord

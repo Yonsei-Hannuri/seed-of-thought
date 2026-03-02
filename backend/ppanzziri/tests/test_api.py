@@ -59,6 +59,7 @@ class PpanzziriApiTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['amount'], 30000)
         self.assertEqual(response.data['memo'], '감자탕')
+        self.assertRegex(response.data['created_at'], r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$')
         self.assertEqual(len(response.data['effective_segments']), 2)
         self.assertEqual(sum(tag['amount'] for tag in response.data['tags']), 30000)
 
