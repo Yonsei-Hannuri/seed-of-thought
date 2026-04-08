@@ -23,7 +23,7 @@ from ppanzziri.serializers import (
     BalanceCertificationSerializer,
     BudgetRecordSerializer,
 )
-from ppanzziri.storage import backfill_certification_photo, backfill_photo_versions, delete_photo, delete_photos, upload_photo_compressed, upload_photos
+from ppanzziri.storage import delete_photo, delete_photos, upload_photo_compressed, upload_photos
 
 
 def _get_admin_password_error_response(request):
@@ -108,31 +108,6 @@ def _serialize_social(social):
         'extra_links': social.extra_links,
     }
 
-
-def _backfill_unoptimized(queryset):
-    # TODO: 임시 코드 - 기존 레코드 backfill 완료 후 제거
-    unoptimized = queryset.exclude(photo_url_original='').filter(photo_url_compressed='')
-    for record in unoptimized:
-        try:
-            original_url, compressed_url, resized_url = backfill_photo_versions(record.photo_url_original)
-            record.photo_url_original = original_url
-            record.photo_url_compressed = compressed_url
-            record.photo_url_resized = resized_url
-            record.save(update_fields=['photo_url_original', 'photo_url_compressed', 'photo_url_resized'])
-        except Exception:
-            pass
-
-
-def _backfill_certifications(queryset):
-    # TODO: 임시 코드 - 기존 certification WebP 변환 완료 후 제거
-    unoptimized = queryset.exclude(photo_url='').exclude(photo_url__endswith='.webp')
-    for cert in unoptimized:
-        try:
-            new_url = backfill_certification_photo(cert.photo_url)
-            cert.photo_url = new_url
-            cert.save(update_fields=['photo_url'])
-        except Exception:
-            pass
 
 
 def _get_or_create_social():
@@ -423,7 +398,6 @@ def dashboard(request):
 def budget_records(request):
     if request.method == 'GET':
         queryset = BudgetRecord.objects.prefetch_related('effective_segments', 'tags').all()
-        _backfill_unoptimized(queryset)
         return Response(BudgetRecordSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
 
     auth_error = _get_admin_password_error_response(request)
@@ -513,7 +487,6 @@ def social(request):
 def budget_certifications(request):
     if request.method == 'GET':
         queryset = BalanceCertification.objects.all()
-        _backfill_certifications(queryset)
         serializer = BalanceCertificationSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
