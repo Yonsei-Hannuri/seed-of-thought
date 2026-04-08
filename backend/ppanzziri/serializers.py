@@ -24,6 +24,7 @@ class BudgetRecordSerializer(serializers.ModelSerializer):
     effective_segments = BudgetEffectiveSegmentSerializer(many=True, read_only=True)
     tags = BudgetRecordTagSerializer(many=True, read_only=True)
     created_at = serializers.SerializerMethodField()
+    photo_url = serializers.CharField(source='photo_url_original', read_only=True)
 
     def get_created_at(self, obj):
         # Keep created_at format stable for frontend parsing.
@@ -40,6 +41,9 @@ class BudgetRecordSerializer(serializers.ModelSerializer):
             'amount',
             'memo',
             'photo_url',
+            'photo_url_original',
+            'photo_url_compressed',
+            'photo_url_resized',
             'created_at',
             'effective_segments',
             'tags',

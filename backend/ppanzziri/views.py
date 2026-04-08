@@ -23,7 +23,7 @@ from ppanzziri.serializers import (
     BalanceCertificationSerializer,
     BudgetRecordSerializer,
 )
-from ppanzziri.storage import delete_photo, upload_photo
+from ppanzziri.storage import backfill_certification_photo, backfill_photo_versions, delete_photo, delete_photos, upload_photo_compressed, upload_photos
 
 
 def _get_admin_password_error_response(request):
@@ -107,6 +107,32 @@ def _serialize_social(social):
         'instagram_profile_url': social.instagram_profile_url,
         'extra_links': social.extra_links,
     }
+
+
+def _backfill_unoptimized(queryset):
+    # TODO: 임시 코드 - 기존 레코드 backfill 완료 후 제거
+    unoptimized = queryset.exclude(photo_url_original='').filter(photo_url_compressed='')
+    for record in unoptimized:
+        try:
+            original_url, compressed_url, resized_url = backfill_photo_versions(record.photo_url_original)
+            record.photo_url_original = original_url
+            record.photo_url_compressed = compressed_url
+            record.photo_url_resized = resized_url
+            record.save(update_fields=['photo_url_original', 'photo_url_compressed', 'photo_url_resized'])
+        except Exception:
+            pass
+
+
+def _backfill_certifications(queryset):
+    # TODO: 임시 코드 - 기존 certification WebP 변환 완료 후 제거
+    unoptimized = queryset.exclude(photo_url='').exclude(photo_url__endswith='.webp')
+    for cert in unoptimized:
+        try:
+            new_url = backfill_certification_photo(cert.photo_url)
+            cert.photo_url = new_url
+            cert.save(update_fields=['photo_url'])
+        except Exception:
+            pass
 
 
 def _get_or_create_social():
@@ -329,9 +355,9 @@ def _create_budget_record(request):
     tags = _parse_record_tags(_extract_json_field(request.data, 'tags', 'recordTags'), amount)
 
     photo_file = request.FILES.get('photo')
-    photo_url = ''
+    photo_urls = {'original': '', 'compressed': '', 'resized': ''}
     if photo_file:
-        photo_url = upload_photo(photo_file, 'records')
+        photo_urls = upload_photos(photo_file, 'records')
 
     with transaction.atomic():
         record = BudgetRecord.objects.create(
@@ -339,7 +365,9 @@ def _create_budget_record(request):
             transaction_date=transaction_date,
             amount=amount,
             memo=str(memo),
-            photo_url=photo_url,
+            photo_url_original=photo_urls['original'],
+            photo_url_compressed=photo_urls['compressed'],
+            photo_url_resized=photo_urls['resized'],
         )
         BudgetEffectiveSegment.objects.bulk_create(
             [
@@ -395,6 +423,7 @@ def dashboard(request):
 def budget_records(request):
     if request.method == 'GET':
         queryset = BudgetRecord.objects.prefetch_related('effective_segments', 'tags').all()
+        _backfill_unoptimized(queryset)
         return Response(BudgetRecordSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
 
     auth_error = _get_admin_password_error_response(request)
@@ -419,7 +448,7 @@ def budget_record_detail(request, record_id):
         return auth_error
 
     record = get_object_or_404(BudgetRecord, pk=record_id)
-    delete_photo(record.photo_url)
+    delete_photos(record.photo_url_original, record.photo_url_compressed, record.photo_url_resized)
     record.delete()
     return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -484,6 +513,7 @@ def social(request):
 def budget_certifications(request):
     if request.method == 'GET':
         queryset = BalanceCertification.objects.all()
+        _backfill_certifications(queryset)
         serializer = BalanceCertificationSerializer(queryset, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -497,7 +527,7 @@ def budget_certifications(request):
         return Response({'photo': 'This field is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
     try:
-        new_photo_url = upload_photo(photo_file, 'certifications')
+        new_photo_url = upload_photo_compressed(photo_file, 'certifications')
     except RuntimeError as exc:
         return Response({'detail': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -507,10 +537,10 @@ def budget_certifications(request):
             defaults={'photo_url': new_photo_url},
         )
         if not created:
-            old_photo_url = certification.photo_url
+            old_url = certification.photo_url
             certification.photo_url = new_photo_url
             certification.save(update_fields=['photo_url'])
-            delete_photo(old_photo_url)
+            delete_photo(old_url)
 
     serializer = BalanceCertificationSerializer(certification)
     return Response(

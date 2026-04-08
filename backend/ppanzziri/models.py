@@ -13,7 +13,9 @@ class BudgetRecord(models.Model):
     transaction_date = models.DateField()
     amount = models.PositiveBigIntegerField()
     memo = models.TextField(blank=True, default='')
-    photo_url = models.TextField(blank=True)
+    photo_url_original = models.TextField(blank=True, default='')
+    photo_url_compressed = models.TextField(blank=True, default='')
+    photo_url_resized = models.TextField(blank=True, default='')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
