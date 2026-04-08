@@ -7,7 +7,7 @@ from urllib.parse import urlparse
 
 import boto3
 from botocore.exceptions import BotoCoreError, ClientError
-from PIL import Image
+from PIL import Image, ImageOps
 
 
 def _cloudfront_base_url():
@@ -85,7 +85,7 @@ def _to_rgb(img):
 
 def _make_compressed(uploaded_file):
     uploaded_file.seek(0)
-    img = _to_rgb(Image.open(uploaded_file))
+    img = _to_rgb(ImageOps.exif_transpose(Image.open(uploaded_file)))
     output = io.BytesIO()
     img.save(output, format='WEBP', quality=80)
     output.seek(0)
@@ -94,7 +94,7 @@ def _make_compressed(uploaded_file):
 
 def _make_resized(uploaded_file):
     uploaded_file.seek(0)
-    img = _to_rgb(Image.open(uploaded_file))
+    img = _to_rgb(ImageOps.exif_transpose(Image.open(uploaded_file)))
 
     width, height = img.size
     min_dim = min(width, height)
