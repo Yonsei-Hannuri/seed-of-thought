@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import date
+from datetime import date, timedelta
 from urllib.parse import urlparse
 
 from django.db import transaction
@@ -367,21 +367,37 @@ def _create_budget_record(request):
     return record
 
 
+def _calculate_days_to_goal(total_expense, goal):
+    today = date.today()
+    ninety_days_ago = today - timedelta(days=90)
+    expense_last_90 = (
+        BudgetRecord.objects
+        .filter(type=BudgetRecord.TYPE_EXPENSE, transaction_date__gte=ninety_days_ago, transaction_date__lte=today)
+        .aggregate(total=Sum('amount'))['total'] or 0
+    )
+    avg_daily = expense_last_90 / 90
+    if avg_daily <= 0:
+        return None
+    remaining = goal - total_expense
+    if remaining <= 0:
+        return 0
+    return int(remaining / avg_daily)
+
+
 @api_view(['GET'])
 def dashboard(request):
     records = BudgetRecord.objects.prefetch_related('effective_segments', 'tags').all()
     social = _get_or_create_social()
 
-    start_capital = int(os.getenv('PPANZZIRI_START_CAPITAL', '30000000'))
-    total_income = BudgetRecord.objects.filter(type=BudgetRecord.TYPE_INCOME).aggregate(total=Sum('amount'))['total'] or 0
+    goal = int(os.getenv('PPANZZIRI_START_CAPITAL', '30000000'))
     total_expense = BudgetRecord.objects.filter(type=BudgetRecord.TYPE_EXPENSE).aggregate(total=Sum('amount'))['total'] or 0
+    days_to_goal = _calculate_days_to_goal(total_expense, goal)
 
     return Response(
         {
-            'startCapital': start_capital,
-            'totalIncome': total_income,
+            'goal': goal,
             'totalExpense': total_expense,
-            'currentBalance': start_capital + total_income - total_expense,
+            'daysToGoal': days_to_goal,
             'records': BudgetRecordSerializer(records, many=True).data,
             'social': _serialize_social(social),
         },
@@ -393,7 +409,7 @@ def dashboard(request):
 @parser_classes([MultiPartParser, FormParser, JSONParser])
 def budget_records(request):
     if request.method == 'GET':
-        queryset = BudgetRecord.objects.prefetch_related('effective_segments', 'tags').all()
+        queryset = BudgetRecord.objects.prefetch_related('effective_segments', 'tags').filter(type=BudgetRecord.TYPE_EXPENSE)
         return Response(BudgetRecordSerializer(queryset, many=True).data, status=status.HTTP_200_OK)
 
     auth_error = _get_admin_password_error_response(request)
