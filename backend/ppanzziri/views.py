@@ -13,17 +13,15 @@ from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
 from ppanzziri.models import (
-    BalanceCertification,
     BudgetEffectiveSegment,
     BudgetRecord,
     BudgetRecordTag,
     Social,
 )
 from ppanzziri.serializers import (
-    BalanceCertificationSerializer,
     BudgetRecordSerializer,
 )
-from ppanzziri.storage import delete_photo, delete_photos, upload_photo_compressed, upload_photos
+from ppanzziri.storage import delete_photos, upload_photos
 
 
 def _get_admin_password_error_response(request):
@@ -372,7 +370,6 @@ def _create_budget_record(request):
 @api_view(['GET'])
 def dashboard(request):
     records = BudgetRecord.objects.prefetch_related('effective_segments', 'tags').all()
-    certifications = BalanceCertification.objects.all()
     social = _get_or_create_social()
 
     start_capital = int(os.getenv('PPANZZIRI_START_CAPITAL', '30000000'))
@@ -386,7 +383,6 @@ def dashboard(request):
             'totalExpense': total_expense,
             'currentBalance': start_capital + total_income - total_expense,
             'records': BudgetRecordSerializer(records, many=True).data,
-            'certifications': BalanceCertificationSerializer(certifications, many=True).data,
             'social': _serialize_social(social),
         },
         status=status.HTTP_200_OK,
@@ -482,54 +478,3 @@ def social(request):
     return Response({'ok': True}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET', 'POST'])
-@parser_classes([MultiPartParser, FormParser, JSONParser])
-def budget_certifications(request):
-    if request.method == 'GET':
-        queryset = BalanceCertification.objects.all()
-        serializer = BalanceCertificationSerializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    auth_error = _get_admin_password_error_response(request)
-    if auth_error is not None:
-        return auth_error
-
-    certification_date = _parse_date(request.data.get('date'), 'date')
-    photo_file = request.FILES.get('photo')
-    if photo_file is None:
-        return Response({'photo': 'This field is required.'}, status=status.HTTP_400_BAD_REQUEST)
-
-    try:
-        new_photo_url = upload_photo_compressed(photo_file, 'certifications')
-    except RuntimeError as exc:
-        return Response({'detail': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-    with transaction.atomic():
-        certification, created = BalanceCertification.objects.get_or_create(
-            date=certification_date,
-            defaults={'photo_url': new_photo_url},
-        )
-        if not created:
-            old_url = certification.photo_url
-            certification.photo_url = new_photo_url
-            certification.save(update_fields=['photo_url'])
-            delete_photo(old_url)
-
-    serializer = BalanceCertificationSerializer(certification)
-    return Response(
-        serializer.data,
-        status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,
-    )
-
-
-@api_view(['DELETE'])
-def budget_certification_detail(request, certification_date):
-    auth_error = _get_admin_password_error_response(request)
-    if auth_error is not None:
-        return auth_error
-
-    parsed_date = _parse_date(certification_date, 'date')
-    certification = get_object_or_404(BalanceCertification, date=parsed_date)
-    delete_photo(certification.photo_url)
-    certification.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)

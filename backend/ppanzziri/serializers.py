@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from ppanzziri.models import (
-    BalanceCertification,
     BudgetEffectiveSegment,
     BudgetRecord,
     BudgetRecordTag,
@@ -49,8 +48,3 @@ class BudgetRecordSerializer(serializers.ModelSerializer):
             'tags',
         ]
 
-
-class BalanceCertificationSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BalanceCertification
-        fields = ['id', 'date', 'photo_url', 'created_at']
