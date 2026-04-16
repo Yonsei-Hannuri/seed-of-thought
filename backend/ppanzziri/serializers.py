@@ -4,6 +4,9 @@ from ppanzziri.models import (
     BudgetEffectiveSegment,
     BudgetRecord,
     BudgetRecordTag,
+    PushSubscription,
+    WritingGoal,
+    WritingRecord,
 )
 
 
@@ -48,3 +51,51 @@ class BudgetRecordSerializer(serializers.ModelSerializer):
             'tags',
         ]
 
+
+class WritingRecordSerializer(serializers.ModelSerializer):
+    submitted_at = serializers.SerializerMethodField()
+    analyzed_at = serializers.SerializerMethodField()
+
+    def get_submitted_at(self, obj):
+        if not obj.submitted_at:
+            return ''
+        return obj.submitted_at.strftime('%Y-%m-%dT%H:%M:%S')
+
+    def get_analyzed_at(self, obj):
+        if not obj.analyzed_at:
+            return ''
+        return obj.analyzed_at.strftime('%Y-%m-%dT%H:%M:%S')
+
+    class Meta:
+        model = WritingRecord
+        fields = [
+            'id',
+            'content',
+            'char_count',
+            'submitted_at',
+            'analysis_status',
+            'summary',
+            'keywords',
+            'analyzed_at',
+        ]
+
+
+class PushSubscriptionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PushSubscription
+        fields = ['id', 'endpoint', 'p256dh', 'auth', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+
+class WritingGoalSerializer(serializers.ModelSerializer):
+    updated_at = serializers.SerializerMethodField()
+
+    def get_updated_at(self, obj):
+        if not obj.updated_at:
+            return ''
+        return obj.updated_at.strftime('%Y-%m-%dT%H:%M:%S')
+
+    class Meta:
+        model = WritingGoal
+        fields = ['id', 'target_chars', 'updated_at']
+        read_only_fields = ['id', 'updated_at']

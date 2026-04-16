@@ -64,3 +64,45 @@ class Social(models.Model):
 
     class Meta:
         db_table = 'social'
+
+
+class WritingRecord(models.Model):
+    STATUS_PENDING = 'pending'
+    STATUS_DONE = 'done'
+    STATUS_CHOICES = (
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_DONE, 'Done'),
+    )
+
+    content = models.TextField()
+    char_count = models.PositiveIntegerField()
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    analysis_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    summary = models.TextField(blank=True, default='')
+    keywords = models.JSONField(blank=True, default=list)
+    analyzed_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'writing_records'
+        ordering = ['-submitted_at']
+
+
+class PushSubscription(models.Model):
+    endpoint = models.TextField(unique=True)
+    p256dh = models.TextField()
+    auth = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'push_subscriptions'
+        ordering = ['-created_at']
+
+
+class WritingGoal(models.Model):
+    target_chars = models.PositiveIntegerField(default=1000)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'writing_goal'
+
+

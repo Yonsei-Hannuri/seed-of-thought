@@ -40,6 +40,12 @@ INSTALLED_APPS = [
     'cowriter.apps.CowriterConfig',
     'ppanzziri.apps.PpanzziriConfig',
     'corsheaders',
+    'django_crontab',
+]
+
+CRONJOBS = [
+    ('30 8 * * *', 'ppanzziri.push_tasks.send_morning_push'),
+    ('0 22 * * *', 'ppanzziri.push_tasks.send_evening_push'),
 ]
 
 MIDDLEWARE = [

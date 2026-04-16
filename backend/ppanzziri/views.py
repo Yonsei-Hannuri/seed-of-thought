@@ -4,7 +4,8 @@ from datetime import date, timedelta
 from urllib.parse import urlparse
 
 from django.db import transaction
-from django.db.models import Sum
+from django.db.models import Count, Sum
+from django.db.models.functions import TruncDate
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view, parser_classes
@@ -12,14 +13,21 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.parsers import FormParser, JSONParser, MultiPartParser
 from rest_framework.response import Response
 
+from ppanzziri.job import WritingAnalysisJob
 from ppanzziri.models import (
     BudgetEffectiveSegment,
     BudgetRecord,
     BudgetRecordTag,
+    PushSubscription,
     Social,
+    WritingGoal,
+    WritingRecord,
 )
 from ppanzziri.serializers import (
     BudgetRecordSerializer,
+    PushSubscriptionSerializer,
+    WritingGoalSerializer,
+    WritingRecordSerializer,
 )
 from ppanzziri.storage import delete_photos, upload_photos
 
@@ -457,6 +465,213 @@ def budget_tags(request):
         for row in rows
     ]
     return Response(response_rows, status=status.HTTP_200_OK)
+
+
+@api_view(['GET', 'POST'])
+@parser_classes([JSONParser])
+def writing_records(request):
+    auth_error = _get_admin_password_error_response(request)
+    if auth_error is not None:
+        return auth_error
+
+    if request.method == 'GET':
+        records = WritingRecord.objects.all()
+        daily_summary = (
+            WritingRecord.objects
+            .annotate(date=TruncDate('submitted_at'))
+            .values('date')
+            .annotate(total_char_count=Sum('char_count'))
+            .order_by('-date')
+        )
+        summary_data = [
+            {
+                'date': str(row['date']),
+                'total_char_count': row['total_char_count'],
+            }
+            for row in daily_summary
+        ]
+        return Response(
+            {
+                'records': WritingRecordSerializer(records, many=True).data,
+                'daily_summary': summary_data,
+            },
+            status=status.HTTP_200_OK,
+        )
+
+    content = request.data.get('content', '')
+    if not content:
+        return Response({'content': 'This field is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    record = WritingRecord.objects.create(
+        content=content,
+        char_count=len(content),
+    )
+    WritingAnalysisJob.spawn(record.id)
+    return Response(WritingRecordSerializer(record).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['PUT', 'DELETE'])
+@parser_classes([JSONParser])
+def writing_record_detail(request, record_id):
+    auth_error = _get_admin_password_error_response(request)
+    if auth_error is not None:
+        return auth_error
+
+    record = get_object_or_404(WritingRecord, pk=record_id)
+
+    if request.method == 'DELETE':
+        record.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    content = request.data.get('content', '')
+    if not content:
+        return Response({'content': 'This field is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    record.content = content
+    record.char_count = len(content)
+    record.analysis_status = WritingRecord.STATUS_PENDING
+    record.summary = ''
+    record.keywords = []
+    record.analyzed_at = None
+    record.save(update_fields=['content', 'char_count', 'analysis_status', 'summary', 'keywords', 'analyzed_at'])
+    WritingAnalysisJob.spawn(record.id)
+    return Response(WritingRecordSerializer(record).data, status=status.HTTP_200_OK)
+
+
+def _parse_optional_date(value, field_name):
+    if value in (None, ''):
+        return None
+    try:
+        return date.fromisoformat(str(value))
+    except ValueError as exc:
+        raise ValidationError({field_name: 'Use YYYY-MM-DD format.'}) from exc
+
+
+@api_view(['GET'])
+def writing_dashboard(request):
+    try:
+        from_date = _parse_optional_date(request.query_params.get('from'), 'from')
+        to_date = _parse_optional_date(request.query_params.get('to'), 'to')
+    except ValidationError as exc:
+        return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+
+    records_qs = WritingRecord.objects.all()
+    if from_date is not None:
+        records_qs = records_qs.filter(submitted_at__date__gte=from_date)
+    if to_date is not None:
+        records_qs = records_qs.filter(submitted_at__date__lte=to_date)
+
+    daily_rows = (
+        records_qs
+        .annotate(date=TruncDate('submitted_at'))
+        .values('date')
+        .annotate(
+            total_char_count=Sum('char_count'),
+            submission_count=Count('id'),
+        )
+        .order_by('date')
+    )
+
+    analyzed_records = records_qs.filter(analysis_status=WritingRecord.STATUS_DONE)
+
+    keywords_by_date = {}
+    analyses_by_date = {}
+    for record in analyzed_records:
+        date_key = record.submitted_at.date().isoformat()
+        keywords_by_date.setdefault(date_key, []).extend(record.keywords or [])
+        analyses_by_date.setdefault(date_key, []).append({
+            'record_id': record.id,
+            'summary': record.summary,
+            'keywords': record.keywords or [],
+        })
+
+    daily = []
+    all_keywords = []
+    for row in daily_rows:
+        date_key = row['date'].isoformat()
+        day_keywords = keywords_by_date.get(date_key, [])
+        daily.append({
+            'date': date_key,
+            'total_char_count': row['total_char_count'] or 0,
+            'submission_count': row['submission_count'] or 0,
+            'keywords': day_keywords,
+            'analyses': analyses_by_date.get(date_key, []),
+        })
+        all_keywords.extend(day_keywords)
+
+    keyword_ranking = _rank_keywords(all_keywords)
+
+    return Response(
+        {
+            'daily': daily,
+            'keyword_ranking': keyword_ranking,
+        },
+        status=status.HTTP_200_OK,
+    )
+
+
+def _rank_keywords(keywords):
+    counts = {}
+    for keyword in keywords:
+        if not keyword:
+            continue
+        counts[keyword] = counts.get(keyword, 0) + 1
+    ranked = sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+    return [{'keyword': name, 'count': count} for name, count in ranked]
+
+
+def _get_or_create_writing_goal():
+    goal = WritingGoal.objects.first()
+    if goal is None:
+        goal = WritingGoal.objects.create()
+    return goal
+
+
+@api_view(['POST'])
+@parser_classes([JSONParser])
+def writing_push_subscription(request):
+    auth_error = _get_admin_password_error_response(request)
+    if auth_error is not None:
+        return auth_error
+
+    endpoint = request.data.get('endpoint', '')
+    keys = request.data.get('keys') or {}
+    p256dh = keys.get('p256dh', '') if isinstance(keys, dict) else ''
+    auth_key = keys.get('auth', '') if isinstance(keys, dict) else ''
+
+    if not endpoint or not p256dh or not auth_key:
+        return Response(
+            {'detail': 'endpoint, keys.p256dh, keys.auth are required.'},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    subscription, _ = PushSubscription.objects.update_or_create(
+        endpoint=endpoint,
+        defaults={'p256dh': p256dh, 'auth': auth_key},
+    )
+    return Response(PushSubscriptionSerializer(subscription).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'PUT'])
+@parser_classes([JSONParser])
+def writing_goal(request):
+    if request.method == 'GET':
+        goal = _get_or_create_writing_goal()
+        return Response(WritingGoalSerializer(goal).data, status=status.HTTP_200_OK)
+
+    auth_error = _get_admin_password_error_response(request)
+    if auth_error is not None:
+        return auth_error
+
+    try:
+        target_chars = _parse_positive_int(request.data.get('target_chars'), 'target_chars')
+    except ValidationError as exc:
+        return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+
+    goal = _get_or_create_writing_goal()
+    goal.target_chars = target_chars
+    goal.save(update_fields=['target_chars', 'updated_at'])
+    return Response(WritingGoalSerializer(goal).data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'PUT'])
