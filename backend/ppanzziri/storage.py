@@ -1,5 +1,8 @@
 import io
+import json
 import os
+import subprocess
+import tempfile
 import uuid
 from datetime import datetime
 from pathlib import Path
@@ -230,6 +233,93 @@ def upload_writing_photos(uploaded_file):
         'compressed': _build_photo_url(compressed_key),
         'resized': _build_photo_url(resized_key),
     }
+
+
+def extract_video_location(uploaded_file):
+    """Extract GPS location from video metadata using ffprobe.
+
+    Returns (latitude, longitude) or (None, None) if not available.
+    """
+    uploaded_file.seek(0)
+    try:
+        with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as tmp:
+            for chunk in uploaded_file.chunks():
+                tmp.write(chunk)
+            tmp_path = tmp.name
+    except AttributeError:
+        # InMemoryUploadedFile without chunks
+        uploaded_file.seek(0)
+        with tempfile.NamedTemporaryFile(suffix='.mp4', delete=False) as tmp:
+            tmp.write(uploaded_file.read())
+            tmp_path = tmp.name
+
+    uploaded_file.seek(0)
+
+    try:
+        result = subprocess.run(
+            [
+                'ffprobe', '-v', 'quiet',
+                '-print_format', 'json',
+                '-show_format',
+                tmp_path,
+            ],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        if result.returncode != 0:
+            return None, None
+
+        metadata = json.loads(result.stdout)
+        tags = metadata.get('format', {}).get('tags', {})
+
+        # iPhone videos: com.apple.quicktime.location.ISO6709
+        # e.g. "+37.5665+126.9780+017.000/"
+        location_str = (
+            tags.get('com.apple.quicktime.location.ISO6709')
+            or tags.get('location')
+            or tags.get('location-eng')
+            or ''
+        )
+        if location_str:
+            return _parse_iso6709(location_str)
+
+        return None, None
+    except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError, OSError):
+        return None, None
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+
+def _parse_iso6709(location_str):
+    """Parse ISO 6709 location string like '+37.5665+126.9780+017.000/'.
+
+    Returns (latitude, longitude) or (None, None).
+    """
+    import re
+    # Match patterns: +DD.DDDD+DDD.DDDD or +DDMM.MM+DDDMM.MM etc.
+    # Most common from iPhone: signed decimal degrees
+    match = re.match(
+        r'([+-]\d+\.?\d*)'   # latitude
+        r'([+-]\d+\.?\d*)',   # longitude
+        location_str.strip().rstrip('/'),
+    )
+    if not match:
+        return None, None
+
+    try:
+        lat = float(match.group(1))
+        lon = float(match.group(2))
+    except (ValueError, TypeError):
+        return None, None
+
+    if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+        return None, None
+
+    return lat, lon
 
 
 def upload_writing_video(uploaded_file):

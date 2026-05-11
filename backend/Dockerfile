@@ -13,6 +13,7 @@ RUN apt-get install libpoppler-cpp-dev -y
 RUN apt-get install pkg-config -y
 RUN apt-get install python3-dev -y 
 RUN apt-get install cmake -y
+RUN apt-get install ffmpeg -y
 
 # install python packages
 COPY ./requirements.txt /backend/requirements.txt

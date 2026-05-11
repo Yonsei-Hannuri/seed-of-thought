@@ -26,7 +26,7 @@ from ppanzziri.serializers import (
     BudgetRecordSerializer,
     WritingRecordSerializer,
 )
-from ppanzziri.storage import delete_photo, delete_photos, upload_photos, upload_writing_photos, upload_writing_video
+from ppanzziri.storage import delete_photo, delete_photos, extract_video_location, upload_photos, upload_writing_photos, upload_writing_video
 
 
 def _get_admin_password_error_response(request):
@@ -599,11 +599,14 @@ def writing_records(request):
         return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
 
     topics = _parse_topics(request.data.get('topics', []))
+    place_name = str(request.data.get('place_name', '') or '').strip()[:100]
 
     # Upload timelapse video
     video_file = request.FILES.get('timelapse_video')
     video_url = ''
+    latitude, longitude = None, None
     if video_file:
+        latitude, longitude = extract_video_location(video_file)
         try:
             video_url = upload_writing_video(video_file)
         except RuntimeError as exc:
@@ -636,6 +639,9 @@ def writing_records(request):
             timelapse_video_url=video_url,
             topics=topics,
             char_count=char_count,
+            latitude=latitude,
+            longitude=longitude,
+            place_name=place_name,
         )
         WritingManuscriptPhoto.objects.bulk_create([
             WritingManuscriptPhoto(
@@ -680,6 +686,10 @@ def writing_record_detail(request, record_id):
 
     topics = _parse_topics(request.data.get('topics', record.topics))
 
+    raw_place_name = request.data.get('place_name')
+    if raw_place_name is not None:
+        record.place_name = str(raw_place_name).strip()[:100]
+
     record.date = record_date
     record.start_time = start_time
     record.end_time = end_time
@@ -688,6 +698,9 @@ def writing_record_detail(request, record_id):
     # Handle new video if provided
     video_file = request.FILES.get('timelapse_video')
     if video_file:
+        lat, lon = extract_video_location(video_file)
+        record.latitude = lat
+        record.longitude = lon
         if record.timelapse_video_url:
             delete_photo(record.timelapse_video_url)
         try:

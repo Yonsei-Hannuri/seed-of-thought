@@ -80,6 +80,9 @@ class WritingRecord(models.Model):
     timelapse_video_url = models.TextField(blank=True, default='')
     topics = models.JSONField(blank=True, default=list)
     char_count = models.PositiveIntegerField(default=0)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    place_name = models.CharField(max_length=100, blank=True, default='')
     submitted_at = models.DateTimeField(auto_now_add=True)
 
     # LLM analysis fields (reserved for future OCR-based analysis)
