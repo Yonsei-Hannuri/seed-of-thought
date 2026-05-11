@@ -197,3 +197,62 @@ def delete_photos(photo_url_original, photo_url_compressed, photo_url_resized):
             s3_client.delete_object(Bucket=bucket, Key=object_key)
         except (BotoCoreError, ClientError):
             pass
+
+
+def upload_writing_photos(uploaded_file):
+    """Upload manuscript photo to S3 under writing/ path.
+
+    Returns dict: {'original': url, 'compressed': url, 'resized': url}
+    """
+    if not uploaded_file:
+        return {'original': '', 'compressed': '', 'resized': ''}
+
+    extension = Path(uploaded_file.name).suffix.lower()
+    base_key = f"writing/manuscripts/{datetime.now():%Y/%m}/{uuid.uuid4().hex}"
+    original_key = f"{base_key}_original{extension}"
+    compressed_key = f"{base_key}_compressed.webp"
+    resized_key = f"{base_key}_resized.webp"
+
+    compressed_data = _make_compressed(uploaded_file)
+    resized_data = _make_resized(uploaded_file)
+    uploaded_file.seek(0)
+
+    s3_client, bucket = _get_s3_client()
+    try:
+        s3_client.put_object(Body=uploaded_file, Bucket=bucket, Key=original_key, ContentType=uploaded_file.content_type)
+        s3_client.put_object(Body=compressed_data, Bucket=bucket, Key=compressed_key, ContentType='image/webp')
+        s3_client.put_object(Body=resized_data, Bucket=bucket, Key=resized_key, ContentType='image/webp')
+    except (BotoCoreError, ClientError) as exc:
+        raise RuntimeError('Failed to upload writing photo to S3.') from exc
+
+    return {
+        'original': _build_photo_url(original_key),
+        'compressed': _build_photo_url(compressed_key),
+        'resized': _build_photo_url(resized_key),
+    }
+
+
+def upload_writing_video(uploaded_file):
+    """Upload timelapse video to S3 under writing/ path.
+
+    Returns video URL string.
+    """
+    if not uploaded_file:
+        return ''
+
+    extension = Path(uploaded_file.name).suffix.lower()
+    object_key = f"writing/timelapse/{datetime.now():%Y/%m}/{uuid.uuid4().hex}{extension}"
+
+    uploaded_file.seek(0)
+    s3_client, bucket = _get_s3_client()
+    try:
+        s3_client.put_object(
+            Body=uploaded_file,
+            Bucket=bucket,
+            Key=object_key,
+            ContentType=uploaded_file.content_type or 'video/mp4',
+        )
+    except (BotoCoreError, ClientError) as exc:
+        raise RuntimeError('Failed to upload writing video to S3.') from exc
+
+    return _build_photo_url(object_key)

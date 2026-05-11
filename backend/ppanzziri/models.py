@@ -74,9 +74,15 @@ class WritingRecord(models.Model):
         (STATUS_DONE, 'Done'),
     )
 
-    content = models.TextField()
-    char_count = models.PositiveIntegerField()
+    date = models.DateField()
+    start_time = models.TimeField(null=True, blank=True)
+    end_time = models.TimeField(null=True, blank=True)
+    timelapse_video_url = models.TextField(blank=True, default='')
+    topics = models.JSONField(blank=True, default=list)
+    char_count = models.PositiveIntegerField(default=0)
     submitted_at = models.DateTimeField(auto_now_add=True)
+
+    # LLM analysis fields (reserved for future OCR-based analysis)
     analysis_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
     summary = models.TextField(blank=True, default='')
     keywords = models.JSONField(blank=True, default=list)
@@ -84,7 +90,19 @@ class WritingRecord(models.Model):
 
     class Meta:
         db_table = 'writing_records'
-        ordering = ['-submitted_at']
+        ordering = ['-date', '-submitted_at']
+
+
+class WritingManuscriptPhoto(models.Model):
+    record = models.ForeignKey(WritingRecord, on_delete=models.CASCADE, related_name='manuscript_photos')
+    photo_url_original = models.TextField(blank=True, default='')
+    photo_url_compressed = models.TextField(blank=True, default='')
+    photo_url_resized = models.TextField(blank=True, default='')
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        db_table = 'writing_manuscript_photos'
+        ordering = ['order', 'id']
 
 
 class PushSubscription(models.Model):

@@ -12,6 +12,4 @@ urlpatterns = [
     path('writing/records', views.writing_records),
     path('writing/records/<int:record_id>', views.writing_record_detail),
     path('writing/dashboard', views.writing_dashboard),
-    path('writing/push-subscription', views.writing_push_subscription),
-    path('writing/goal', views.writing_goal),
 ]

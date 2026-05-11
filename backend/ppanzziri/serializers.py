@@ -4,8 +4,7 @@ from ppanzziri.models import (
     BudgetEffectiveSegment,
     BudgetRecord,
     BudgetRecordTag,
-    PushSubscription,
-    WritingGoal,
+    WritingManuscriptPhoto,
     WritingRecord,
 )
 
@@ -52,9 +51,27 @@ class BudgetRecordSerializer(serializers.ModelSerializer):
         ]
 
 
+class WritingManuscriptPhotoSerializer(serializers.ModelSerializer):
+    photo_url = serializers.CharField(source='photo_url_original', read_only=True)
+
+    class Meta:
+        model = WritingManuscriptPhoto
+        fields = [
+            'id',
+            'photo_url',
+            'photo_url_original',
+            'photo_url_compressed',
+            'photo_url_resized',
+            'order',
+        ]
+
+
 class WritingRecordSerializer(serializers.ModelSerializer):
     submitted_at = serializers.SerializerMethodField()
     analyzed_at = serializers.SerializerMethodField()
+    start_time = serializers.SerializerMethodField()
+    end_time = serializers.SerializerMethodField()
+    manuscript_photos = WritingManuscriptPhotoSerializer(many=True, read_only=True)
 
     def get_submitted_at(self, obj):
         if not obj.submitted_at:
@@ -66,12 +83,27 @@ class WritingRecordSerializer(serializers.ModelSerializer):
             return ''
         return obj.analyzed_at.strftime('%Y-%m-%dT%H:%M:%S')
 
+    def get_start_time(self, obj):
+        if not obj.start_time:
+            return ''
+        return obj.start_time.strftime('%H:%M')
+
+    def get_end_time(self, obj):
+        if not obj.end_time:
+            return ''
+        return obj.end_time.strftime('%H:%M')
+
     class Meta:
         model = WritingRecord
         fields = [
             'id',
-            'content',
+            'date',
+            'start_time',
+            'end_time',
+            'timelapse_video_url',
+            'topics',
             'char_count',
+            'manuscript_photos',
             'submitted_at',
             'analysis_status',
             'summary',
@@ -80,22 +112,3 @@ class WritingRecordSerializer(serializers.ModelSerializer):
         ]
 
 
-class PushSubscriptionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = PushSubscription
-        fields = ['id', 'endpoint', 'p256dh', 'auth', 'created_at']
-        read_only_fields = ['id', 'created_at']
-
-
-class WritingGoalSerializer(serializers.ModelSerializer):
-    updated_at = serializers.SerializerMethodField()
-
-    def get_updated_at(self, obj):
-        if not obj.updated_at:
-            return ''
-        return obj.updated_at.strftime('%Y-%m-%dT%H:%M:%S')
-
-    class Meta:
-        model = WritingGoal
-        fields = ['id', 'target_chars', 'updated_at']
-        read_only_fields = ['id', 'updated_at']

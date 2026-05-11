@@ -18,18 +18,15 @@ from ppanzziri.models import (
     BudgetEffectiveSegment,
     BudgetRecord,
     BudgetRecordTag,
-    PushSubscription,
     Social,
-    WritingGoal,
+    WritingManuscriptPhoto,
     WritingRecord,
 )
 from ppanzziri.serializers import (
     BudgetRecordSerializer,
-    PushSubscriptionSerializer,
-    WritingGoalSerializer,
     WritingRecordSerializer,
 )
-from ppanzziri.storage import delete_photos, upload_photos
+from ppanzziri.storage import delete_photo, delete_photos, upload_photos, upload_writing_photos, upload_writing_video
 
 
 def _get_admin_password_error_response(request):
@@ -435,16 +432,86 @@ def budget_records(request):
     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-@api_view(['DELETE'])
+@api_view(['PUT', 'DELETE'])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def budget_record_detail(request, record_id):
     auth_error = _get_admin_password_error_response(request)
     if auth_error is not None:
         return auth_error
 
     record = get_object_or_404(BudgetRecord, pk=record_id)
-    delete_photos(record.photo_url_original, record.photo_url_compressed, record.photo_url_resized)
-    record.delete()
-    return Response(status=status.HTTP_204_NO_CONTENT)
+
+    if request.method == 'DELETE':
+        delete_photos(record.photo_url_original, record.photo_url_compressed, record.photo_url_resized)
+        record.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+    # PUT: update record
+    try:
+        record_type = _normalize_record_type(request.data.get('type', record.type))
+        transaction_date = _parse_date(
+            request.data.get('transaction_date', request.data.get('transactionDate', str(record.transaction_date))),
+            'transaction_date',
+        )
+        amount = _parse_positive_int(request.data.get('amount', record.amount), 'amount')
+    except ValidationError as exc:
+        return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+
+    memo = request.data.get('memo', record.memo)
+    if memo is None:
+        memo = ''
+
+    # Handle photo
+    photo_file = request.FILES.get('photo')
+    if photo_file:
+        delete_photos(record.photo_url_original, record.photo_url_compressed, record.photo_url_resized)
+        try:
+            photo_urls = upload_photos(photo_file, 'records')
+        except RuntimeError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        record.photo_url_original = photo_urls['original']
+        record.photo_url_compressed = photo_urls['compressed']
+        record.photo_url_resized = photo_urls['resized']
+
+    record.type = record_type
+    record.transaction_date = transaction_date
+    record.amount = amount
+    record.memo = str(memo)
+
+    # Handle segments
+    raw_segments = _extract_json_field(request.data, 'effective_segments', 'effectiveSegments')
+    if raw_segments is not None:
+        try:
+            segments = _parse_effective_segments(raw_segments, transaction_date, amount)
+        except ValidationError as exc:
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+        record.effective_segments.all().delete()
+        BudgetEffectiveSegment.objects.bulk_create([
+            BudgetEffectiveSegment(
+                record=record,
+                effective_from=seg['effective_from'],
+                effective_to=seg['effective_to'],
+                segment_amount=seg['segment_amount'],
+            )
+            for seg in segments
+        ])
+
+    # Handle tags
+    raw_tags = _extract_json_field(request.data, 'tags', 'recordTags')
+    if raw_tags is not None:
+        try:
+            tags = _parse_record_tags(raw_tags, amount)
+        except ValidationError as exc:
+            return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
+        record.tags.all().delete()
+        BudgetRecordTag.objects.bulk_create([
+            BudgetRecordTag(record=record, name=tag['name'], amount=tag['amount'])
+            for tag in tags
+        ])
+
+    record.save()
+    record = BudgetRecord.objects.prefetch_related('effective_segments', 'tags').get(pk=record.pk)
+    return Response(BudgetRecordSerializer(record).data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET'])
@@ -467,26 +534,48 @@ def budget_tags(request):
     return Response(response_rows, status=status.HTTP_200_OK)
 
 
-@api_view(['GET', 'POST'])
-@parser_classes([JSONParser])
-def writing_records(request):
-    auth_error = _get_admin_password_error_response(request)
-    if auth_error is not None:
-        return auth_error
+def _parse_time(value, field_name):
+    if value in (None, ''):
+        return None
+    from datetime import time as dt_time
+    try:
+        parts = str(value).split(':')
+        return dt_time(int(parts[0]), int(parts[1]))
+    except (ValueError, IndexError) as exc:
+        raise ValidationError({field_name: 'Use HH:MM format.'}) from exc
 
+
+def _parse_topics(value):
+    if isinstance(value, list):
+        return [str(t).strip() for t in value if str(t).strip()]
+    if isinstance(value, str):
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, list):
+                return [str(t).strip() for t in parsed if str(t).strip()]
+        except (json.JSONDecodeError, ValueError):
+            pass
+        stripped = value.strip()
+        return [stripped] if stripped else []
+    return []
+
+
+@api_view(['GET', 'POST'])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
+def writing_records(request):
     if request.method == 'GET':
-        records = WritingRecord.objects.all()
+        records = WritingRecord.objects.prefetch_related('manuscript_photos').all()
         daily_summary = (
             WritingRecord.objects
-            .annotate(date=TruncDate('submitted_at'))
             .values('date')
-            .annotate(total_char_count=Sum('char_count'))
+            .annotate(total_char_count=Sum('char_count'), submission_count=Count('id'))
             .order_by('-date')
         )
         summary_data = [
             {
                 'date': str(row['date']),
                 'total_char_count': row['total_char_count'],
+                'submission_count': row['submission_count'],
             }
             for row in daily_summary
         ]
@@ -498,20 +587,73 @@ def writing_records(request):
             status=status.HTTP_200_OK,
         )
 
-    content = request.data.get('content', '')
-    if not content:
-        return Response({'content': 'This field is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    # POST: create new writing record
+    auth_error = _get_admin_password_error_response(request)
+    if auth_error is not None:
+        return auth_error
+    try:
+        record_date = _parse_date(request.data.get('date'), 'date')
+        start_time = _parse_time(request.data.get('start_time'), 'start_time')
+        end_time = _parse_time(request.data.get('end_time'), 'end_time')
+    except ValidationError as exc:
+        return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
 
-    record = WritingRecord.objects.create(
-        content=content,
-        char_count=len(content),
-    )
-    WritingAnalysisJob.spawn(record.id)
+    topics = _parse_topics(request.data.get('topics', []))
+
+    # Upload timelapse video
+    video_file = request.FILES.get('timelapse_video')
+    video_url = ''
+    if video_file:
+        try:
+            video_url = upload_writing_video(video_file)
+        except RuntimeError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # Upload manuscript photos
+    photo_files = request.FILES.getlist('manuscript_photos')
+    photo_results = []
+    for photo_file in photo_files:
+        try:
+            urls = upload_writing_photos(photo_file)
+            photo_results.append(urls)
+        except RuntimeError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    raw_char_count = request.data.get('char_count')
+    if raw_char_count not in (None, ''):
+        try:
+            char_count = int(raw_char_count)
+        except (ValueError, TypeError):
+            char_count = 0
+    else:
+        char_count = len(photo_results) * 400 if photo_results else 0
+
+    with transaction.atomic():
+        record = WritingRecord.objects.create(
+            date=record_date,
+            start_time=start_time,
+            end_time=end_time,
+            timelapse_video_url=video_url,
+            topics=topics,
+            char_count=char_count,
+        )
+        WritingManuscriptPhoto.objects.bulk_create([
+            WritingManuscriptPhoto(
+                record=record,
+                photo_url_original=urls['original'],
+                photo_url_compressed=urls['compressed'],
+                photo_url_resized=urls['resized'],
+                order=idx,
+            )
+            for idx, urls in enumerate(photo_results)
+        ])
+
+    record = WritingRecord.objects.prefetch_related('manuscript_photos').get(pk=record.pk)
     return Response(WritingRecordSerializer(record).data, status=status.HTTP_201_CREATED)
 
 
 @api_view(['PUT', 'DELETE'])
-@parser_classes([JSONParser])
+@parser_classes([MultiPartParser, FormParser, JSONParser])
 def writing_record_detail(request, record_id):
     auth_error = _get_admin_password_error_response(request)
     if auth_error is not None:
@@ -520,21 +662,76 @@ def writing_record_detail(request, record_id):
     record = get_object_or_404(WritingRecord, pk=record_id)
 
     if request.method == 'DELETE':
+        # Delete S3 files
+        for photo in record.manuscript_photos.all():
+            delete_photos(photo.photo_url_original, photo.photo_url_compressed, photo.photo_url_resized)
+        if record.timelapse_video_url:
+            delete_photo(record.timelapse_video_url)
         record.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    content = request.data.get('content', '')
-    if not content:
-        return Response({'content': 'This field is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    # PUT: update record
+    try:
+        record_date = _parse_date(request.data.get('date', str(record.date)), 'date')
+        start_time = _parse_time(request.data.get('start_time'), 'start_time')
+        end_time = _parse_time(request.data.get('end_time'), 'end_time')
+    except ValidationError as exc:
+        return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
 
-    record.content = content
-    record.char_count = len(content)
-    record.analysis_status = WritingRecord.STATUS_PENDING
-    record.summary = ''
-    record.keywords = []
-    record.analyzed_at = None
-    record.save(update_fields=['content', 'char_count', 'analysis_status', 'summary', 'keywords', 'analyzed_at'])
-    WritingAnalysisJob.spawn(record.id)
+    topics = _parse_topics(request.data.get('topics', record.topics))
+
+    record.date = record_date
+    record.start_time = start_time
+    record.end_time = end_time
+    record.topics = topics
+
+    # Handle new video if provided
+    video_file = request.FILES.get('timelapse_video')
+    if video_file:
+        if record.timelapse_video_url:
+            delete_photo(record.timelapse_video_url)
+        try:
+            record.timelapse_video_url = upload_writing_video(video_file)
+        except RuntimeError as exc:
+            return Response({'detail': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    # Handle new photos if provided
+    photo_files = request.FILES.getlist('manuscript_photos')
+    if photo_files:
+        # Delete old photos
+        for photo in record.manuscript_photos.all():
+            delete_photos(photo.photo_url_original, photo.photo_url_compressed, photo.photo_url_resized)
+        record.manuscript_photos.all().delete()
+
+        photo_results = []
+        for photo_file in photo_files:
+            try:
+                urls = upload_writing_photos(photo_file)
+                photo_results.append(urls)
+            except RuntimeError as exc:
+                return Response({'detail': str(exc)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        WritingManuscriptPhoto.objects.bulk_create([
+            WritingManuscriptPhoto(
+                record=record,
+                photo_url_original=urls['original'],
+                photo_url_compressed=urls['compressed'],
+                photo_url_resized=urls['resized'],
+                order=idx,
+            )
+            for idx, urls in enumerate(photo_results)
+        ])
+        record.char_count = len(photo_results) * 400
+
+    raw_char_count = request.data.get('char_count')
+    if raw_char_count not in (None, ''):
+        try:
+            record.char_count = int(raw_char_count)
+        except (ValueError, TypeError):
+            pass
+
+    record.save()
+    record = WritingRecord.objects.prefetch_related('manuscript_photos').get(pk=record.pk)
     return Response(WritingRecordSerializer(record).data, status=status.HTTP_200_OK)
 
 
@@ -557,13 +754,12 @@ def writing_dashboard(request):
 
     records_qs = WritingRecord.objects.all()
     if from_date is not None:
-        records_qs = records_qs.filter(submitted_at__date__gte=from_date)
+        records_qs = records_qs.filter(date__gte=from_date)
     if to_date is not None:
-        records_qs = records_qs.filter(submitted_at__date__lte=to_date)
+        records_qs = records_qs.filter(date__lte=to_date)
 
     daily_rows = (
         records_qs
-        .annotate(date=TruncDate('submitted_at'))
         .values('date')
         .annotate(
             total_char_count=Sum('char_count'),
@@ -572,30 +768,22 @@ def writing_dashboard(request):
         .order_by('date')
     )
 
-    analyzed_records = records_qs.filter(analysis_status=WritingRecord.STATUS_DONE)
-
-    keywords_by_date = {}
-    analyses_by_date = {}
-    for record in analyzed_records:
-        date_key = record.submitted_at.date().isoformat()
-        keywords_by_date.setdefault(date_key, []).extend(record.keywords or [])
-        analyses_by_date.setdefault(date_key, []).append({
-            'record_id': record.id,
-            'summary': record.summary,
-            'keywords': record.keywords or [],
-        })
+    # Collect topics by date as keywords
+    topics_by_date = {}
+    for record in records_qs:
+        date_key = record.date.isoformat()
+        topics_by_date.setdefault(date_key, []).extend(record.topics or [])
 
     daily = []
     all_keywords = []
     for row in daily_rows:
         date_key = row['date'].isoformat()
-        day_keywords = keywords_by_date.get(date_key, [])
+        day_keywords = topics_by_date.get(date_key, [])
         daily.append({
             'date': date_key,
-            'total_char_count': row['total_char_count'] or 0,
+            'char_count': row['total_char_count'] or 0,
             'submission_count': row['submission_count'] or 0,
             'keywords': day_keywords,
-            'analyses': analyses_by_date.get(date_key, []),
         })
         all_keywords.extend(day_keywords)
 
@@ -618,60 +806,6 @@ def _rank_keywords(keywords):
         counts[keyword] = counts.get(keyword, 0) + 1
     ranked = sorted(counts.items(), key=lambda item: (-item[1], item[0]))
     return [{'keyword': name, 'count': count} for name, count in ranked]
-
-
-def _get_or_create_writing_goal():
-    goal = WritingGoal.objects.first()
-    if goal is None:
-        goal = WritingGoal.objects.create()
-    return goal
-
-
-@api_view(['POST'])
-@parser_classes([JSONParser])
-def writing_push_subscription(request):
-    auth_error = _get_admin_password_error_response(request)
-    if auth_error is not None:
-        return auth_error
-
-    endpoint = request.data.get('endpoint', '')
-    keys = request.data.get('keys') or {}
-    p256dh = keys.get('p256dh', '') if isinstance(keys, dict) else ''
-    auth_key = keys.get('auth', '') if isinstance(keys, dict) else ''
-
-    if not endpoint or not p256dh or not auth_key:
-        return Response(
-            {'detail': 'endpoint, keys.p256dh, keys.auth are required.'},
-            status=status.HTTP_400_BAD_REQUEST,
-        )
-
-    subscription, _ = PushSubscription.objects.update_or_create(
-        endpoint=endpoint,
-        defaults={'p256dh': p256dh, 'auth': auth_key},
-    )
-    return Response(PushSubscriptionSerializer(subscription).data, status=status.HTTP_201_CREATED)
-
-
-@api_view(['GET', 'PUT'])
-@parser_classes([JSONParser])
-def writing_goal(request):
-    if request.method == 'GET':
-        goal = _get_or_create_writing_goal()
-        return Response(WritingGoalSerializer(goal).data, status=status.HTTP_200_OK)
-
-    auth_error = _get_admin_password_error_response(request)
-    if auth_error is not None:
-        return auth_error
-
-    try:
-        target_chars = _parse_positive_int(request.data.get('target_chars'), 'target_chars')
-    except ValidationError as exc:
-        return Response(exc.detail, status=status.HTTP_400_BAD_REQUEST)
-
-    goal = _get_or_create_writing_goal()
-    goal.target_chars = target_chars
-    goal.save(update_fields=['target_chars', 'updated_at'])
-    return Response(WritingGoalSerializer(goal).data, status=status.HTTP_200_OK)
 
 
 @api_view(['GET', 'PUT'])
